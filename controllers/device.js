@@ -19,7 +19,7 @@ var createRegistry = function(req) {
     });
 };
 
-deviceController.findDevices = function(req, res) {
+deviceController.updateDevicesInfo = function(req, res) {
     deviceModel.findOne({'id': req.query.id}, function(err, matchedDevice) {
         if(err) {
             console.log('No device found. Creating registry...');
