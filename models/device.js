@@ -3,7 +3,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var deviceSchema = new Schema({
-  id : String,
+  _id : String,
   model : String,
   version : String,
   ip : String,
