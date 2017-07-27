@@ -4,7 +4,7 @@ var deviceController = {};
 
 var createRegistry = function(req) {
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  newDeviceModel = new deviceModel({'id': req.body.id,
+  newDeviceModel = new deviceModel({'_id': req.body.id,
                                     'model': req.body.model,
                                     'version': req.body.version,
                                     'ip': ip,
@@ -13,6 +13,7 @@ var createRegistry = function(req) {
                                   });
   newDeviceModel.save(function (err) {
     if (err) {
+      console.log('Error creating device: ' + err);
       return false;
     } else {
       return true;
@@ -24,7 +25,7 @@ var createRegistry = function(req) {
 deviceController.updateDevicesInfo = function(req, res) {
   deviceModel.findById(req.body.id, function(err, matchedDevice) {
     if(err) {
-      console.log('Error finding device' + err);
+      console.log('Error finding device: ' + err);
       return res.status(500);
     } else {
       if(matchedDevice == null){
