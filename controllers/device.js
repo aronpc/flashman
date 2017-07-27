@@ -21,7 +21,7 @@ var createRegistry = function(req) {
 
 // Create new device entry or update an existing one
 deviceController.updateDevicesInfo = function(req, res) {
-  deviceModel.findOne({'id': req.query.id}, function(err, matchedDevice) {
+  deviceModel.findById(req.query.id, function(err, matchedDevice) {
     if(err) {
       console.log('Error finding device' + err);
       return res.status(500);
