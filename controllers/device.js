@@ -3,10 +3,11 @@ var deviceModel = require('../models/device');
 var deviceController = {};
 
 var createRegistry = function(req) {
-  newDeviceModel = new deviceModel({'id': req.query.id,
-                                    'model': req.query.model,
-                                    'version': req.query.version,
-                                    'ip': req.ip,
+  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  newDeviceModel = new deviceModel({'id': req.body.id,
+                                    'model': req.body.model,
+                                    'version': req.body.version,
+                                    'ip': ip,
                                     'last_contact': Date.now(),
                                     'do_update': false,
                                   });
@@ -21,7 +22,7 @@ var createRegistry = function(req) {
 
 // Create new device entry or update an existing one
 deviceController.updateDevicesInfo = function(req, res) {
-  deviceModel.findById(req.query.id, function(err, matchedDevice) {
+  deviceModel.findById(req.body.id, function(err, matchedDevice) {
     if(err) {
       console.log('Error finding device' + err);
       return res.status(500);
@@ -34,9 +35,10 @@ deviceController.updateDevicesInfo = function(req, res) {
           return res.status(500);
         }
       } else {
-        deviceModel.update({'model': req.query.model,
-                            'version': req.query.version,
-                            'ip': req.ip,
+        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        deviceModel.update({'model': req.body.model,
+                            'version': req.body.version,
+                            'ip': ip,
                             'last_contact': Date.now()
                            });
         return res.status(200).json({'do_update': matchedDevice.do_update});
