@@ -1,0 +1,19 @@
+nav.navbar.navbar-default.navbar-static-top
+  .container
+    .navbar-header
+      if (username)
+        button(type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-menu")
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+      a.navbar-brand(href="/")
+        .image-block
+          img(alt="brand", src="/images/logo.png", width="24", height="24")
+          span &nbsp #{apptitle}
+    if (username)
+      #navbar-menu.navbar-default.navbar-collapse.collapse
+        ul.nav.navbar-nav.navbar-right
+          li.hidden-xs
+            p.navbar-text Olá, #{username}!
+          li
+            a.pull-right(href="/logout") Sair

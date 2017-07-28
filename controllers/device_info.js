@@ -1,6 +1,6 @@
 
 var deviceModel = require('../models/device');
-var deviceController = {};
+var deviceInfoController = {};
 
 var createRegistry = function(req) {
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
@@ -22,7 +22,7 @@ var createRegistry = function(req) {
 };
 
 // Create new device entry or update an existing one
-deviceController.updateDevicesInfo = function(req, res) {
+deviceInfoController.updateDevicesInfo = function(req, res) {
   deviceModel.findById(req.body.id, function(err, matchedDevice) {
     if(err) {
       console.log('Error finding device: ' + err);
@@ -48,4 +48,4 @@ deviceController.updateDevicesInfo = function(req, res) {
   });
 };
 
-module.exports = deviceController;
+module.exports = deviceInfoController;
