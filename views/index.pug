@@ -16,17 +16,13 @@ block content
         tr(id=device._id)
           td.col-xs-1=index + 1
           td.col-xs-3
-            .col-xs-8
-              #{device._id}
+            | #{device._id}
           td.col-xs-2
-            .col-xs-8
-              #{device.model}
+            | #{device.model}
           td.col-xs-2
-            .col-xs-8
-              #{device.version}
+            | #{device.version}
           td.col-xs-2
-            .col-xs-8
-              #{device.ip}
+            | #{device.ip}
           td.col-xs-2
             a.edit.pull-right.btn.btn-sm.btn-primary.spaced-btn(href="/devices/edit/" + device._id)
               span.hidden-xs Editar&nbsp;
