@@ -2,13 +2,14 @@
 var updateDevice = function(event) {
   var row = $(event.target).parents('tr');
   var id = row.attr('id');
+  $(event.target).attr("disabled", true);
   $.ajax({
-      url: 'devices/'+ id,
-      type: 'update',
-      success: function() {
-          row.hide('fast', function() {
-              $(event.target).remove();
-          });
+      url: 'devicelist/update/'+ id,
+      type: 'post',
+      success: function(res) {
+        if(res.success) {
+          $(event.target).removeAttr("disabled");
+        }
       }
   });
 };
