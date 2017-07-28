@@ -37,11 +37,11 @@ deviceController.updateDevicesInfo = function(req, res) {
         }
       } else {
         var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-        deviceModel.update({'model': req.body.model,
-                            'version': req.body.version,
-                            'ip': ip,
-                            'last_contact': Date.now()
-                           });
+        matchedDevice.model = req.body.model;
+        matchedDevice.version = req.body.version;
+        matchedDevice.ip = ip;
+        matchedDevice.last_contact = Date.now();
+        matchedDevice.save();
         return res.status(200).json({'do_update': matchedDevice.do_update});
       }
     }
