@@ -48,4 +48,25 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
   });
 };
 
+// Receive device firmware upgrade confirmation
+deviceInfoController.confirmDeviceUpdate = function(req, res) {
+  deviceModel.findById(req.body.id, function(err, matchedDevice) {
+    if(err) {
+      console.log('Error finding device: ' + err);
+      return res.status(500);
+    } else {
+      if(matchedDevice == null){
+        return res.status(500);
+      } else {
+        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        matchedDevice.ip = ip;
+        matchedDevice.last_contact = Date.now();
+        matchedDevice.do_update = false;
+        matchedDevice.save();
+        return res.status(200);
+      }
+    }
+  });
+};
+
 module.exports = deviceInfoController;

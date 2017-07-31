@@ -8,5 +8,7 @@ router.route('/').get(deviceListController.index);
 
 // POST change device update status
 router.route('/update/:id').post(deviceListController.changeUpdate);
+// POST change all device status
+router.route('/updateall').post(deviceListController.changeAllUpdates);
 
 module.exports = router;

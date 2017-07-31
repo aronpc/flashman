@@ -6,28 +6,36 @@ block content
   else
     table.table.table-responsive.devices-table
       tr
-        th #
-        th Identificação
-        th Modelo
-        th Versão
-        th IP
-        th Atualizar Firmware
-        th
+        th.text-center #
+        th.text-center Identificação
+        th.text-center Modelo
+        th.text-center Versão
+        th.text-center IP
+        th.text-center Atualizar Firmware
+      tr
+        td.text-center *
+        td.text-center *
+        td.text-center *
+        td.text-center *
+        td.text-center *
+        td.text-center
+          label.switch
+            input.checkbox(id="all-devices", type="checkbox", name="do_update", checked=false)
+            .slider.round
       each device, index in devices
         tr(id=device._id)
-          td.col-xs-1=index + 1
-          td.col-xs-3
+          td.text-center.col-xs-1=index + 1
+          td.text-center.col-xs-3
             | #{device._id}
-          td.col-xs-2
+          td.text-center.col-xs-2
             | #{device.model}
-          td.col-xs-2
+          td.text-center.col-xs-2
             | #{device.version}
-          td.col-xs-2
+          td.text-center.col-xs-2
             | #{device.ip}
-          td.col-xs-2
+          td.text-center.col-xs-2
             label.switch
               input.checkbox(type="checkbox", name="do_update", checked=device.do_update)
               .slider.round
-
 block scripts
   script(src='/javascripts/update_device.js')

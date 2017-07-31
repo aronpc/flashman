@@ -34,4 +34,20 @@ deviceListController.changeUpdate = function(req, res) {
   });
 };
 
+deviceListController.changeAllUpdates = function(req, res) {
+  deviceModel.find({'_id': {'$in': req.body.ids}},
+  function(err, matchedDevices) {
+    if(err) {
+      var indexContent = {apptitle: 'FlashMan'};
+      indexContent.message = err.message;
+      return res.render('error', indexContent);
+    }
+    for(var idx in matchedDevices) {
+      matchedDevices[idx].do_update = req.body.do_update;
+      matchedDevices[idx].save();
+    }
+    return res.status(200).json({'success': true});
+  });
+};
+
 module.exports = deviceListController;
