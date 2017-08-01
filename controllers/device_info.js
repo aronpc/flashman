@@ -32,7 +32,8 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
       if(matchedDevice == null){
         createdStatus = createRegistry(req);
         if(createdStatus) {
-          return res.status(200).json({'do_update': false});
+          return res.status(200).json({'do_update': false,
+                                       'release_id:': req.body.release_id.trim()});
         } else {
           return res.status(500);
         }
@@ -44,7 +45,8 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
         matchedDevice.save();
-        return res.status(200).json({'do_update': matchedDevice.do_update});
+        return res.status(200).json({'do_update': matchedDevice.do_update,
+                                     'release_id': matchedDevice.release});
       }
     }
   });
