@@ -1,0 +1,21 @@
+extends layout
+
+block content
+  .col-xs-12.text-center.pagination-centered
+    h3
+      .image-block
+        img(alt="brand", src="/images/logo.png", width="48", height="48")
+        span &nbsp FlashMan
+  hr
+  .col-md-12.text-center.pagination-centered
+    form(method='post', action='/login').form-horizontal
+      .form-group
+        label.col-md-2.control-label(for="name") Usuário
+        .col-md-4
+          input.form-control(type="text", name="name")
+      .form-group
+        label.col-md-2.control-label(for="password") Senha
+        .col-md-4
+          input.form-control(type="password", name="password")
+      .form-buttons
+        button.btn.btn-primary(type="submit") Entrar

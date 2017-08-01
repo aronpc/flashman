@@ -1,14 +1,14 @@
 
 var updateDevice = function(event) {
   var row = $(event.target).parents('tr');
-  var id = row.attr('id');
-  $(event.target).attr('disabled', true);
+  var id = row.prop('id');
+  $(event.target).prop('disabled', true);
   $.ajax({
-      url: 'devicelist/update/'+ id,
+      url: 'devicelist/update/' + id,
       type: 'post',
       success: function(res) {
         if(res.success) {
-          $(event.target).removeAttr('disabled');
+          $(event.target).prop('disabled', false);
         }
       }
   });
@@ -20,11 +20,11 @@ var updateAllDevices = function(event) {
   var rows = row.siblings();
   var ids_list = [];
   rows.each(function(idx) {
-    if($(this).attr('id') !== undefined) {
-      ids_list.push($(this).attr('id'));
+    if($(this).has('id')) {
+      ids_list.push($(this).prop('id'));
     }
   });
-  $(event.target).attr('disabled', true);
+  $(event.target).prop('disabled', true);
   $.ajax({
       url: 'devicelist/updateall',
       type: 'post',
@@ -32,18 +32,14 @@ var updateAllDevices = function(event) {
       traditional: true,
       success: function(res) {
         if(res.success) {
-          if(is_checked) {
-            $(':checkbox').attr('checked', is_checked);
-          } else {
-            $(':checkbox').removeAttr('checked');
-          }
-          $(event.target).removeAttr('disabled');
+          $('.checkbox').prop('checked', is_checked);
+          $(event.target).prop('disabled', false);
         }
       }
   });
 };
 
 $(function() {
-    $(':checkbox').not('#all-devices').change(updateDevice);
-    $('#all-devices:checkbox').change(updateAllDevices);
+    $('.checkbox').not('#all-devices').change(updateDevice);
+    $('#all-devices').change(updateAllDevices);
 });

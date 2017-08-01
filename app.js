@@ -4,14 +4,18 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
+var mongoose = require('mongoose');
+var passport = require('passport');
 
 var index = require('./routes/index');
 var deviceInfo = require('./routes/device_info');
 
 var app = express();
 
-var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/flashman', {useMongoClient: true});
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
