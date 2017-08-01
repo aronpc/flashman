@@ -2,8 +2,8 @@
 var deviceModel = require('../models/device');
 var deviceListController = {};
 
-const imageReleasesDir = './images/';
 const fs = require('fs');
+const imageReleasesDir = require('../config/configs').imageReleasesDir;
 
 var getReleases = function() {
   var releases = [];

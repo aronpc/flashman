@@ -1,8 +1,12 @@
 
+var fs = require('fs');
 var prompt = require('prompt');
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/flashman', {useMongoClient: true});
 var user = require('../models/user');
+
+const imageReleasesDir = require('../config/configs').imageReleasesDir;
+
+mongoose.connect('mongodb://localhost:27017/flashman', {useMongoClient: true});
 
 var createSuperUser = function() {
   prompt.get([{
@@ -67,6 +71,10 @@ var confirmSuperUserCreation = function(hasSuperUser) {
   }
 };
 
+console.log('Checking directories...')
+if (!fs.existsSync(imageReleasesDir)){
+    fs.mkdirSync(imageReleasesDir);
+}
 console.log('Checking if a superuser exists...');
 prompt.start();
 user.find({is_superuser: true}, function(err, matchedUsers) {
