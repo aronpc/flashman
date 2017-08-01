@@ -1,13 +1,12 @@
 extends layout
 
 block content
-  .col-xs-12.text-center.pagination-centered
+  .col-md-12.text-center
     h3
       .image-block
-        img(alt="brand", src="/images/logo.png", width="48", height="48")
+        img(alt="brand", src="/images/logo.png", width="36", height="36")
         span &nbsp FlashMan
-  hr
-  .col-md-12.text-center.pagination-centered
+  .col-md-8.col-md-offset-4
     form(method='post', action='/login').form-horizontal
       .form-group
         label.col-md-2.control-label(for="name") Usuário

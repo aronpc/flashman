@@ -14,9 +14,6 @@ var app = express();
 
 mongoose.connect('mongodb://localhost:27017/flashman', {useMongoClient: true});
 
-app.use(passport.initialize());
-app.use(passport.session());
-
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -28,6 +25,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(require('express-session')
+  ({ secret: 'aSjdh%%$@asdy8ajoia7qnL&34S0))L',
+     resave: false, saveUninitialized: false }));
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use('/', index);
 app.use('/deviceinfo', deviceInfo);

@@ -78,7 +78,7 @@ exports.editUser = function(req, res) {
             });
         }
         else {
-            return res.status(403).json({message: "You don't have permission to do it"})
+            return res.status(403).json({message: "You don't have permission to do it"});
         }
     });
 };

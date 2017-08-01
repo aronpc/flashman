@@ -13,9 +13,6 @@ router.route('/')
     .get(function(req, res) {
         return res.render('login');
     })
-    .post(authController.uiAuthenticate, function(req, res) {
-        res.redirect('/devicelist');
-    });;
-
+    .post(authController.uiAuthenticate);
 
 module.exports = router;

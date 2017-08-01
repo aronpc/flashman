@@ -10,7 +10,8 @@ html
   body
     include includes/navbar
     .container
-        block content
+      include includes/flash
+      block content
     p.version-label 0.0.0
 
     script(src="/javascripts/jquery.min.js")
