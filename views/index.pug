@@ -8,11 +8,13 @@ block content
       tr
         th.text-center #
         th.text-center Identificação
+        th.text-center IP
         th.text-center Modelo
         th.text-center Versão
-        th.text-center IP
+        th.text-center Release
         th.text-center Atualizar Firmware
       tr
+        td.text-center *
         td.text-center *
         td.text-center *
         td.text-center *
@@ -28,11 +30,23 @@ block content
           td.text-center.col-xs-3
             | #{device._id}
           td.text-center.col-xs-2
+            | #{device.ip}
+          td.text-center.col-xs-2
             | #{device.model}
           td.text-center.col-xs-2
             | #{device.version}
           td.text-center.col-xs-2
-            | #{device.ip}
+            .dropdown
+              button.btn.btn-default.dropdown-toggle(type="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="true")
+                span.selected #{device.release} &nbsp
+                span.caret
+              ul.dropdown-menu
+                li
+                  a(href="#").text-center #{device.release}
+                each release, idx in releases
+                  - if (device.model === release.model)
+                      li
+                        a(href="#").text-center #{release.id}
           td.text-center.col-xs-2
             label.switch
               input.checkbox(type="checkbox", name="do_update", checked=device.do_update)

@@ -4,9 +4,10 @@ var deviceInfoController = {};
 
 var createRegistry = function(req) {
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  newDeviceModel = new deviceModel({'_id': req.body.id,
-                                    'model': req.body.model,
-                                    'version': req.body.version,
+  newDeviceModel = new deviceModel({'_id': req.body.id.trim(),
+                                    'model': req.body.model.trim(),
+                                    'version': req.body.version.trim(),
+                                    'release': req.body.release_id.trim(),
                                     'ip': ip,
                                     'last_contact': Date.now(),
                                     'do_update': false,
@@ -37,8 +38,9 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         }
       } else {
         var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-        matchedDevice.model = req.body.model;
-        matchedDevice.version = req.body.version;
+        matchedDevice.model = req.body.model.trim();
+        matchedDevice.version = req.body.version.trim();
+        matchedDevice.release = req.body.release_id.trim();
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
         matchedDevice.save();

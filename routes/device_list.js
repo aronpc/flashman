@@ -8,7 +8,7 @@ var authController = require('../controllers/auth');
 router.route('/').get(authController.ensureLogin(),
                       deviceListController.index);
 // POST change device update status
-router.route('/update/:id').post(authController.ensureLogin(),
+router.route('/update/:id/:release').post(authController.ensureLogin(),
                                  deviceListController.changeUpdate);
 // POST change all device status
 router.route('/updateall').post(authController.ensureLogin(),

@@ -6,6 +6,7 @@ var deviceSchema = new Schema({
   _id : String,
   model : String,
   version : String,
+  release : String,
   ip : String,
   last_contact : Date,
   do_update : Boolean
