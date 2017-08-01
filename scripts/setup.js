@@ -28,14 +28,21 @@ var createSuperUser = function() {
               is_superuser: true
           });
           newSuperUser.save(function(err) {
-              if(err) {
-                console.log(err);
-              }
-              console.log('User successfully created!');
+            if(err) {
+              console.log(err);
+            }
+            console.log('User successfully created!');
+            mongoose.connection.close();
           });
         } else {
           matchedUser.password = result.password;
-          matchedUser.save();
+          matchedUser.save(function(err) {
+            if(err) {
+              console.log(err);
+            }
+            console.log('User successfully created!');
+            mongoose.connection.close();
+          });
           console.log('User successfully edited!');
         }
       });
@@ -55,6 +62,8 @@ var confirmSuperUserCreation = function(hasSuperUser) {
       }], function (err, result) {
         if(result.editwanted) {
           createSuperUser();
+        } else {
+          mongoose.connection.close();
         }
     });
   } else {
