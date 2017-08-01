@@ -57,6 +57,8 @@ var confirmSuperUserCreation = function(hasSuperUser) {
           createSuperUser();
         }
     });
+  } else {
+    createSuperUser();
   }
 };
 
