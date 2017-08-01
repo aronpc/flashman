@@ -6,13 +6,11 @@ var user = require('../models/user');
 
 var createSuperUser = function() {
   prompt.get([{
-      description: 'Insert superuser user name: ',
       name: 'username',
       validator: /^[a-zA-Z\-]+$/,
       warning: 'Only letters and dashes are valid',
       required: true
     }, {
-      description: 'Insert superuser password: ',
       name: 'password',
       hidden: true,
       conform: function (value) {
@@ -40,10 +38,9 @@ var createSuperUser = function() {
             if(err) {
               console.log(err);
             }
-            console.log('User successfully created!');
+            console.log('User successfully edited!');
             mongoose.connection.close();
           });
-          console.log('User successfully edited!');
         }
       });
   });
@@ -54,7 +51,6 @@ var confirmSuperUserCreation = function(hasSuperUser) {
 
   if(hasSuperUser) {
     prompt.get([{
-        description: 'Want to create a new one or edit an existing one? ',
         name: 'editwanted',
         type: 'boolean',
         warning: 'Type true or false',
