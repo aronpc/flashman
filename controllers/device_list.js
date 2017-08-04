@@ -20,6 +20,21 @@ var getReleases = function() {
   return releases;
 };
 
+var getStatus = function(devices) {
+  var statusAll = {};
+  var yesterday = new Date();
+  // 24 hours back from now
+  yesterday.setDate(yesterday.getDate() - 1);
+  devices.forEach(device => {
+    var deviceColor = "offline-sign";
+    if(device.last_contact.getTime() > yesterday.getTime()) {
+      deviceColor = "online-sign";
+    }
+    statusAll[device._id] = deviceColor;
+  });
+  return statusAll;
+};
+
 // List all devices on a main page
 deviceListController.index = function(req, res) {
   var indexContent = {apptitle: 'FlashMan'};
@@ -28,9 +43,11 @@ deviceListController.index = function(req, res) {
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
-    var releases = getReleases(devices);
+    var releases = getReleases();
+    var status = getStatus(devices);
     indexContent.devices = devices;
     indexContent.releases = releases;
+    indexContent.status = status;
     return res.render('index', indexContent);
   });
 };

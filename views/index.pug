@@ -7,6 +7,7 @@ block content
     table.table.table-responsive.devices-table
       tr
         th.text-center #
+        th.text-center Status
         th.text-center Identificação
         th.text-center IP
         th.text-center Modelo
@@ -20,6 +21,7 @@ block content
         td.text-center *
         td.text-center *
         td.text-center *
+        td.text-center *
         td.text-center
           label.switch
             input.checkbox(id="all-devices", type="checkbox", name="do_update", checked=false)
@@ -27,7 +29,8 @@ block content
       each device, index in devices
         tr(id=device._id)
           td.text-center.col-xs-1=index + 1
-          td.text-center.col-xs-3
+          td.text-center.col-xs-1(class=status[device._id] data-toggle="tooltip" title=device.last_contact)
+          td.text-center.col-xs-2
             | #{device._id}
           td.text-center.col-xs-2
             | #{device.ip}

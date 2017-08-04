@@ -119,3 +119,15 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+.offline-sign:before {
+    content:"\25cf";
+    font-size: 3em;
+    color: FireBrick;
+}
+
+.online-sign:before {
+    content:"\25cf";
+    font-size: 3em;
+    color: GreenYellow;
+}
