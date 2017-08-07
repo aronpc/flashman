@@ -14,8 +14,8 @@ Tool created to manage flash firmware of OpenWRT devices
 * install pm2 via npm `$ npm install pm2 -g`
 * install FlashMan dependencies: `$ npm install`
 * setup FlashMan: `$ npm run setup`
-* to start it: `$ pm2 start flashman`
-* to close it: `$ pm2 stop flashman`
+* to start it: `$ pm2 start environment.config.js`
+* to close it: `$ pm2 stop environment.config.js`
 
 ## COPYRIGHT ##
 
