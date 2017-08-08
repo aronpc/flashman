@@ -2,12 +2,25 @@
 var deviceModel = require('../models/device');
 var deviceInfoController = {};
 
+var returnObjOrEmptyStr = function(query) {
+  if(typeof query !== 'undefined' && query) {
+    return query;
+  } else {
+    return "";
+  }
+};
+
 var createRegistry = function(req) {
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  if(typeof req.body.id == 'undefined') {
+    return false;
+  }
   newDeviceModel = new deviceModel({'_id': req.body.id.trim().toUpperCase(),
-                                    'model': req.body.model.trim(),
-                                    'version': req.body.version.trim(),
-                                    'release': req.body.release_id.trim(),
+                                    'model': returnObjOrEmptyStr(req.body.model).trim(),
+                                    'version': returnObjOrEmptyStr(req.body.version).trim(),
+                                    'release': returnObjOrEmptyStr(req.body.release_id).trim(),
+                                    'pppoe_user': returnObjOrEmptyStr(req.body.pppoe_user).trim(),
+                                    'pppoe_password': returnObjOrEmptyStr(req.body.pppoe_password).trim(),
                                     'ip': ip,
                                     'last_contact': Date.now(),
                                     'do_update': false,
@@ -39,9 +52,11 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         }
       } else {
         var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-        matchedDevice.model = req.body.model.trim();
-        matchedDevice.version = req.body.version.trim();
-        matchedDevice.release = req.body.release_id.trim();
+        matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim();
+        matchedDevice.version = returnObjOrEmptyStr(req.body.version).trim();
+        matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
+        matchedDevice.pppoe_user = returnObjOrEmptyStr(req.body.pppoe_user).trim();
+        matchedDevice.pppoe_password = returnObjOrEmptyStr(req.body.pppoe_password).trim();
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
         matchedDevice.save();
