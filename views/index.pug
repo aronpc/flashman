@@ -11,12 +11,14 @@ block content
         th.text-center Usuário PPPoE
         th.text-center Senha PPPoE
         th.text-center Identificação
-        th.text-center IP
+        th.text-center IP WAN
+        th.text-center IP Público
         th.text-center Modelo
         th.text-center Versão
         th.text-center Release
         th.text-center Atualizar Firmware
       tr
+        td.text-center *
         td.text-center *
         td.text-center *
         td.text-center *
@@ -40,6 +42,8 @@ block content
             | #{device.pppoe_password}
           td.text-center.col-xs-2
             | #{device._id}
+          td.text-center.col-xs-1
+            | #{device.wan_ip}
           td.text-center.col-xs-1
             | #{device.ip}
           td.text-center.col-xs-2

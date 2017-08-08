@@ -21,6 +21,7 @@ var createRegistry = function(req) {
                                     'release': returnObjOrEmptyStr(req.body.release_id).trim(),
                                     'pppoe_user': returnObjOrEmptyStr(req.body.pppoe_user).trim(),
                                     'pppoe_password': returnObjOrEmptyStr(req.body.pppoe_password).trim(),
+                                    'wan_ip': returnObjOrEmptyStr(req.body.wan_ip).trim(),
                                     'ip': ip,
                                     'last_contact': Date.now(),
                                     'do_update': false,
@@ -58,6 +59,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
         matchedDevice.pppoe_user = returnObjOrEmptyStr(req.body.pppoe_user).trim();
         matchedDevice.pppoe_password = returnObjOrEmptyStr(req.body.pppoe_password).trim();
+        matchedDevice.wan_ip = returnObjOrEmptyStr(req.body.wan_ip).trim();
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
         matchedDevice.save();
