@@ -51,6 +51,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           return res.status(500);
         }
       } else {
+        var storedRelease = JSON.parse(JSON.stringify(matchedDevice.release));
         var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim();
         matchedDevice.version = returnObjOrEmptyStr(req.body.version).trim();
@@ -61,7 +62,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.last_contact = Date.now();
         matchedDevice.save();
         return res.status(200).json({'do_update': matchedDevice.do_update,
-                                     'release_id': matchedDevice.release});
+                                     'release_id': storedRelease});
       }
     }
   });

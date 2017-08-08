@@ -8,6 +8,8 @@ block content
       tr
         th.text-center #
         th.text-center Status
+        th.text-center Usuário PPPoE
+        th.text-center Senha PPPoE
         th.text-center Identificação
         th.text-center IP
         th.text-center Modelo
@@ -15,6 +17,8 @@ block content
         th.text-center Release
         th.text-center Atualizar Firmware
       tr
+        td.text-center *
+        td.text-center *
         td.text-center *
         td.text-center *
         td.text-center *
@@ -31,12 +35,16 @@ block content
           td.text-center.col-xs-1=index + 1
           td.text-center.col-xs-1(class=status[device._id] data-toggle="tooltip" title=device.last_contact)
           td.text-center.col-xs-2
-            | #{device._id}
+            | #{device.pppoe_user}
           td.text-center.col-xs-2
+            | #{device.pppoe_password}
+          td.text-center.col-xs-2
+            | #{device._id}
+          td.text-center.col-xs-1
             | #{device.ip}
           td.text-center.col-xs-2
             | #{device.model}
-          td.text-center.col-xs-2
+          td.text-center.col-xs-1
             | #{device.version}
           td.text-center.col-xs-2
             .dropdown

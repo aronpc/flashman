@@ -1,3 +1,3 @@
 module.exports = {
-  imageReleasesDir: './images/'
+  imageReleasesDir: './public/firmwares/'
 };
