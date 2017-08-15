@@ -13,9 +13,30 @@ Tool created to manage flash firmware of OpenWRT devices
 
 * install pm2 via npm `$ npm install pm2 -g`
 * install FlashMan dependencies: `$ npm install`
-* setup FlashMan: `$ npm run setup`
+* setup Nginx configuration:
+
+`location ~ ^/(images/|javascripts/|js/|stylesheets/|fonts/|schemas/|images/) {
+	root /home/localuser/flashman/public;
+	access_log on;
+}`
+
+`location / {
+	proxy_set_header X-Real-IP $remote_addr;
+	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+	proxy_set_header X-NginX-Proxy true;
+	proxy_set_header Upgrade $http_upgrade;
+	proxy_set_header Connection 'upgrade';
+	proxy_set_header Host $host;
+
+	proxy_pass http://localhost:8000/;
+	proxy_http_version 1.1;
+
+	proxy_cache_bypass $http_upgrade;
+}`
+
 * to start it: `$ pm2 start environment.config.js`
 * to close it: `$ pm2 stop environment.config.js`
+
 
 ## COPYRIGHT ##
 
