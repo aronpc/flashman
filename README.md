@@ -15,12 +15,15 @@ Tool created to manage flash firmware of OpenWRT devices
 * install FlashMan dependencies: `$ npm install`
 * setup Nginx configuration:
 
-`location ~ ^/(images/|javascripts/|js/|stylesheets/|fonts/|schemas/|images/) {
+```
+location ~ ^/(images/|javascripts/|js/|stylesheets/|fonts/|schemas/|images/) {
 	root /home/localuser/flashman/public;
 	access_log on;
-}`
+}
+```
 
-`location / {
+```
+location / {
 	proxy_set_header X-Real-IP $remote_addr;
 	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 	proxy_set_header X-NginX-Proxy true;
@@ -32,7 +35,8 @@ Tool created to manage flash firmware of OpenWRT devices
 	proxy_http_version 1.1;
 
 	proxy_cache_bypass $http_upgrade;
-}`
+}
+```
 
 * to start it: `$ pm2 start environment.config.js`
 * to close it: `$ pm2 stop environment.config.js`
