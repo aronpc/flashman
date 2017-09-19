@@ -57,9 +57,9 @@ block content
             label.switch
               input.checkbox(type="checkbox", name="do_update", checked=device.do_update)
               .slider.round
-        tr(id="hide-" + index + 1, class="collapse out").active
+        tr(id="hide-" + index + 1, class="collapse out", data-deviceid=device._id).active
           td.text-center.col-xs-1.glyphicon.glyphicon-info-sign
-          td(colspan=8).text-left
+          td(colspan=7).text-left
             div
             b Senha PPPoE:
             |  #{device.pppoe_password}
@@ -69,6 +69,7 @@ block content
             br
             b Versão:
             |  #{device.version}
+          td(style="cursor: pointer;").btn-trash.text-center.col-xs-1.glyphicon.glyphicon-trash
 block scripts
   script(src='/javascripts/update_device.js')
   script(src='/javascripts/table_anim.js')

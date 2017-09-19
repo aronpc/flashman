@@ -90,6 +90,15 @@ deviceListController.changeAllUpdates = function(req, res) {
   });
 };
 
+deviceListController.delDeviceReg =  function(req, res) {
+  deviceModel.remove({_id: req.params.id}, function(err) {
+    if(err) {
+      return res.status(500).json({'message': 'device cannot be removed'});
+    }
+    return res.status(200).json({'success': true});
+  });
+};
+
 //
 // REST API functions
 //
