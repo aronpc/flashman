@@ -21,14 +21,16 @@ app.use(bodyParser.json());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
+app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(require('express-session')
   ({ secret: 'aSjdh%%$@asdy8ajoia7qnL&34S0))L',
-     resave: false, saveUninitialized: false }));
+     resave: false,
+     saveUninitialized: false
+   })
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
