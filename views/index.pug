@@ -70,6 +70,16 @@ block content
             b Versão:
             |  #{device.version}
           td(style="cursor: pointer;").btn-trash.text-center.col-xs-1.glyphicon.glyphicon-trash
+    div.text-center
+      ul.pagination
+        - for (var index=1; index<=pages; index++)
+          - if (index == page)
+            li.active
+              a(href="#")= index
+          - else
+            li
+              a(href="/devicelist?page=" + index)= index
+    
 block scripts
   script(src='/javascripts/update_device.js')
   script(src='/javascripts/table_anim.js')

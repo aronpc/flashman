@@ -38,17 +38,28 @@ var getStatus = function(devices) {
 // List all devices on a main page
 deviceListController.index = function(req, res) {
   var indexContent = {apptitle: 'FlashMan'};
-  deviceModel.find(function(err, devices) {
+  var reqPage = 1;
+
+  if(req.query.page) {
+    reqPage = req.query.page;
+  }
+
+  deviceModel.paginate({}, {page: reqPage,
+                            limit: 10,
+                            sort: {_id: 1}}, function(err, devices) {
     if(err) {
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
     var releases = getReleases();
-    var status = getStatus(devices);
+    var status = getStatus(devices.docs);
     indexContent.username = req.user.name;
-    indexContent.devices = devices;
+    indexContent.devices = devices.docs;
     indexContent.releases = releases;
     indexContent.status = status;
+    indexContent.page = devices.page;
+    indexContent.pages = devices.pages;
+
     return res.render('index', indexContent);
   });
 };

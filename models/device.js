@@ -1,5 +1,6 @@
 
 var mongoose = require('mongoose');
+var mongoosePaginate = require('mongoose-paginate');
 var Schema = mongoose.Schema;
 
 var deviceSchema = new Schema({
@@ -14,6 +15,8 @@ var deviceSchema = new Schema({
   last_contact : Date,
   do_update : Boolean
 });
+
+deviceSchema.plugin(mongoosePaginate);
 
 var Device = mongoose.model('Device', deviceSchema );
 
