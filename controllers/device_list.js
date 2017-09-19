@@ -45,6 +45,7 @@ deviceListController.index = function(req, res) {
     }
     var releases = getReleases();
     var status = getStatus(devices);
+    indexContent.username = req.user.name;
     indexContent.devices = devices;
     indexContent.releases = releases;
     indexContent.status = status;
@@ -86,6 +87,32 @@ deviceListController.changeAllUpdates = function(req, res) {
       matchedDevices[idx].save();
     }
     return res.status(200).json({'success': true});
+  });
+};
+
+//
+// REST API functions
+//
+
+deviceListController.getDeviceReg =  function(req, res) {
+  deviceModel.findById(req.params.id, function(err, matchedDevice) {
+    if(err) {
+      return res.status(500).json({'message': 'device not found'});
+    }
+    return res.status(200).json(matchedDevice);
+  });
+};
+
+deviceListController.setDeviceReg =  function(req, res) {
+  deviceModel.findById(req.params.id, function(err, matchedDevice) {
+    if(err) {
+      return res.status(500).json({'message': 'device not found'});
+    }
+    var content = JSON.parse(req.body.content);
+    matchedDevice.pppoe_user = content.pppoe_user;
+    matchedDevice.pppoe_password = content.pppoe_password;
+    matchedDevice.save();
+    return res.status(200).json(matchedDevice);
   });
 };
 
