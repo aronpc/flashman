@@ -68,12 +68,6 @@ passport.deserializeUser(function(id, done) {
   });
 });
 
-exports.ensureLogin = require('connect-ensure-login').ensureLoggedIn;
-
-exports.apiAuthenticate = passport.authenticate('basic', {
-  session : false
-});
-
 exports.uiAuthenticate = function(req, res, next) {
   passport.authenticate('local', {session : true}, function(err, user) {
     if (err) {
@@ -87,3 +81,9 @@ exports.uiAuthenticate = function(req, res, next) {
     });
   })(req, res, next);
 };
+
+exports.ensureLogin = require('connect-ensure-login').ensureLoggedIn;
+
+exports.ensureAPIAccess = passport.authenticate('basic', {
+  session : false
+});
