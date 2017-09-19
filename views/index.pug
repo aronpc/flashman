@@ -6,22 +6,18 @@ block content
   else
     table.table.table-responsive.devices-table
       tr
-        th.text-center #
+        th
+        th.text-left #
         th.text-center Status
         th.text-center Usuário PPPoE
-        th.text-center Senha PPPoE
         th.text-center Identificação
         th.text-center IP WAN
         th.text-center IP Público
-        th.text-center Modelo
-        th.text-center Versão
         th.text-center Release
         th.text-center Atualizar Firmware
       tr
-        td.text-center *
-        td.text-center *
-        td.text-center *
-        td.text-center *
+        td
+        td.text-left *
         td.text-center *
         td.text-center *
         td.text-center *
@@ -34,23 +30,18 @@ block content
             .slider.round
       each device, index in devices
         tr(id=device._id)
-          td.text-center.col-xs-1=index + 1
+          td(data-toggle="collapse", data-target="#hide-" + index + 1, style="cursor: pointer;").text-center.col-xs-1.glyphicon.glyphicon-menu-right
+          td.text-left.col-xs-1=index + 1
           td.text-center.col-xs-1(class=status[device._id] data-toggle="tooltip" title=device.last_contact)
           td.text-center.col-xs-2
             | #{device.pppoe_user}
           td.text-center.col-xs-2
-            | #{device.pppoe_password}
-          td.text-center.col-xs-2
             | #{device._id}
           td.text-center.col-xs-1
             | #{device.wan_ip}
-          td.text-center.col-xs-1
+          td.text-center.col-xs-2
             | #{device.ip}
-          td.text-center.col-xs-2
-            | #{device.model}
           td.text-center.col-xs-1
-            | #{device.version}
-          td.text-center.col-xs-2
             .dropdown
               button.btn.btn-default.dropdown-toggle(type="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="true")
                 span.selected #{device.release} &nbsp
@@ -62,9 +53,22 @@ block content
                   - if (device.model === release.model)
                       li
                         a(href="#").text-center #{release.id}
-          td.text-center.col-xs-2
+          td.text-center.col-xs-1
             label.switch
               input.checkbox(type="checkbox", name="do_update", checked=device.do_update)
               .slider.round
+        tr(id="hide-" + index + 1, class="collapse out").active
+          td.text-center.col-xs-1.glyphicon.glyphicon-info-sign
+          td(colspan=8).text-left
+            div
+            b Senha PPPoE:
+            |  #{device.pppoe_password}
+            br
+            b Modelo:
+            |  #{device.model}
+            br
+            b Versão:
+            |  #{device.version}
 block scripts
   script(src='/javascripts/update_device.js')
+  script(src='/javascripts/table_anim.js')
