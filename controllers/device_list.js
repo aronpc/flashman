@@ -21,6 +21,9 @@ var getReleases = function() {
 };
 
 var getStatus = function(devices) {
+  var onlinenum = 0;
+  var totalnum = 0;
+  var statusObj = {};
   var statusAll = {};
   var yesterday = new Date();
   // 24 hours back from now
@@ -28,11 +31,18 @@ var getStatus = function(devices) {
   devices.forEach(device => {
     var deviceColor = "offline-sign";
     if(device.last_contact.getTime() > yesterday.getTime()) {
+      onlinenum++;
       deviceColor = "online-sign";
     }
+    totalnum++;
     statusAll[device._id] = deviceColor;
   });
-  return statusAll;
+
+  statusObj.totalnum = totalnum;
+  statusObj.onlinenum = onlinenum;
+  statusObj.devices = statusAll;
+
+  return statusObj;
 };
 
 // List all devices on a main page

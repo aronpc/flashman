@@ -7,7 +7,7 @@ block content
     table.table.table-responsive.devices-table
       tr
         th
-        th.text-left #
+        th.text-center #
         th.text-center Status
         th.text-center Usuário PPPoE
         th.text-center Identificação
@@ -17,8 +17,10 @@ block content
         th.text-center Atualizar Firmware
       tr
         td
-        td.text-left *
-        td.text-center *
+        td.text-center
+          | #{status.totalnum} total
+        td.text-center
+          | #{status.onlinenum} online  
         td.text-center *
         td.text-center *
         td.text-center *
@@ -31,8 +33,8 @@ block content
       each device, index in devices
         tr(id=device._id)
           td(data-toggle="collapse", data-target="#hide-" + index + 1, style="cursor: pointer;").text-center.col-xs-1.glyphicon.glyphicon-menu-right
-          td.text-left.col-xs-1=index + 1
-          td.text-center.col-xs-1(class=status[device._id] data-toggle="tooltip" title=device.last_contact)
+          td.text-center.col-xs-1=index + 1
+          td.text-center.col-xs-1(class=status.devices[device._id] data-toggle="tooltip" title=device.last_contact)
           td.text-center.col-xs-2
             | #{device.pppoe_user}
           td.text-center.col-xs-2
