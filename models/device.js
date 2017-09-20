@@ -10,6 +10,8 @@ var deviceSchema = new Schema({
   release : String,
   pppoe_user : String,
   pppoe_password : String,
+  wifi_ssid : String,
+  wifi_password : String,
   wan_ip : String,
   ip : String,
   last_contact : Date,

@@ -61,7 +61,7 @@ block content
               .slider.round
         tr(id="hide-" + index + 1, class="collapse out", data-deviceid=device._id).active
           td.text-center.col-xs-1.glyphicon.glyphicon-info-sign
-          td(colspan=7).text-left
+          td(colspan=3).text-left
             div
             b Senha PPPoE:
             |  #{device.pppoe_password}
@@ -71,6 +71,13 @@ block content
             br
             b Versão:
             |  #{device.version}
+          td(colspan=4).text-left
+            div
+            b SSID WiFi:
+            |  #{device.wifi_ssid}
+            br
+            b Senha WiFi:
+            |  #{device.wifi_password}
           td(style="cursor: pointer;").btn-trash.text-center.col-xs-1.glyphicon.glyphicon-trash
     div.text-center
       ul.pagination

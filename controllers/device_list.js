@@ -141,6 +141,8 @@ deviceListController.setDeviceReg =  function(req, res) {
     var content = JSON.parse(req.body.content);
     matchedDevice.pppoe_user = content.pppoe_user;
     matchedDevice.pppoe_password = content.pppoe_password;
+    matchedDevice.wifi_ssid = content.wifi_ssid;
+    matchedDevice.wifi_password = content.wifi_password;
     matchedDevice.save();
     return res.status(200).json(matchedDevice);
   });
