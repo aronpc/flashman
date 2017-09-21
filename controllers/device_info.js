@@ -23,6 +23,7 @@ var createRegistry = function(req) {
                                     'pppoe_password': returnObjOrEmptyStr(req.body.pppoe_password).trim(),
                                     'wifi_ssid': returnObjOrEmptyStr(req.body.wifi_ssid).trim(),
                                     'wifi_password': returnObjOrEmptyStr(req.body.wifi_password).trim(),
+                                    'wifi_channel': returnObjOrEmptyStr(req.body.wifi_channel).trim(),
                                     'wan_ip': returnObjOrEmptyStr(req.body.wan_ip).trim(),
                                     'ip': ip,
                                     'last_contact': Date.now(),
@@ -55,6 +56,11 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         }
       } else {
         var storedRelease = JSON.parse(JSON.stringify(matchedDevice.release));
+        var storedPppoeUser = JSON.parse(JSON.stringify(matchedDevice.pppoe_user));
+        var storedPppoePasswd = JSON.parse(JSON.stringify(matchedDevice.pppoe_password));
+        var storedWifiSsid = JSON.parse(JSON.stringify(matchedDevice.wifi_ssid));
+        var storedWifiPasswd = JSON.parse(JSON.stringify(matchedDevice.wifi_password));
+        var storedWifiChannel = JSON.parse(JSON.stringify(matchedDevice.wifi_channel));
         var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim();
         matchedDevice.version = returnObjOrEmptyStr(req.body.version).trim();
@@ -63,12 +69,18 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.pppoe_password = returnObjOrEmptyStr(req.body.pppoe_password).trim();
         matchedDevice.wifi_ssid = returnObjOrEmptyStr(req.body.wifi_ssid).trim();
         matchedDevice.wifi_password = returnObjOrEmptyStr(req.body.wifi_password).trim();
+        matchedDevice.wifi_channel = returnObjOrEmptyStr(req.body.wifi_channel).trim();
         matchedDevice.wan_ip = returnObjOrEmptyStr(req.body.wan_ip).trim();
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
         matchedDevice.save();
         return res.status(200).json({'do_update': matchedDevice.do_update,
-                                     'release_id': storedRelease});
+                                     'release_id': storedRelease,
+                                     'pppoe_user': storedPppoeUser,
+                                     'pppoe_password': storedPppoePasswd,
+                                     'wifi_ssid': storedWifiSsid,
+                                     'wifi_password': storedWifiPasswd,
+                                     'wifi_channel': storedWifiChannel});
       }
     }
   });
