@@ -16,6 +16,10 @@ router.route('/updateall').post(authController.ensureLogin(),
 // POST delete device
 router.route('/delete/:id').post(authController.ensureLogin(),
                                 deviceListController.delDeviceReg);
+// POST search device
+router.route('/search').get(authController.ensureLogin(),
+                             deviceListController.searchDeviceReg);
+
 // REST API - GET device registry
 router.route('/update/:id').get(authController.ensureAPIAccess,
                                 deviceListController.getDeviceReg);

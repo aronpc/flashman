@@ -1,6 +1,16 @@
 extends layout
 
 block content
+  div.row
+    div.col-xs-3
+    div.col-xs-6
+      form(action="/devicelist/search")
+        div.input-group
+          input(type="text" name="content").form-control
+          span.input-group-btn
+            button(type="submit").btn.btn-default
+              .glyphicon.glyphicon-search
+  br
   if ! devices || devices.length == 0
     h3.text-center Nenhum dispositivo registrado
   else
@@ -90,7 +100,7 @@ block content
               a(href="#")= index
           - else
             li
-              a(href="/devicelist?page=" + index)= index
+              a(href="?content=" + lastquery + "&page=" + index)= index
     
 block scripts
   script(src='/javascripts/update_device.js')

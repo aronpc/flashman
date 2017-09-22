@@ -1,3 +1,4 @@
+
 $(document).ready(function() {
     $('.glyphicon-menu-right').click(function() {
         $(this).toggleClass("glyphicon-menu-down");

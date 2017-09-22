@@ -21,9 +21,6 @@ var getReleases = function() {
 };
 
 var getStatus = function(devices) {
-  var onlinenum = 0;
-  var totalnum = 0;
-  var statusObj = {};
   var statusAll = {};
   var yesterday = new Date();
   // 24 hours back from now
@@ -31,18 +28,34 @@ var getStatus = function(devices) {
   devices.forEach(device => {
     var deviceColor = "offline-sign";
     if(device.last_contact.getTime() > yesterday.getTime()) {
-      onlinenum++;
       deviceColor = "online-sign";
     }
-    totalnum++;
     statusAll[device._id] = deviceColor;
   });
+  return statusAll;
+};
 
-  statusObj.totalnum = totalnum;
-  statusObj.onlinenum = onlinenum;
-  statusObj.devices = statusAll;
+var getOnlineCount = function(query, status) {
+  var andQuery = {};
+  var yesterday = new Date();
+  // 24 hours back from now
+  yesterday.setDate(yesterday.getDate() - 1);
+  andQuery.$and = [{ last_contact: {$gt: yesterday.getTime()}}, query];
+  deviceModel.count(andQuery, function(err, count) {
+    if(err) {
+      status.onlinenum = 0;
+    }
+    status.onlinenum = count;
+  });
+};
 
-  return statusObj;
+var getTotalCount = function(query, status) {
+  deviceModel.count(query, function(err, count) {
+    if(err) {
+      status.totalnum = 0;
+    }
+    status.totalnum = count;
+  });
 };
 
 // List all devices on a main page
@@ -53,6 +66,10 @@ deviceListController.index = function(req, res) {
   if(req.query.page) {
     reqPage = req.query.page;
   }
+  // Counters
+  var status = {};
+  getOnlineCount({}, status);
+  getTotalCount({}, status);
 
   deviceModel.paginate({}, {page: reqPage,
                             limit: 10,
@@ -62,7 +79,7 @@ deviceListController.index = function(req, res) {
       return res.render('error', indexContent);
     }
     var releases = getReleases();
-    var status = getStatus(devices.docs);
+    status.devices = getStatus(devices.docs);
     indexContent.username = req.user.name;
     indexContent.devices = devices.docs;
     indexContent.releases = releases;
@@ -117,6 +134,52 @@ deviceListController.delDeviceReg =  function(req, res) {
       return res.status(500).json({'message': 'device cannot be removed'});
     }
     return res.status(200).json({'success': true});
+  });
+};
+
+deviceListController.searchDeviceReg =  function(req, res) {
+  var queryInput = new RegExp(req.query.content, 'i');
+  var queryArray = [];
+  var indexContent = {apptitle: 'FlashMan'};
+  var reqPage = 1;
+
+  for (var property in deviceModel.schema.paths) {
+    if (deviceModel.schema.paths.hasOwnProperty(property) &&
+        deviceModel.schema.paths[property].instance === "String") {
+      var field = {};
+      field[property] = queryInput;
+      queryArray.push(field);
+    }
+  }
+  var query = {
+    $or: queryArray
+  };
+  if(req.query.page) {
+    reqPage = req.query.page;
+  }
+  // Counters
+  var status = {};
+  getOnlineCount(query, status);
+  getTotalCount(query, status);
+
+  deviceModel.paginate(query, {page: reqPage,
+                            limit: 10,
+                            sort: {_id: 1}}, function(err, matchedDevices) {
+    if(err) {
+      indexContent.message = err.message;
+      return res.render('error', indexContent);
+    }
+    var releases = getReleases();
+    status.devices = getStatus(matchedDevices.docs);
+    indexContent.username = req.user.name;
+    indexContent.devices = matchedDevices.docs;
+    indexContent.releases = releases;
+    indexContent.status = status;
+    indexContent.page = matchedDevices.page;
+    indexContent.pages = matchedDevices.pages;
+    indexContent.lastquery = req.query.content;
+
+    return res.render('index', indexContent);
   });
 };
 
