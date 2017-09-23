@@ -55,13 +55,22 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           return res.status(500);
         }
       } else {
+        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         var storedRelease = JSON.parse(JSON.stringify(matchedDevice.release));
         var storedPppoeUser = JSON.parse(JSON.stringify(matchedDevice.pppoe_user));
         var storedPppoePasswd = JSON.parse(JSON.stringify(matchedDevice.pppoe_password));
-        var storedWifiSsid = JSON.parse(JSON.stringify(matchedDevice.wifi_ssid));
-        var storedWifiPasswd = JSON.parse(JSON.stringify(matchedDevice.wifi_password));
-        var storedWifiChannel = JSON.parse(JSON.stringify(matchedDevice.wifi_channel));
-        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        var storedWifiSsid = "";
+        if(matchedDevice.hasOwnProperty('wifi_ssid')){
+          storedWifiSsid = JSON.parse(JSON.stringify(matchedDevice.wifi_ssid));
+        }
+        var storedWifiPasswd = "";
+        if(matchedDevice.hasOwnProperty('wifi_password')){
+          storedWifiPasswd = JSON.parse(JSON.stringify(matchedDevice.wifi_password));
+        }
+        var storedWifiChannel = "";
+        if(matchedDevice.hasOwnProperty('wifi_channel')){
+          storedWifiChannel = JSON.parse(JSON.stringify(matchedDevice.wifi_channel));
+        }
         matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim();
         matchedDevice.version = returnObjOrEmptyStr(req.body.version).trim();
         matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
