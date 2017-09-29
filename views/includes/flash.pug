@@ -1,0 +1,5 @@
+if message
+  .row
+    div.flash(class="alert alert-" + type + " alert-dismissible fade in", role='alert')= message
+      button.close(type="button", data-dismiss="alert", aria-label="Fechar")
+        span(aria-hidden="true") ×
