@@ -40,6 +40,8 @@ location / {
 
 * to start it: `$ pm2 start environment.config.js`
 * to close it: `$ pm2 stop environment.config.js`
+* generate a startup script to start the app at boot: `pm2 startup`
+* save startup configurations with `pm2 save`
 
 
 ## COPYRIGHT ##

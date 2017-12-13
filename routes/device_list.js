@@ -23,8 +23,10 @@ router.route('/search').get(authController.ensureLogin(),
 // REST API - GET device registry
 router.route('/update/:id').get(authController.ensureAPIAccess,
                                 deviceListController.getDeviceReg);
-// REST API - POST change device registry
+// REST API - POST or PUT change device registry
 router.route('/update/:id').post(authController.ensureAPIAccess,
+                                 deviceListController.setDeviceReg);
+router.route('/update/:id').put(authController.ensureAPIAccess,
                                  deviceListController.setDeviceReg);
 
 module.exports = router;

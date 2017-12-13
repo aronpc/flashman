@@ -189,8 +189,11 @@ deviceListController.searchDeviceReg =  function(req, res) {
 
 deviceListController.getDeviceReg =  function(req, res) {
   deviceModel.findById(req.params.id, function(err, matchedDevice) {
-    if(err) {
-      return res.status(500).json({'message': 'device not found'});
+    if(err){
+      return res.status(500).json({'message': 'internal server error'});
+    }
+    if(matchedDevice == null){
+      return res.status(404).json({'message': 'device not found'});
     }
     return res.status(200).json(matchedDevice);
   });
@@ -198,14 +201,33 @@ deviceListController.getDeviceReg =  function(req, res) {
 
 deviceListController.setDeviceReg =  function(req, res) {
   deviceModel.findById(req.params.id, function(err, matchedDevice) {
-    if(err) {
-      return res.status(500).json({'message': 'device not found'});
+    if(err){
+      return res.status(500).json({'message': 'internal server error'});
     }
-    var content = JSON.parse(req.body.content);
-    matchedDevice.pppoe_user = content.pppoe_user;
-    matchedDevice.pppoe_password = content.pppoe_password;
-    matchedDevice.wifi_ssid = content.wifi_ssid;
-    matchedDevice.wifi_password = content.wifi_password;
+    if(matchedDevice == null){
+      return res.status(404).json({'message': 'device not found'});
+    }
+    var content;
+    
+    try {
+      content = JSON.parse(req.body.content);
+    } catch(e){
+      return res.status(500).json({'message': 'error parsing json'});
+    }
+
+    if(content.hasOwnProperty('pppoe_user')){
+      matchedDevice.pppoe_user = content.pppoe_user;
+    }
+    if(content.hasOwnProperty('pppoe_password')){
+      matchedDevice.pppoe_password = content.pppoe_password;
+    }
+    if(content.hasOwnProperty('wifi_ssid')){
+      matchedDevice.wifi_ssid = content.wifi_ssid;
+    }
+    if(content.hasOwnProperty('wifi_password')){
+      matchedDevice.wifi_password = content.wifi_password;
+    }
+
     matchedDevice.save();
     return res.status(200).json(matchedDevice);
   });
