@@ -1,3 +1,4 @@
 module.exports = {
-  imageReleasesDir: './public/firmwares/'
+  imageReleasesDir: './public/firmwares/',
+  deviceAllowUpdateRESTData: true,
 };

@@ -16,7 +16,8 @@ var deviceSchema = new Schema({
   wan_ip : String,
   ip : String,
   last_contact : Date,
-  do_update : Boolean
+  do_update : Boolean,
+  do_update_parameters : Boolean
 });
 
 deviceSchema.plugin(mongoosePaginate);

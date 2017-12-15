@@ -58,6 +58,10 @@ var getTotalCount = function(query, status) {
   });
 };
 
+var isJSONObject = function(val) {
+  return val instanceof Object ? true : false;
+}
+
 // List all devices on a main page
 deviceListController.index = function(req, res) {
   var indexContent = {apptitle: 'FlashMan'};
@@ -207,29 +211,40 @@ deviceListController.setDeviceReg =  function(req, res) {
     if(matchedDevice == null){
       return res.status(404).json({'message': 'device not found'});
     }
-    var content;
-    
-    try {
-      content = JSON.parse(req.body.content);
-    } catch(e){
+
+    if(isJSONObject(req.body.content)){
+      var content = req.body.content;
+      var updateParameters = false;
+
+      if(content.hasOwnProperty('pppoe_user')){
+        matchedDevice.pppoe_user = content.pppoe_user;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('pppoe_password')){
+        matchedDevice.pppoe_password = content.pppoe_password;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('wifi_ssid')){
+        matchedDevice.wifi_ssid = content.wifi_ssid;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('wifi_password')){
+        matchedDevice.wifi_password = content.wifi_password;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('wifi_channel')){
+        matchedDevice.wifi_channel = content.wifi_channel;
+        updateParameters = true;
+      }
+      if(updateParameters){
+        matchedDevice.do_update_parameters = true;
+      }
+
+      matchedDevice.save();
+      return res.status(200).json(matchedDevice);
+    } else {
       return res.status(500).json({'message': 'error parsing json'});
     }
-
-    if(content.hasOwnProperty('pppoe_user')){
-      matchedDevice.pppoe_user = content.pppoe_user;
-    }
-    if(content.hasOwnProperty('pppoe_password')){
-      matchedDevice.pppoe_password = content.pppoe_password;
-    }
-    if(content.hasOwnProperty('wifi_ssid')){
-      matchedDevice.wifi_ssid = content.wifi_ssid;
-    }
-    if(content.hasOwnProperty('wifi_password')){
-      matchedDevice.wifi_password = content.wifi_password;
-    }
-
-    matchedDevice.save();
-    return res.status(200).json(matchedDevice);
   });
 };
 
