@@ -2,6 +2,8 @@
 var deviceModel = require('../models/device');
 var deviceInfoController = {};
 
+const deviceAllowUpdateRESTData = require('../config/configs').deviceAllowUpdateRESTData;
+
 var returnObjOrEmptyStr = function(query) {
   if(typeof query !== 'undefined' && query) {
     return query;
@@ -10,10 +12,10 @@ var returnObjOrEmptyStr = function(query) {
   }
 };
 
-var createRegistry = function(req) {
+var createRegistry = function(req, res) {
   var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   if(typeof req.body.id == 'undefined') {
-    return false;
+    return res.status(400);
   }
   newDeviceModel = new deviceModel({'_id': req.body.id.trim().toUpperCase(),
                                     'model': returnObjOrEmptyStr(req.body.model).trim(),
@@ -28,13 +30,15 @@ var createRegistry = function(req) {
                                     'ip': ip,
                                     'last_contact': Date.now(),
                                     'do_update': false,
+                                    'do_update_parameters': false,
                                   });
   newDeviceModel.save(function (err) {
     if (err) {
       console.log('Error creating device: ' + err);
-      return false;
+      return res.status(500);
     } else {
-      return true;
+      return res.status(200).json({'do_update': false,
+                                   'release_id:': req.body.release_id.trim()});
     }
   });
 };
@@ -47,49 +51,43 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
       return res.status(500);
     } else {
       if(matchedDevice == null){
-        createdStatus = createRegistry(req);
-        if(createdStatus) {
-          return res.status(200).json({'do_update': false,
-                                       'release_id:': req.body.release_id.trim()});
-        } else {
-          return res.status(500);
-        }
+        createRegistry(req, res);
       } else {
         var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-        var storedRelease = JSON.parse(JSON.stringify(matchedDevice.release));
-        var storedPppoeUser = JSON.parse(JSON.stringify(matchedDevice.pppoe_user));
-        var storedPppoePasswd = JSON.parse(JSON.stringify(matchedDevice.pppoe_password));
-        var storedWifiSsid = "";
-        if(matchedDevice.hasOwnProperty('wifi_ssid')){
-          storedWifiSsid = JSON.parse(JSON.stringify(matchedDevice.wifi_ssid));
+
+        // Update old entries
+        if(!matchedDevice.hasOwnProperty('do_update_parameters')){
+          matchedDevice.do_update_parameters = false;
         }
-        var storedWifiPasswd = "";
-        if(matchedDevice.hasOwnProperty('wifi_password')){
-          storedWifiPasswd = JSON.parse(JSON.stringify(matchedDevice.wifi_password));
-        }
-        var storedWifiChannel = "";
-        if(matchedDevice.hasOwnProperty('wifi_channel')){
-          storedWifiChannel = JSON.parse(JSON.stringify(matchedDevice.wifi_channel));
-        }
+
+        // Parameters *NOT* available to be modified by REST API
         matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim();
         matchedDevice.version = returnObjOrEmptyStr(req.body.version).trim();
         matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
-        matchedDevice.pppoe_user = returnObjOrEmptyStr(req.body.pppoe_user).trim();
-        matchedDevice.pppoe_password = returnObjOrEmptyStr(req.body.pppoe_password).trim();
-        matchedDevice.wifi_ssid = returnObjOrEmptyStr(req.body.wifi_ssid).trim();
-        matchedDevice.wifi_password = returnObjOrEmptyStr(req.body.wifi_password).trim();
-        matchedDevice.wifi_channel = returnObjOrEmptyStr(req.body.wifi_channel).trim();
         matchedDevice.wan_ip = returnObjOrEmptyStr(req.body.wan_ip).trim();
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
+
+        // Parameters available to be modified by REST API
+        if((!matchedDevice.do_update_parameters) && deviceAllowUpdateRESTData){
+          matchedDevice.pppoe_user = returnObjOrEmptyStr(req.body.pppoe_user).trim();
+          matchedDevice.pppoe_password = returnObjOrEmptyStr(req.body.pppoe_password).trim();
+          matchedDevice.wifi_ssid = returnObjOrEmptyStr(req.body.wifi_ssid).trim();
+          matchedDevice.wifi_password = returnObjOrEmptyStr(req.body.wifi_password).trim();
+          matchedDevice.wifi_channel = returnObjOrEmptyStr(req.body.wifi_channel).trim();
+        }
+
+        // We can disable since the device will receive the update
+        matchedDevice.do_update_parameters = false;
+
         matchedDevice.save();
         return res.status(200).json({'do_update': matchedDevice.do_update,
-                                     'release_id': storedRelease,
-                                     'pppoe_user': storedPppoeUser,
-                                     'pppoe_password': storedPppoePasswd,
-                                     'wifi_ssid': storedWifiSsid,
-                                     'wifi_password': storedWifiPasswd,
-                                     'wifi_channel': storedWifiChannel});
+                                     'release_id': returnObjOrEmptyStr(matchedDevice.release),
+                                     'pppoe_user': returnObjOrEmptyStr(matchedDevice.pppoe_user),
+                                     'pppoe_password': returnObjOrEmptyStr(matchedDevice.pppoe_password),
+                                     'wifi_ssid': returnObjOrEmptyStr(matchedDevice.wifi_ssid),
+                                     'wifi_password': returnObjOrEmptyStr(matchedDevice.wifi_password),
+                                     'wifi_channel': returnObjOrEmptyStr(matchedDevice.wifi_channel)});
       }
     }
   });
