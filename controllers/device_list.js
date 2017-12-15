@@ -214,19 +214,32 @@ deviceListController.setDeviceReg =  function(req, res) {
 
     if(isJSONObject(req.body.content)){
       var content = req.body.content;
+      var updateParameters = false;
 
       if(content.hasOwnProperty('pppoe_user')){
         matchedDevice.pppoe_user = content.pppoe_user;
+        updateParameters = true;
       }
       if(content.hasOwnProperty('pppoe_password')){
         matchedDevice.pppoe_password = content.pppoe_password;
+        updateParameters = true;
       }
       if(content.hasOwnProperty('wifi_ssid')){
         matchedDevice.wifi_ssid = content.wifi_ssid;
+        updateParameters = true;
       }
       if(content.hasOwnProperty('wifi_password')){
         matchedDevice.wifi_password = content.wifi_password;
+        updateParameters = true;
       }
+      if(content.hasOwnProperty('wifi_channel')){
+        matchedDevice.wifi_channel = content.wifi_channel;
+        updateParameters = true;
+      }
+      if(updateParameters){
+        matchedDevice.do_update_parameters = true;
+      }
+
       matchedDevice.save();
       return res.status(200).json(matchedDevice);
     } else {
