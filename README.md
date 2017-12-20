@@ -13,6 +13,7 @@ Tool created to manage flash firmware of OpenWRT devices
 
 * install pm2 via npm `$ npm install pm2 -g`
 * install FlashMan dependencies: `$ npm install`
+* configure MQTT broker URL on `config/configs.js` (e.g. `mqtt:\\mymqttbroker.com`)
 * setup Nginx configuration:
 
 ```

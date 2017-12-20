@@ -1,8 +1,10 @@
 
 var deviceModel = require('../models/device');
+var mqtt = require('mqtt');
 var deviceInfoController = {};
 
 const deviceAllowUpdateRESTData = require('../config/configs').deviceAllowUpdateRESTData;
+const mqttBrokerURL = require('../config/configs').mqttBrokerURL;
 
 var returnObjOrEmptyStr = function(query) {
   if(typeof query !== 'undefined' && query) {
@@ -79,6 +81,15 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
 
         // We can disable since the device will receive the update
         matchedDevice.do_update_parameters = false;
+
+        // Remove notification to device using MQTT
+        var client  = mqtt.connect(mqttBrokerURL);
+        client.on('connect', function () {
+          client.publish(
+            'flashman/update/' + matchedDevice._id, 
+            '', {qos: 1, retain: true}); // topic, msg, options
+          client.end();
+        });
 
         matchedDevice.save();
         return res.status(200).json({'do_update': matchedDevice.do_update,

@@ -17,6 +17,7 @@
     "mongoose": "^4.11.4",
     "mongoose-paginate": "^5.0.3",
     "morgan": "~1.8.1",
+    "mqtt": "^2.15.0",
     "passport": "^0.3.2",
     "passport-http": "^0.3.0",
     "passport-http-bearer": "^1.0.1",
