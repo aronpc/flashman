@@ -87,9 +87,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         client.on('connect', function () {
           client.publish(
             'flashman/update/' + matchedDevice._id, 
-            '',
-            1,
-            true); // topic, msg, qos, retain
+            '', {qos: 1, retain: true}); // topic, msg, qos, retain
           client.end();
         });
 

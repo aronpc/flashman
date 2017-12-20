@@ -249,9 +249,7 @@ deviceListController.setDeviceReg =  function(req, res) {
       client.on('connect', function () {
         client.publish(
           'flashman/update/' + matchedDevice._id, 
-          '1',
-          1,
-          true); // topic, msg, qos, retain
+          '1', {qos: 1, retain: true}); // topic, msg, qos, retain
         client.end();
       });
 
