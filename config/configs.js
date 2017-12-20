@@ -1,5 +1,5 @@
 module.exports = {
   imageReleasesDir: './public/firmwares/',
   deviceAllowUpdateRESTData: false,
-  mqttBrokerURL: '',
+  mqttBrokerURL: 'mqtt://',
 };
