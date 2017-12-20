@@ -67,6 +67,8 @@ typings/
 # dotenv environment variables file
 .env
 
+# Deployment configuration file
+config/configs.js
 
 ### Vim ###
 # swap
