@@ -1,9 +1,11 @@
 
 var deviceModel = require('../models/device');
+var mqtt = require('mqtt');
 var deviceListController = {};
 
 const fs = require('fs');
 const imageReleasesDir = require('../config/configs').imageReleasesDir;
+const mqttBrokerURL = require('../config/configs').mqttBrokerURL;
 
 var getReleases = function() {
   var releases = [];
@@ -241,6 +243,18 @@ deviceListController.setDeviceReg =  function(req, res) {
       }
 
       matchedDevice.save();
+
+      // Send notification to device using MQTT
+      var client  = mqtt.connect(mqttBrokerURL);
+      client.on('connect', function () {
+        client.publish(
+          'flashman/update/' + matchedDevice._id, 
+          '1',
+          1,
+          true); // topic, msg, qos, retain
+        client.end();
+      });
+
       return res.status(200).json(matchedDevice);
     } else {
       return res.status(500).json({'message': 'error parsing json'});
