@@ -44,6 +44,15 @@ location / {
 * generate a startup script to start the app at boot: `pm2 startup`
 * save startup configurations with `pm2 save`
 
+## PLACING IMAGES ON FIRMWARE DIRECTORY ##
+
+When adding new firmware images, please follow the following file format:
+
+`<VENDOR *UPPERCASE*>_<HARDWARE MODEL *UPPERCASE*>_<HARDWARE VERSION *UPPERCASE*>_<RELEASE ID *FORMAT USED BY FLASMAN BUILDROOT CONFIGURATION>.bin`
+
+Example:
+
+`TP-LINK_MR3020_V1_0000-flm.bin`
 
 ## COPYRIGHT ##
 
