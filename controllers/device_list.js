@@ -10,7 +10,7 @@ const mqttBrokerURL = require('../config/configs').mqttBrokerURL;
 var getReleases = function() {
   var releases = [];
   fs.readdirSync(imageReleasesDir).forEach(filename => {
-    // File name pattern is VENDOR_MODEL_RELEASE.bin
+    // File name pattern is VENDOR_MODEL_MODELVERSION_RELEASE.bin
     var fnameSubStrings = filename.split('_');
     var releaseSubStringRaw = fnameSubStrings[fnameSubStrings.length - 1];
     var releaseSubStringsRaw = releaseSubStringRaw.split('.');
