@@ -12,7 +12,7 @@ $(document).ready(function() {
       var row = $(event.target).parents('tr');
       var id = row.data('deviceid');
       $.ajax({
-          url: 'devicelist/delete/' + id,
+          url: '/devicelist/delete/' + id,
           type: 'post',
           success: function(res) {
             setTimeout(function(){
