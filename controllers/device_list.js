@@ -113,7 +113,7 @@ deviceListController.changeUpdate = function(req, res) {
     } else {
       matchedDevice.do_update = true;
     }
-    matchedDevice.release = req.params.release;
+    matchedDevice.release = req.params.release.trim();
     matchedDevice.save();
 
     // Send notification to device using MQTT
@@ -144,7 +144,7 @@ deviceListController.changeAllUpdates = function(req, res) {
     client.on('connect', function() {
       for(var idx in matchedDevices) {
         
-        matchedDevices[idx].release = form.ids[matchedDevices[idx]._id];
+        matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
         matchedDevices[idx].do_update = form.do_update;
         matchedDevices[idx].save();
 
