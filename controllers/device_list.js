@@ -16,6 +16,9 @@ var getReleases = function() {
     var releaseSubStringsRaw = releaseSubStringRaw.split('.');
     var releaseId = releaseSubStringsRaw[0];
     var releaseModel = fnameSubStrings[1];
+    if(fnameSubStrings.length == 4) {
+      releaseModel += fnameSubStrings[2];
+    }
     var release = {id: releaseId, model: releaseModel};
     releases.push(release);
   });

@@ -20,7 +20,8 @@ var createRegistry = function(req, res) {
     return res.status(400);
   }
   newDeviceModel = new deviceModel({'_id': req.body.id.trim().toUpperCase(),
-                                    'model': returnObjOrEmptyStr(req.body.model).trim(),
+                                    'model': returnObjOrEmptyStr(req.body.model).trim() +
+                                             returnObjOrEmptyStr(req.body.model_ver).trim(),
                                     'version': returnObjOrEmptyStr(req.body.version).trim(),
                                     'release': returnObjOrEmptyStr(req.body.release_id).trim(),
                                     'pppoe_user': returnObjOrEmptyStr(req.body.pppoe_user).trim(),
@@ -63,7 +64,8 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         }
 
         // Parameters *NOT* available to be modified by REST API
-        matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim();
+        matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim() +
+                              returnObjOrEmptyStr(req.body.model_ver).trim();
         matchedDevice.version = returnObjOrEmptyStr(req.body.version).trim();
         matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
         matchedDevice.wan_ip = returnObjOrEmptyStr(req.body.wan_ip).trim();
