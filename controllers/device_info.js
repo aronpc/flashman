@@ -67,13 +67,13 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim() +
                               returnObjOrEmptyStr(req.body.model_ver).trim();
         matchedDevice.version = returnObjOrEmptyStr(req.body.version).trim();
-        matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
         matchedDevice.wan_ip = returnObjOrEmptyStr(req.body.wan_ip).trim();
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
 
         // Parameters available to be modified by REST API
         if((!matchedDevice.do_update_parameters) && deviceAllowUpdateRESTData){
+          matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
           matchedDevice.pppoe_user = returnObjOrEmptyStr(req.body.pppoe_user).trim();
           matchedDevice.pppoe_password = returnObjOrEmptyStr(req.body.pppoe_password).trim();
           matchedDevice.wifi_ssid = returnObjOrEmptyStr(req.body.wifi_ssid).trim();
