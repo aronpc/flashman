@@ -56,6 +56,7 @@ var confirmSuperUserCreation = function(hasSuperUser) {
   if(hasSuperUser) {
     prompt.get([{
         name: 'editwanted',
+        message: 'Do you want to change the superuser? (true/false)',
         type: 'boolean',
         warning: 'Type true or false',
         required: true
@@ -72,7 +73,7 @@ var confirmSuperUserCreation = function(hasSuperUser) {
 };
 
 console.log('Checking directories...')
-if (!fs.existsSync(imageReleasesDir)){
+if (!fs.existsSync(imageReleasesDir)) {
     fs.mkdirSync(imageReleasesDir);
 }
 console.log('Checking if a superuser exists...');

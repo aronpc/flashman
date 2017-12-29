@@ -1,8 +1,10 @@
 
 var deviceModel = require('../models/device');
+var mqtt = require('mqtt');
 var deviceInfoController = {};
 
 const deviceAllowUpdateRESTData = require('../config/configs').deviceAllowUpdateRESTData;
+const mqttBrokerURL = require('../config/configs').mqttBrokerURL;
 
 var returnObjOrEmptyStr = function(query) {
   if(typeof query !== 'undefined' && query) {
@@ -18,7 +20,8 @@ var createRegistry = function(req, res) {
     return res.status(400);
   }
   newDeviceModel = new deviceModel({'_id': req.body.id.trim().toUpperCase(),
-                                    'model': returnObjOrEmptyStr(req.body.model).trim(),
+                                    'model': returnObjOrEmptyStr(req.body.model).trim() +
+                                             returnObjOrEmptyStr(req.body.model_ver).trim(),
                                     'version': returnObjOrEmptyStr(req.body.version).trim(),
                                     'release': returnObjOrEmptyStr(req.body.release_id).trim(),
                                     'pppoe_user': returnObjOrEmptyStr(req.body.pppoe_user).trim(),
@@ -61,15 +64,16 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         }
 
         // Parameters *NOT* available to be modified by REST API
-        matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim();
+        matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim() +
+                              returnObjOrEmptyStr(req.body.model_ver).trim();
         matchedDevice.version = returnObjOrEmptyStr(req.body.version).trim();
-        matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
         matchedDevice.wan_ip = returnObjOrEmptyStr(req.body.wan_ip).trim();
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
 
         // Parameters available to be modified by REST API
         if((!matchedDevice.do_update_parameters) && deviceAllowUpdateRESTData){
+          matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
           matchedDevice.pppoe_user = returnObjOrEmptyStr(req.body.pppoe_user).trim();
           matchedDevice.pppoe_password = returnObjOrEmptyStr(req.body.pppoe_password).trim();
           matchedDevice.wifi_ssid = returnObjOrEmptyStr(req.body.wifi_ssid).trim();
@@ -79,6 +83,15 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
 
         // We can disable since the device will receive the update
         matchedDevice.do_update_parameters = false;
+
+        // Remove notification to device using MQTT
+        var client  = mqtt.connect(mqttBrokerURL);
+        client.on('connect', function () {
+          client.publish(
+            'flashman/update/' + matchedDevice._id, 
+            '', {qos: 1, retain: true}); // topic, msg, options
+          client.end();
+        });
 
         matchedDevice.save();
         return res.status(200).json({'do_update': matchedDevice.do_update,

@@ -1,19 +1,24 @@
 
 var deviceModel = require('../models/device');
+var mqtt = require('mqtt');
 var deviceListController = {};
 
 const fs = require('fs');
 const imageReleasesDir = require('../config/configs').imageReleasesDir;
+const mqttBrokerURL = require('../config/configs').mqttBrokerURL;
 
 var getReleases = function() {
   var releases = [];
   fs.readdirSync(imageReleasesDir).forEach(filename => {
-    // File name pattern is VENDOR_MODEL_RELEASE.bin
+    // File name pattern is VENDOR_MODEL_MODELVERSION_RELEASE.bin
     var fnameSubStrings = filename.split('_');
     var releaseSubStringRaw = fnameSubStrings[fnameSubStrings.length - 1];
     var releaseSubStringsRaw = releaseSubStringRaw.split('.');
     var releaseId = releaseSubStringsRaw[0];
     var releaseModel = fnameSubStrings[1];
+    if(fnameSubStrings.length == 4) {
+      releaseModel += fnameSubStrings[2];
+    }
     var release = {id: releaseId, model: releaseModel};
     releases.push(release);
   });
@@ -108,8 +113,18 @@ deviceListController.changeUpdate = function(req, res) {
     } else {
       matchedDevice.do_update = true;
     }
-    matchedDevice.release = req.params.release;
+    matchedDevice.release = req.params.release.trim();
     matchedDevice.save();
+
+    // Send notification to device using MQTT
+    var client  = mqtt.connect(mqttBrokerURL);
+    client.on('connect', function () {
+      client.publish(
+        'flashman/update/' + matchedDevice._id, 
+        '1', {qos: 1, retain: true}); // topic, msg, options
+      client.end();
+    });
+
     return res.status(200).json({'success': true});
   });
 };
@@ -123,11 +138,28 @@ deviceListController.changeAllUpdates = function(req, res) {
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
-    for(var idx in matchedDevices) {
-      matchedDevices[idx].release = form.ids[matchedDevices[idx]._id];
-      matchedDevices[idx].do_update = form.do_update;
-      matchedDevices[idx].save();
-    }
+
+    // Send notification to device using MQTT
+    var client  = mqtt.connect(mqttBrokerURL);
+    client.on('connect', function() {
+      for(var idx in matchedDevices) {
+        
+        matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
+        matchedDevices[idx].do_update = form.do_update;
+        matchedDevices[idx].save();
+
+        client.publish(
+          'flashman/update/' + matchedDevices[idx]._id, 
+          '1', {qos: 1, retain: true},
+          function(err) {
+            if(idx == (matchedDevices.length - 1)) {
+              client.end();
+            }
+          }
+        ); // topic, msg, options, callback
+      }
+    });
+
     return res.status(200).json({'success': true});
   });
 };
@@ -241,6 +273,16 @@ deviceListController.setDeviceReg =  function(req, res) {
       }
 
       matchedDevice.save();
+
+      // Send notification to device using MQTT
+      var client  = mqtt.connect(mqttBrokerURL);
+      client.on('connect', function () {
+        client.publish(
+          'flashman/update/' + matchedDevice._id, 
+          '1', {qos: 1, retain: true}); // topic, msg, options
+        client.end();
+      });
+
       return res.status(200).json(matchedDevice);
     } else {
       return res.status(500).json({'message': 'error parsing json'});
