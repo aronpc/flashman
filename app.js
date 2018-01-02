@@ -12,7 +12,8 @@ var deviceInfo = require('./routes/device_info');
 
 var app = express();
 
-mongoose.connect('mongodb://localhost:27017/flashman', {useMongoClient: true});
+mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman',
+                 {useMongoClient: true});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
