@@ -7,16 +7,17 @@ ENV FLM_MQTT_BROKER "mqtt://"
 ENV FLM_IMG_RELEASE_DIR "./public/firmwares/"
 ENV FLM_ALLOW_DEV_UPDATE_REST_DATA false
 ENV FLM_MONGODB_HOST "localhost"
+ENV FLM_ADM_USER "admin"
+ENV FLM_ADM_PASS "flashman"
 
 WORKDIR /app
 
-COPY ./docker/package.json ./docker/environment.config.json ./app.js ./LICENSE /app/
+COPY ./app.js ./LICENSE ./package.json ./docker/environment.config.json /app/
 COPY ./bin /app/bin
 COPY ./controllers /app/controllers
 COPY ./models /app/models
 COPY ./public /app/public
 COPY ./routes /app/routes
-COPY ./scripts /app/scripts
 COPY ./views /app/views
 
 # Run as root

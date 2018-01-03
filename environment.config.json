@@ -10,6 +10,8 @@
         "FLM_ALLOW_DEV_UPDATE_REST_DATA": false,
         "FLM_MQTT_BROKER": "mqtt://",
         "FLM_MONGODB_HOST": "localhost",
+        "FLM_ADM_USER": "admin",
+        "FLM_ADM_PASS": "flashman"
       },
       "error_file": "/dev/stderr",
       "out_file": "/dev/stdout",

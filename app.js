@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
+var user = require('./models/user');
 
 var index = require('./routes/index');
 var deviceInfo = require('./routes/device_info');
@@ -14,6 +15,18 @@ var app = express();
 
 mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman',
                  {useMongoClient: true});
+
+// check administration user existence
+user.find({is_superuser: true}, function(err, matchedUsers) {
+  if(err || !matchedUsers || 0 === matchedUsers.length) {
+    var newSuperUser = new user({
+      name: process.env.FLM_ADM_USER,
+      password: process.env.FLM_ADM_PASS,
+      is_superuser: true
+    });
+    newSuperUser.save();
+  }
+});
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
