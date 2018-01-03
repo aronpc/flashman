@@ -70,13 +70,25 @@ passport.deserializeUser(function(id, done) {
 
 exports.uiAuthenticate = function(req, res, next) {
   passport.authenticate('local', {session : true}, function(err, user) {
-    if (err) {
+    if(err) {
       return res.render('login', {message: err.message, type: "danger"});
     }
+    if(!user) {
+      return res.render('login', {message: err.message, type: "danger"});
+    }
+
     req.logIn(user, function() {
       if(err) {
-        return next('error');
+        return res.render('login', {message: err.message, type: "danger"});
       }
+      // First login
+      if (user.lastLogin == null) {
+        return res.redirect('/user/changepassword');
+      }
+
+      user.lastLogin = new Date();
+      user.save();
+
       res.redirect('/devicelist');
     });
   })(req, res, next);
