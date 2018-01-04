@@ -57,6 +57,8 @@ location / {
 ### DOCKER SETUP ###
 
 * please use this [repository](https://github.com/guisenges/docker-flashman) and follow its instructions
+* in case you want just to build this docker image:
+	* `sudo docker build -t anlixhub/flashman -f docker/Dockerfile .`
 
 ## PLACING IMAGES ON FIRMWARE DIRECTORY ##
 
