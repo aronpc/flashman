@@ -4,8 +4,8 @@ var mqtt = require('mqtt');
 var deviceListController = {};
 
 const fs = require('fs');
-const imageReleasesDir = require('../config/configs').imageReleasesDir;
-const mqttBrokerURL = require('../config/configs').mqttBrokerURL;
+const imageReleasesDir = process.env.FLM_IMG_RELEASE_DIR;
+const mqttBrokerURL = process.env.FLM_MQTT_BROKER;
 
 var getReleases = function() {
   var releases = [];

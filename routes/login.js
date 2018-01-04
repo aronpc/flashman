@@ -1,7 +1,3 @@
-/**
- * Copyright (C) 2013-2017,
- * TGR - Tecnologia em Gestão de Redes S.A.
- */
 
 var express = require('express');
 var router = express.Router();

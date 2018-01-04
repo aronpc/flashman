@@ -3,8 +3,8 @@ var deviceModel = require('../models/device');
 var mqtt = require('mqtt');
 var deviceInfoController = {};
 
-const deviceAllowUpdateRESTData = require('../config/configs').deviceAllowUpdateRESTData;
-const mqttBrokerURL = require('../config/configs').mqttBrokerURL;
+const deviceAllowUpdateRESTData = process.env.FLM_ALLOW_DEV_UPDATE_REST_DATA;
+const mqttBrokerURL = process.env.FLM_MQTT_BROKER;
 
 var returnObjOrEmptyStr = function(query) {
   if(typeof query !== 'undefined' && query) {
