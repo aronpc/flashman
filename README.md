@@ -34,13 +34,6 @@ Tool created to manage flash firmware of OpenWRT/LEDE devices
 * setup Nginx configuration:
 
 ```
-location ~ ^/(images/|javascripts/|js/|stylesheets/|fonts/|schemas/|images/) {
-	root /home/localuser/flashman/public;
-	access_log on;
-}
-```
-
-```
 location / {
 	proxy_set_header X-Real-IP $remote_addr;
 	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
