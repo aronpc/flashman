@@ -9,10 +9,6 @@ const mqttBrokerURL = process.env.FLM_MQTT_BROKER;
 
 var getReleases = function() {
   var releases = [];
-  // Release dir must exists
-  if (!fs.existsSync(imageReleasesDir)) {
-    fs.mkdirSync(imageReleasesDir);
-  }
   fs.readdirSync(imageReleasesDir).forEach(filename => {
     // File name pattern is VENDOR_MODEL_MODELVERSION_RELEASE.bin
     var fnameSubStrings = filename.split('_');

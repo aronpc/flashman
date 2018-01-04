@@ -1,3 +1,5 @@
+
+var fs = require('fs');
 var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
@@ -27,6 +29,11 @@ user.find({is_superuser: true}, function(err, matchedUsers) {
     newSuperUser.save();
   }
 });
+
+// release dir must exists
+if (!fs.existsSync(process.env.FLM_IMG_RELEASE_DIR)) {
+  fs.mkdirSync(process.env.FLM_IMG_RELEASE_DIR);
+}
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
