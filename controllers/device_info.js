@@ -59,7 +59,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
         // Update old entries
-        if(!matchedDevice.hasOwnProperty('do_update_parameters')){
+        if(!matchedDevice.get('do_update_parameters')){
           matchedDevice.do_update_parameters = false;
         }
 
