@@ -180,19 +180,19 @@ deviceInfoController.removeApp = function(req, res) {
 deviceInfoController.appSet = function(req, res) {
   deviceModel.findById(req.body.id, function(err, matchedDevice) {
     if(err) {
-      return res.status(400).json({message:"Erro na requisicao"});
+      return res.status(400).json({is_set: 0});
     } 
     if(!matchedDevice) {
-      return res.status(404).json({message:"Nao encontrado"});
+      return res.status(404).json({is_set: 0});
     }
     var appObj = matchedDevice.apps.filter(function(app) {
       return app.id === req.body.app_id;
     });
     if (appObj.length == 0) {
-      return res.status(404).json({message:"Nao encontrado"});
+      return res.status(404).json({is_set: 0});
     }
     if (appObj[0].secret != req.body.app_secret) {
-      return res.status(404).json({message:"Nao confere"}); 
+      return res.status(404).json({is_set: 0}); 
     }
 
     if(isJSONObject(req.body.content)){
@@ -236,7 +236,7 @@ deviceInfoController.appSet = function(req, res) {
 
       return res.status(200).json({is_set: 1});
     } else {
-      return res.status(500).json({'message': 'error parsing json'});
+      return res.status(500).json({is_set: 0});
     }
   });
 };
