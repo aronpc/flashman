@@ -177,4 +177,68 @@ deviceInfoController.removeApp = function(req, res) {
   }
 };
 
+deviceInfoController.appSet = function(req, res) {
+  deviceModel.findById(req.body.id, function(err, matchedDevice) {
+    if(err) {
+      return res.status(400).json({message:"Erro na requisicao"});
+    } 
+    if(!matchedDevice) {
+      return res.status(404).json({message:"Nao encontrado"});
+    }
+    var appObj = matchedDevice.apps.filter(function(app) {
+      return app.id === req.body.app_id;
+    });
+    if (appObj.length == 0) {
+      return res.status(404).json({message:"Nao encontrado"});
+    }
+    if (appObj[0].secret != req.body.app_secret) {
+      return res.status(404).json({message:"Nao confere"}); 
+    }
+
+    if(isJSONObject(req.body.content)){
+      var content = req.body.content;
+      var updateParameters = false;
+
+      if(content.hasOwnProperty('pppoe_user')){
+        matchedDevice.pppoe_user = content.pppoe_user;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('pppoe_password')){
+        matchedDevice.pppoe_password = content.pppoe_password;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('wifi_ssid')){
+        matchedDevice.wifi_ssid = content.wifi_ssid;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('wifi_password')){
+        matchedDevice.wifi_password = content.wifi_password;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('wifi_channel')){
+        matchedDevice.wifi_channel = content.wifi_channel;
+        updateParameters = true;
+      }
+      if(updateParameters){
+        matchedDevice.do_update_parameters = true;
+      }
+
+      matchedDevice.save();
+
+      // Send notification to device using MQTT
+      var client  = mqtt.connect(mqttBrokerURL);
+      client.on('connect', function () {
+        client.publish(
+          'flashman/update/' + matchedDevice._id, 
+          '1', {qos: 1, retain: true}); // topic, msg, options
+        client.end();
+      });
+
+      return res.status(200).json({is_set: 1});
+    } else {
+      return res.status(500).json({'message': 'error parsing json'});
+    }
+  });
+};
+
 module.exports = deviceInfoController;
