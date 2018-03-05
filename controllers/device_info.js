@@ -131,22 +131,50 @@ deviceInfoController.registerApp = function(req, res) {
   if (req.body.secret == req.app.locals.secret) {
     deviceModel.findById(req.body.id, function(err, matchedDevice) {
       if(err) {
-        console.log('Error finding device: ' + err);
-        return res.status(500);
+        return res.status(400).json({is_registered: 0});
       } 
-      if(matchedDevice == null) {
-        return res.status(500);
+      if(!matchedDevice) {
+        return res.status(404).json({is_registered: 0});
       }
-      matchedDevice.apps.push({id: req.body.app_id,
-                               secret: req.body.app_secret});
+      var appObj = matchedDevice.apps.filter(function(app) {
+        return app.id === req.body.app_id;
+      });
+      if (appObj.length == 0) {
+        matchedDevice.apps.push({id: req.body.app_id,
+                                 secret: req.body.app_secret});
+      } else {
+        var objIdx = matchedDevice.apps.indexOf(appObj[0]);
+        matchedDevice.apps.splice(objIdx, 1);
+        appObj[0].secret = req.body.app_secret;
+        matchedDevice.apps.push(appObj[0]);
+      }
       matchedDevice.save();
-      return res.status(200);
+      return res.status(200).json({is_registered: 1});
     });
+  } else {
+    return res.status(401).json({is_registered: 0});
   }
 };
 
 deviceInfoController.removeApp = function(req, res) {
-  return res.status(404);
+  if (req.body.secret == req.app.locals.secret) {
+    deviceModel.findById(req.body.id, function(err, matchedDevice) {
+      if(err) {
+        return res.status(400).json({is_unregistered: 0});
+      } 
+      if(!matchedDevice) {
+        return res.status(404).json({is_unregistered: 0});
+      }
+      var appsFiltered = matchedDevice.apps.filter(function(app) {
+        return app.id !== req.body.app_id;
+      });
+      matchedDevice.apps = appsFiltered;
+      matchedDevice.save();
+      return res.status(200).json({is_unregistered: 1});
+    });
+  } else {
+    return res.status(401).json({is_unregistered: 0});
+  }
 };
 
 module.exports = deviceInfoController;
