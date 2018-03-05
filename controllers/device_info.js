@@ -127,4 +127,26 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
   });
 };
 
+deviceInfoController.registerApp = function(req, res) {
+  if (req.body.secret == req.app.locals.secret) {
+    deviceModel.findById(req.body.id, function(err, matchedDevice) {
+      if(err) {
+        console.log('Error finding device: ' + err);
+        return res.status(500);
+      } 
+      if(matchedDevice == null) {
+        return res.status(500);
+      }
+      matchedDevice.apps.push({id: req.body.app_id,
+                               secret: req.body.app_secret});
+      matchedDevice.save();
+      return res.status(200);
+    });
+  }
+};
+
+deviceInfoController.removeApp = function(req, res) {
+  return res.status(404);
+};
+
 module.exports = deviceInfoController;
