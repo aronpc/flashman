@@ -46,6 +46,10 @@ var createRegistry = function(req, res) {
   });
 };
 
+var isJSONObject = function(val) {
+  return val instanceof Object ? true : false;
+}
+
 // Create new device entry or update an existing one
 deviceInfoController.updateDevicesInfo = function(req, res) {
   deviceModel.findById(req.body.id.toUpperCase(), function(err, matchedDevice) {
