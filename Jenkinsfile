@@ -18,7 +18,7 @@ node {
       sh """
 
         echo { > secret.json
-        echo \"secret\":${params.AUTHCLIENTSECRET} >> secret.json  
+        echo '"secret":"'${params.AUTHCLIENTSECRET}'"' >> secret.json  
         echo } >> secret.json
 
         IMGZIP='flashman.zip'
