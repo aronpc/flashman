@@ -15,8 +15,7 @@ var deviceInfo = require('./routes/device_info');
 
 var app = express();
 
-mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman',
-                 {useMongoClient: true});
+mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman');
 
 // check administration user existence
 user.find({is_superuser: true}, function(err, matchedUsers) {
@@ -34,6 +33,24 @@ user.find({is_superuser: true}, function(err, matchedUsers) {
 if (!fs.existsSync(process.env.FLM_IMG_RELEASE_DIR)) {
   fs.mkdirSync(process.env.FLM_IMG_RELEASE_DIR);
 }
+
+// check secret file and load if available
+var companySecret = {};
+try {
+  var fileContents = fs.readFileSync('./secret.json', 'utf8');
+  companySecret = JSON.parse(fileContents);
+} catch (err) {
+  if (err.code === 'ENOENT') {
+    console.log('Shared secret file not found!');
+    companySecret['secret'] = '';
+  } else if (err.code === 'EACCES') {
+    console.log('Cannot open shared secret file!');
+    companySecret['secret'] = '';
+  } else {
+    throw err;
+  }
+}
+app.locals.secret = companySecret.secret;
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());

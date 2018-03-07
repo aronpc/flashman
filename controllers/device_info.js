@@ -46,6 +46,10 @@ var createRegistry = function(req, res) {
   });
 };
 
+var isJSONObject = function(val) {
+  return val instanceof Object ? true : false;
+}
+
 // Create new device entry or update an existing one
 deviceInfoController.updateDevicesInfo = function(req, res) {
   deviceModel.findById(req.body.id.toUpperCase(), function(err, matchedDevice) {
@@ -123,6 +127,120 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
         matchedDevice.save();
         return res.status(200);
       }
+    }
+  });
+};
+
+deviceInfoController.registerApp = function(req, res) {
+  if (req.body.secret == req.app.locals.secret) {
+    deviceModel.findById(req.body.id, function(err, matchedDevice) {
+      if(err) {
+        return res.status(400).json({is_registered: 0});
+      } 
+      if(!matchedDevice) {
+        return res.status(404).json({is_registered: 0});
+      }
+      var appObj = matchedDevice.apps.filter(function(app) {
+        return app.id === req.body.app_id;
+      });
+      if (appObj.length == 0) {
+        matchedDevice.apps.push({id: req.body.app_id,
+                                 secret: req.body.app_secret});
+      } else {
+        var objIdx = matchedDevice.apps.indexOf(appObj[0]);
+        matchedDevice.apps.splice(objIdx, 1);
+        appObj[0].secret = req.body.app_secret;
+        matchedDevice.apps.push(appObj[0]);
+      }
+      matchedDevice.save();
+      return res.status(200).json({is_registered: 1});
+    });
+  } else {
+    return res.status(401).json({is_registered: 0});
+  }
+};
+
+deviceInfoController.removeApp = function(req, res) {
+  if (req.body.secret == req.app.locals.secret) {
+    deviceModel.findById(req.body.id, function(err, matchedDevice) {
+      if(err) {
+        return res.status(400).json({is_unregistered: 0});
+      } 
+      if(!matchedDevice) {
+        return res.status(404).json({is_unregistered: 0});
+      }
+      var appsFiltered = matchedDevice.apps.filter(function(app) {
+        return app.id !== req.body.app_id;
+      });
+      matchedDevice.apps = appsFiltered;
+      matchedDevice.save();
+      return res.status(200).json({is_unregistered: 1});
+    });
+  } else {
+    return res.status(401).json({is_unregistered: 0});
+  }
+};
+
+deviceInfoController.appSet = function(req, res) {
+  deviceModel.findById(req.body.id, function(err, matchedDevice) {
+    if(err) {
+      return res.status(400).json({is_set: 0});
+    } 
+    if(!matchedDevice) {
+      return res.status(404).json({is_set: 0});
+    }
+    var appObj = matchedDevice.apps.filter(function(app) {
+      return app.id === req.body.app_id;
+    });
+    if (appObj.length == 0) {
+      return res.status(404).json({is_set: 0});
+    }
+    if (appObj[0].secret != req.body.app_secret) {
+      return res.status(404).json({is_set: 0}); 
+    }
+
+    if(isJSONObject(req.body.content)){
+      var content = req.body.content;
+      var updateParameters = false;
+
+      if(content.hasOwnProperty('pppoe_user')){
+        matchedDevice.pppoe_user = content.pppoe_user;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('pppoe_password')){
+        matchedDevice.pppoe_password = content.pppoe_password;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('wifi_ssid')){
+        matchedDevice.wifi_ssid = content.wifi_ssid;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('wifi_password')){
+        matchedDevice.wifi_password = content.wifi_password;
+        updateParameters = true;
+      }
+      if(content.hasOwnProperty('wifi_channel')){
+        matchedDevice.wifi_channel = content.wifi_channel;
+        updateParameters = true;
+      }
+      if(updateParameters){
+        matchedDevice.do_update_parameters = true;
+      }
+
+      matchedDevice.save();
+
+      // Send notification to device using MQTT
+      var client  = mqtt.connect(mqttBrokerURL);
+      client.on('connect', function () {
+        client.publish(
+          'flashman/update/' + matchedDevice._id, 
+          '1', {qos: 1, retain: true}); // topic, msg, options
+        client.end();
+      });
+
+      return res.status(200).json({is_set: 1});
+    } else {
+      return res.status(500).json({is_set: 0});
     }
   });
 };
