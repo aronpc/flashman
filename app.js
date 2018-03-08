@@ -8,10 +8,10 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
+var fileUpload = require('express-fileupload');
 var user = require('./models/user');
 
 var index = require('./routes/index');
-var deviceInfo = require('./routes/device_info');
 
 var app = express();
 
@@ -72,9 +72,9 @@ app.use(require('express-session')
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(fileUpload());
 
 app.use('/', index);
-app.use('/deviceinfo', deviceInfo);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

@@ -2,66 +2,70 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+.font-bold {
+  font-weight: bold;
+}
+
 .flash {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 .navbar-default .navbar-brand,
 .navbar-default .navbar-nav > li > a,
 .navbar-default .navbar-nav > li > p.navbar-text {
-    font-weight: bolder;
+  font-weight: bolder;
 }
 
 table {
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
 .table > tbody > tr > td {
-    vertical-align: middle;
+  vertical-align: middle;
 }
 
 .table > tbody > tr > td > * > .label{
-    vertical-align: middle;
-    text-align: right;
+  vertical-align: middle;
+  text-align: right;
 }
 
 .version-label {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    font-size: 10px;
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  font-size: 10px;
 }
 
 /*Fix to vertically align bootstrap radio*/
 input.aligned-radio {
-    margin-top: 0;
-    vertical-align: middle;
+  margin-top: 0;
+  vertical-align: middle;
 }
 
 .form-horizontal .control-label {
-    text-align: left;
+  text-align: left;
 }
 
 .well.well-sm > div > div > .row,
 .well.well-sm > div.form-group {
-    margin-right: 15px;
-    margin-left: 15px;
+  margin-right: 15px;
+  margin-left: 15px;
 }
 
 
 @media (min-width: 768px) {
-    .button-group.pull-right {
-        float: left;
-    }
+  .button-group.pull-right {
+      float: left;
+  }
 }
 
 .spaced-btn {
-    margin: 5px 2px;
+  margin: 5px 2px;
 }
 
 .params-description {
-    padding-top: 20px;
-    padding-bottom:10px;
+  padding-top: 20px;
+  padding-bottom:10px;
 }
 
 .switch {
@@ -121,13 +125,34 @@ input:checked + .slider:before {
 }
 
 .offline-sign:before {
-    content:"\25cf";
-    font-size: 3em;
-    color: FireBrick;
+  content:"\25cf";
+  font-size: 3em;
+  color: FireBrick;
 }
 
 .online-sign:before {
-    content:"\25cf";
-    font-size: 3em;
-    color: GreenYellow;
+  content:"\25cf";
+  font-size: 3em;
+  color: GreenYellow;
+}
+
+/* File input */
+.btn-file {
+  position: relative;
+  overflow: hidden;
+}
+.btn-file input[type=file] {
+  position: absolute;
+  top: 0;
+  right: 0;
+  min-width: 100%;
+  min-height: 100%;
+  font-size: 100px;
+  text-align: right;
+  filter: alpha(opacity=0);
+  opacity: 0;
+  outline: none;
+  background: white;
+  cursor: inherit;
+  display: block;
 }

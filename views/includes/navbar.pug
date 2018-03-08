@@ -13,7 +13,16 @@ nav.navbar.navbar-default.navbar-static-top
     if (username)
       #navbar-menu.navbar-default.navbar-collapse.collapse
         ul.nav.navbar-nav.navbar-right
-          li.hidden-xs
-            p.navbar-text Olá, #{username}
+          li.dropdown.hidden-xs
+            a.dropdown-toggle(data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false")
+              | Olá, #{username}
+              |
+              span.caret
+            ul.dropdown-menu
+              li
+                a(href="/firmware")
+                  span.glyphicon.glyphicon-hdd
+                  span &nbsp Firmwares
           li
-            a(class="glyphicon glyphicon-log-out" href="/logout").pull-right
+            a.pull-right(href="/logout")
+              span.glyphicon.glyphicon-log-out
