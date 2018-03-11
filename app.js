@@ -9,7 +9,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var passport = require('passport');
 var fileUpload = require('express-fileupload');
-var user = require('./models/user');
+var User = require('./models/user');
 
 var index = require('./routes/index');
 
@@ -18,12 +18,12 @@ var app = express();
 mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman');
 
 // check administration user existence
-user.find({is_superuser: true}, function(err, matchedUsers) {
-  if(err || !matchedUsers || 0 === matchedUsers.length) {
-    var newSuperUser = new user({
+User.find({is_superuser: true}, function(err, matchedUsers) {
+  if (err || !matchedUsers || 0 === matchedUsers.length) {
+    let newSuperUser = new User({
       name: process.env.FLM_ADM_USER,
       password: process.env.FLM_ADM_PASS,
-      is_superuser: true
+      is_superuser: true,
     });
     newSuperUser.save();
   }
@@ -52,7 +52,7 @@ try {
 }
 app.locals.secret = companySecret.secret;
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 // view engine setup
@@ -64,9 +64,9 @@ app.use(logger('dev'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(require('express-session')
-  ({ secret: 'aSjdh%%$@asdy8ajoia7qnL&34S0))L',
+  ({secret: 'aSjdh%%$@asdy8ajoia7qnL&34S0))L',
      resave: false,
-     saveUninitialized: false
+     saveUninitialized: false,
    })
 );
 
@@ -78,7 +78,7 @@ app.use('/', index);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
+  let err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
