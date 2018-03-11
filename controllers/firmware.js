@@ -8,16 +8,16 @@ var firmwareController = {};
 
 var isValidFilename = function(filename) {
   return /^([A-Z\-0-9]+)_([A-Z\-0-9]+)_([A-Z0-9]+)_([0-9]{4}\-[a-z]{3})\.(bin)$/.test(filename);
-}
+};
 
-var parseFilename = function(filename) {  
+var parseFilename = function(filename) {
   // File name pattern is VENDOR_MODEL_MODELVERSION_RELEASE.bin
-  var fnameSubStrings = filename.split('_');
-  var releaseSubStringRaw = fnameSubStrings[fnameSubStrings.length - 1];
-  var releaseSubStringsRaw = releaseSubStringRaw.split('.');
-  var firmwareRelease = releaseSubStringsRaw[0];
-  
-  var firmwareFields = {release: firmwareRelease,
+  let fnameSubStrings = filename.split('_');
+  let releaseSubStringRaw = fnameSubStrings[fnameSubStrings.length - 1];
+  let releaseSubStringsRaw = releaseSubStringRaw.split('.');
+  let firmwareRelease = releaseSubStringsRaw[0];
+
+  let firmwareFields = {release: firmwareRelease,
                         vendor: fnameSubStrings[0],
                         model: fnameSubStrings[1],
                         version: fnameSubStrings[2]};
@@ -25,18 +25,18 @@ var parseFilename = function(filename) {
 };
 
 firmwareController.firmwares = function(req, res) {
-  var reqPage = 1;
-  var indexContent = {};
+  let reqPage = 1;
+  let indexContent = {};
   indexContent.username = req.user.name;
 
-  if(req.query.page) {
+  if (req.query.page) {
     reqPage = req.query.page;
   }
 
   Firmware.paginate({}, {page: reqPage,
                          limit: 10,
                          sort: {_id: 1}}, function(err, firmwares) {
-    if(err) {
+    if (err) {
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
@@ -50,69 +50,67 @@ firmwareController.firmwares = function(req, res) {
 
 firmwareController.delFirmware = function(req, res) {
   if (req.user.is_superuser) {
-    
     Firmware.find({'_id': {$in: req.body.ids}}, function(err, firmwares) {
-      firmwares.forEach(firmware => {
+      firmwares.forEach((firmware) => {
         fs.unlink('./public/firmwares/' + firmware.filename, function(err) {
           if (err) {
             return res.json({
               type: 'danger',
-              message: 'Arquivo não encontrado'
+              message: 'Arquivo não encontrado',
             });
           }
           firmware.remove(function(err) {
             if (err) {
               return res.json({
                 type: 'danger',
-                message: 'Registro não encontrado'
+                message: 'Registro não encontrado',
               });
             }
             return res.json({
               type: 'success',
-              message: 'Deleted firmware model(s) successfully!'
-            });     
+              message: 'Deleted firmware model(s) successfully!',
+            });
           });
         });
       });
     });
-  }
-  else {
-    return res.status(403).json({ message: "Permissão negada"});
+  } else {
+    return res.status(403).json({message: 'Permissão negada'});
   }
 };
 
 firmwareController.uploadFirmware = function(req, res) {
   if (!req.files) {
-    return res.json({type:'danger', message: 'Nenhum arquivo foi selecionado'});
+    return res.json({type: 'danger', message: 'Nenhum arquivo foi selecionado'});
   }
-   
+
   let firmwarefile = req.files.firmwarefile;
-   
+
   if (!isValidFilename(firmwarefile.name)) {
-    return res.json({type:'danger', message: 'Formato inválido de arquivo. ' +
+    return res.json({type: 'danger', message: 'Formato inválido de arquivo. ' +
       'Nomes de arquivo válidos: *FABRICANTE*_*MODELO*_*VERSÃO*_*RELEASE*.bin'});
   }
 
   firmwarefile.mv('./public/firmwares/' + firmwarefile.name,
     function(err) {
       if (err) {
-        return res.json({type:'danger', message: 'Erro ao mover arquivo'});
+        return res.json({type: 'danger', message: 'Erro ao mover arquivo'});
       }
 
-      var fnameFields = parseFilename(firmwarefile.name);
+      let fnameFields = parseFilename(firmwarefile.name);
 
-      var firmware = new Firmware({
+      let firmware = new Firmware({
         vendor: fnameFields.vendor,
         model: fnameFields.model,
         version: fnameFields.version,
         release: fnameFields.release,
-        filename: firmwarefile.name 
+        filename: firmwarefile.name,
       });
       firmware.save(function(err) {
         if (err) {
-          var msg = ""
+          let msg = '';
           for (field in err.errors) {
-            msg += err.errors[field].message + " ";
+            msg += err.errors[field].message + ' ';
           }
           return res.json({type: 'danger', message: msg});
         }
