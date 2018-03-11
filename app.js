@@ -1,19 +1,20 @@
 
-var fs = require('fs');
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var passport = require('passport');
-var fileUpload = require('express-fileupload');
-var User = require('./models/user');
+const fs = require('fs');
+const express = require('express');
+const path = require('path');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const fileUpload = require('express-fileupload');
+let session = require('express-session');
 
-var index = require('./routes/index');
+let User = require('./models/user');
+let index = require('./routes/index');
 
-var app = express();
+let app = express();
 
 mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman');
 
@@ -63,11 +64,24 @@ app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(require('express-session')
-  ({secret: 'aSjdh%%$@asdy8ajoia7qnL&34S0))L',
-     resave: false,
-     saveUninitialized: false,
-   })
+app.use(session({
+  secret: 'aSjdh%%$@asdy8ajoia7qnL&34S0))L',
+  resave: false,
+  saveUninitialized: false,
+}));
+
+// create static routes for public libraries
+app.use('/scripts/jquery',
+  express.static(path.join(__dirname, 'node_modules/jquery/dist'))
+);
+app.use('/scripts/popper',
+  express.static(path.join(__dirname, 'node_modules/popper.js/dist'))
+);
+app.use('/scripts/bootstrap',
+  express.static(path.join(__dirname, 'node_modules/bootstrap/dist'))
+);
+app.use('/scripts/mdbootstrap',
+  express.static(path.join(__dirname, 'node_modules/mdbootstrap'))
 );
 
 app.use(passport.initialize());
