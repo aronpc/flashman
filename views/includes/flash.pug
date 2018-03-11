@@ -1,11 +1,13 @@
 
 if message
-  .row
-    div.flash(class="alert alert-" + type + " alert-dismissible fade in", role='alert')= message
-      button.close(type="button", data-dismiss="alert", aria-label="Fechar")
-        span(aria-hidden="true") ×
+  .row.justify-content-center
+    .col
+      .flash.alert.alert-dismissible.fade.show(class="alert-" + type, role='alert')= message
+        button.close(type="button", data-dismiss="alert", aria-label="Fechar")
+          span(aria-hidden="true") ×
 else
-  #flash-banner.row(style={display: 'none'})
-    div.flash(class="alert alert-dismissible fade in", role='alert')
-      button.close(type="button", data-dismiss="alert", aria-label="Fechar")
-        span(aria-hidden="true") ×
+  #flash-banner.row.justify-content-center(style={display: 'none'})
+    .col
+      .flash.alert.alert-dismissible.fade.show(role='alert')
+        button.close(type="button", data-dismiss="alert", aria-label="Fechar")
+          span(aria-hidden="true") ×

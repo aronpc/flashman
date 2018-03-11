@@ -31,9 +31,9 @@ var getStatus = function(devices) {
   // 24 hours back from now
   yesterday.setDate(yesterday.getDate() - 1);
   devices.forEach((device) => {
-    let deviceColor = 'offline-sign';
+    let deviceColor = 'red-text';
     if (device.last_contact.getTime() > yesterday.getTime()) {
-      deviceColor = 'online-sign';
+      deviceColor = 'green-text';
     }
     statusAll[device._id] = deviceColor;
   });

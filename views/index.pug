@@ -1,107 +1,141 @@
 extends layout
 
 block content
-  div.row
-    div.col-xs-3
-    div.col-xs-6
+  .row.justify-content-center
+    .col-6.mt-4
       form(action="/devicelist/search")
-        div.input-group
-          input(type="text" name="content").form-control
-          span.input-group-btn
-            button(type="submit").btn.btn-default
-              .glyphicon.glyphicon-search
-  br
-  if ! devices || devices.length == 0
-    h3.text-center Nenhum dispositivo registrado
-  else
-    table.table.table-responsive.devices-table
-      tr
-        th
-        th.text-center #
-        th.text-center Status
-        th.text-center Usuário PPPoE
-        th.text-center Identificação
-        th.text-center IP WAN
-        th.text-center IP Público
-        th.text-center Release
-        th.text-center Atualizar Firmware
-      tr
-        td
-        td.text-center
-          | #{status.totalnum} total
-        td.text-center
-          | #{status.onlinenum} online  
-        td.text-center *
-        td.text-center *
-        td.text-center *
-        td.text-center *
-        td.text-center *
-        td.text-center
-          label.switch
-            input.checkbox(id="all-devices", type="checkbox", name="do_update", checked=false)
-            .slider.round
-      each device, index in devices
-        tr(id=device._id)
-          td(data-toggle="collapse", data-target="#hide-" + index + 1, style="cursor: pointer;").text-center.col-xs-1.glyphicon.glyphicon-menu-right
-          td.text-center.col-xs-1=index + 1
-          td.text-center.col-xs-1(class=status.devices[device._id] data-toggle="tooltip" title=device.last_contact)
-          td.text-center.col-xs-2
-            | #{device.pppoe_user}
-          td.text-center.col-xs-2
-            | #{device._id}
-          td.text-center.col-xs-1
-            | #{device.wan_ip}
-          td.text-center.col-xs-2
-            | #{device.ip}
-          td.text-center.col-xs-1
-            .dropdown
-              button.btn.btn-default.dropdown-toggle(type="button", data-toggle="dropdown", aria-haspopup="true", aria-expanded="true")
-                span.selected #{device.release} &nbsp
-                span.caret
-              ul.dropdown-menu
+        .md-form.input-group
+          input.form-control(type="search", name="content",
+                             placeholder="Buscar...")
+          .input-group-btn
+            button.my-0.btn.orange.darken-2(type="submit")
+              .fas.fa-search.fa-lg
+
+  .row.justify-content-center
+    .col-12.mt-4
+      if ! devices || devices.length == 0
+        h3.text-center Nenhum dispositivo registrado
+      else
+        .card.mt-3
+          .card-body
+            .table-responsive
+              table.table.devices-table
+                thead
+                  tr
+                    th
+                    th.text-center #
+                    th.text-center Status
+                    th.text-center Usuário PPPoE
+                    th.text-center Identificação
+                    th.text-center IP WAN
+                    th.text-center IP Público
+                    th.text-center Release
+                    th.text-center Atualizar Firmware
+                tbody
+                  tr
+                    td
+                    td.text-center
+                      | #{status.totalnum} total
+                    td.text-center
+                      | #{status.onlinenum} online  
+                    td.text-center *
+                    td.text-center *
+                    td.text-center *
+                    td.text-center *
+                    td.text-center *
+                    td.text-center
+                      label.switch
+                        input.checkbox(
+                          id="all-devices",
+                          type="checkbox",
+                          name="do_update",
+                          checked=false
+                        )
+                        .slider.round
+                  each device, index in devices
+                    tr(id=device._id)
+                      td.text-center.col-xs-1(
+                        data-toggle="collapse",
+                        data-target="#hide-" + index + 1,
+                        style="cursor: pointer;"
+                      )
+                        .fas.fa-chevron-right.fa-lg
+                      td.text-center.col-xs-1=index + 1
+                      td.text-center.col-xs-1
+                        .fas.fa-circle.fa-lg(
+                          class=status.devices[device._id],
+                          data-toggle="tooltip",
+                          title=device.last_contact
+                        )
+                      td.text-center.col-xs-2
+                        | #{device.pppoe_user}
+                      td.text-center.col-xs-2
+                        | #{device._id}
+                      td.text-center.col-xs-1
+                        | #{device.wan_ip}
+                      td.text-center.col-xs-2
+                        | #{device.ip}
+                      td.text-center.col-xs-1
+                        .btn-group
+                          button.btn.btn-sm.orange.darken-2.dropdown-toggle(
+                            type="button",
+                            data-toggle="dropdown",
+                            aria-haspopup="true",
+                            aria-expanded="true"
+                          )
+                            span.selected #{device.release} &nbsp
+                          .dropdown-menu
+                            a.dropdown-item.text-center(href="#") #{device.release}
+                            each release, idx in releases
+                              if (device.model === release.model)
+                                a.dropdown-item.text-center(href="#") #{release.id}
+                      td.text-center.col-xs-1
+                        label.switch
+                          input.checkbox(
+                            type="checkbox",
+                            name="do_update",
+                            checked=device.do_update
+                          )
+                          .slider.round
+                    tr.collapse.out.table-active(
+                      id="hide-" + index + 1,
+                      data-deviceid=device._id
+                    )
+                      td.text-center.col-xs-1
+                        .fas.fa-info-circle.fa-lg
+                      td(colspan=3).text-left
+                        div
+                        b Senha PPPoE:
+                        |  #{device.pppoe_password}
+                        br
+                        b Modelo:
+                        |  #{device.model}
+                        br
+                        b Versão:
+                        |  #{device.version}
+                      td(colspan=4).text-left
+                        div
+                        b SSID WiFi:
+                        |  #{device.wifi_ssid}
+                        br
+                        b Senha WiFi:
+                        |  #{device.wifi_password}
+                        br
+                        b Canal WiFi:
+                        |  #{device.wifi_channel}
+                      td(style="cursor: pointer;").btn-trash.text-center.col-xs-1
+                        .fas.fa-trash.fa-lg
+
+        .row.justify-content-center.mt-2
+          ul.pagination
+            - for (var index=1; index<=pages; index++)
+              - if (index == page)
+                li.active
+                  a.btn.orange.darken-2(href="#")= index
+              - else
                 li
-                  a(href="#").text-center #{device.release}
-                each release, idx in releases
-                  - if (device.model === release.model)
-                      li
-                        a(href="#").text-center #{release.id}
-          td.text-center.col-xs-1
-            label.switch
-              input.checkbox(type="checkbox", name="do_update", checked=device.do_update)
-              .slider.round
-        tr(id="hide-" + index + 1, class="collapse out", data-deviceid=device._id).active
-          td.text-center.col-xs-1.glyphicon.glyphicon-info-sign
-          td(colspan=3).text-left
-            div
-            b Senha PPPoE:
-            |  #{device.pppoe_password}
-            br
-            b Modelo:
-            |  #{device.model}
-            br
-            b Versão:
-            |  #{device.version}
-          td(colspan=4).text-left
-            div
-            b SSID WiFi:
-            |  #{device.wifi_ssid}
-            br
-            b Senha WiFi:
-            |  #{device.wifi_password}
-            br
-            b Canal WiFi:
-            |  #{device.wifi_channel}
-          td(style="cursor: pointer;").btn-trash.text-center.col-xs-1.glyphicon.glyphicon-trash
-    div.text-center
-      ul.pagination
-        - for (var index=1; index<=pages; index++)
-          - if (index == page)
-            li.active
-              a(href="#")= index
-          - else
-            li
-              a(href="?content=" + lastquery + "&page=" + index)= index
-    
+                  a.btn.orange.darken-2(href="?content=" + lastquery + "&page=" + index)= index
+
 block scripts
   script(src='/javascripts/update_device.js')
   script(src='/javascripts/table_anim.js')
