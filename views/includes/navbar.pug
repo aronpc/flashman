@@ -1,28 +1,23 @@
-nav.navbar.navbar-default.navbar-static-top
-  .container
-    .navbar-header
-      if (username)
-        button(type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-menu")
-          span.icon-bar
-          span.icon-bar
-          span.icon-bar
-      a.navbar-brand(href="/")
-        .image-block
-          img(alt="brand", src="/images/logo.png", width="24", height="24")
-          span &nbsp #{apptitle}
+nav.navbar.navbar-expand-lg.navbar-dark.orange.darken-2
+  a.navbar-brand(href="/")
+    .image-block
+      img(alt="brand", src="/images/logo.png", width="50", height="50")
+      span &nbsp FlashMan
+  button.navbar-toggler(type="button", data-toggle="collapse",
+                        data-target="#navbar-menu", aria-controls="#navbar-menu",
+                        aria-expanded="false", aria-label="Alternar navegação")
+    span.navbar-toggler-icon
+  
+  #navbar-menu.navbar-default.navbar-collapse.collapse
     if (username)
-      #navbar-menu.navbar-default.navbar-collapse.collapse
-        ul.nav.navbar-nav.navbar-right
-          li.dropdown.hidden-xs
-            a.dropdown-toggle(data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false")
-              | Olá, #{username}
-              |
-              span.caret
-            ul.dropdown-menu
-              li
-                a(href="/firmware")
-                  span.glyphicon.glyphicon-hdd
-                  span &nbsp Firmwares
-          li
-            a.pull-right(href="/logout")
-              span.glyphicon.glyphicon-log-out
+      ul.navbar-nav.ml-auto
+        li.nav-item.dropdown
+          a#navbarDropdown.nav-link.dropdown-toggle(data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false")
+            | Olá, #{username}
+          .dropdown-menu(aria-labelledby="navbarDropdown")
+            a.dropdown-item(href="/firmware")
+              .fas.fa-hdd.fa-lg
+              span &nbsp Firmwares
+        li.nav-item
+          a.nav-link(href="/logout")
+            .fas.fa-sign-out-alt.fa-lg
