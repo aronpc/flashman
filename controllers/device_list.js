@@ -69,7 +69,7 @@ var isJSONObject = function(val) {
 
 // List all devices on a main page
 deviceListController.index = function(req, res) {
-  var indexContent = {apptitle: 'FlashMan'};
+  var indexContent = {};
   var reqPage = 1;
 
   if(req.query.page) {
@@ -103,7 +103,7 @@ deviceListController.index = function(req, res) {
 deviceListController.changeUpdate = function(req, res) {
   deviceModel.findById(req.params.id, function(err, matchedDevice) {
     if(err) {
-      var indexContent = {apptitle: 'FlashMan'};
+      var indexContent = {};
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
@@ -134,7 +134,7 @@ deviceListController.changeAllUpdates = function(req, res) {
   deviceModel.find({'_id': {'$in': Object.keys(form.ids)}},
   function(err, matchedDevices) {
     if(err) {
-      var indexContent = {apptitle: 'FlashMan'};
+      var indexContent = {};
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
@@ -176,7 +176,7 @@ deviceListController.delDeviceReg =  function(req, res) {
 deviceListController.searchDeviceReg =  function(req, res) {
   var queryInput = new RegExp(req.query.content, 'i');
   var queryArray = [];
-  var indexContent = {apptitle: 'FlashMan'};
+  var indexContent = {};
   var reqPage = 1;
 
   for (var property in deviceModel.schema.paths) {

@@ -26,7 +26,7 @@ var parseFilename = function(filename) {
 
 firmwareController.firmwares = function(req, res) {
   var reqPage = 1;
-  var indexContent = {apptitle: 'FlashMan'};
+  var indexContent = {};
   indexContent.username = req.user.name;
 
   if(req.query.page) {
