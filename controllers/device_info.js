@@ -3,20 +3,20 @@ var deviceModel = require('../models/device');
 var mqtt = require('mqtt');
 var deviceInfoController = {};
 
-const deviceAllowUpdateRESTData = require('../config/configs').deviceAllowUpdateRESTData;
-const mqttBrokerURL = require('../config/configs').mqttBrokerURL;
+const deviceAllowUpdateRESTData = process.env.FLM_ALLOW_DEV_UPDATE_REST_DATA;
+const mqttBrokerURL = process.env.FLM_MQTT_BROKER;
 
 var returnObjOrEmptyStr = function(query) {
-  if(typeof query !== 'undefined' && query) {
+  if (typeof query !== 'undefined' && query) {
     return query;
   } else {
-    return "";
+    return '';
   }
 };
 
 var createRegistry = function(req, res) {
-  var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  if(typeof req.body.id == 'undefined') {
+  let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  if (typeof req.body.id == 'undefined') {
     return res.status(400);
   }
   newDeviceModel = new deviceModel({'_id': req.body.id.trim().toUpperCase(),
@@ -35,7 +35,7 @@ var createRegistry = function(req, res) {
                                     'do_update': false,
                                     'do_update_parameters': false,
                                   });
-  newDeviceModel.save(function (err) {
+  newDeviceModel.save(function(err) {
     if (err) {
       console.log('Error creating device: ' + err);
       return res.status(500);
@@ -46,20 +46,24 @@ var createRegistry = function(req, res) {
   });
 };
 
+var isJSONObject = function(val) {
+  return val instanceof Object ? true : false;
+};
+
 // Create new device entry or update an existing one
 deviceInfoController.updateDevicesInfo = function(req, res) {
   deviceModel.findById(req.body.id.toUpperCase(), function(err, matchedDevice) {
-    if(err) {
+    if (err) {
       console.log('Error finding device: ' + err);
       return res.status(500);
     } else {
-      if(matchedDevice == null){
+      if (matchedDevice == null) {
         createRegistry(req, res);
       } else {
-        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
 
         // Update old entries
-        if(!matchedDevice.hasOwnProperty('do_update_parameters')){
+        if (!matchedDevice.get('do_update_parameters')) {
           matchedDevice.do_update_parameters = false;
         }
 
@@ -72,7 +76,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.last_contact = Date.now();
 
         // Parameters available to be modified by REST API
-        if((!matchedDevice.do_update_parameters) && deviceAllowUpdateRESTData){
+        if ((!matchedDevice.do_update_parameters) && deviceAllowUpdateRESTData) {
           matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
           matchedDevice.pppoe_user = returnObjOrEmptyStr(req.body.pppoe_user).trim();
           matchedDevice.pppoe_password = returnObjOrEmptyStr(req.body.pppoe_password).trim();
@@ -85,10 +89,10 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.do_update_parameters = false;
 
         // Remove notification to device using MQTT
-        var client  = mqtt.connect(mqttBrokerURL);
-        client.on('connect', function () {
+        let client = mqtt.connect(mqttBrokerURL);
+        client.on('connect', function() {
           client.publish(
-            'flashman/update/' + matchedDevice._id, 
+            'flashman/update/' + matchedDevice._id,
             '', {qos: 1, retain: true}); // topic, msg, options
           client.end();
         });
@@ -109,20 +113,134 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
 // Receive device firmware upgrade confirmation
 deviceInfoController.confirmDeviceUpdate = function(req, res) {
   deviceModel.findById(req.body.id, function(err, matchedDevice) {
-    if(err) {
+    if (err) {
       console.log('Error finding device: ' + err);
       return res.status(500);
     } else {
-      if(matchedDevice == null){
+      if (matchedDevice == null) {
         return res.status(500);
       } else {
-        var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
         matchedDevice.do_update = false;
         matchedDevice.save();
         return res.status(200);
       }
+    }
+  });
+};
+
+deviceInfoController.registerApp = function(req, res) {
+  if (req.body.secret == req.app.locals.secret) {
+    deviceModel.findById(req.body.id, function(err, matchedDevice) {
+      if (err) {
+        return res.status(400).json({is_registered: 0});
+      }
+      if (!matchedDevice) {
+        return res.status(404).json({is_registered: 0});
+      }
+      let appObj = matchedDevice.apps.filter(function(app) {
+        return app.id === req.body.app_id;
+      });
+      if (appObj.length == 0) {
+        matchedDevice.apps.push({id: req.body.app_id,
+                                 secret: req.body.app_secret});
+      } else {
+        let objIdx = matchedDevice.apps.indexOf(appObj[0]);
+        matchedDevice.apps.splice(objIdx, 1);
+        appObj[0].secret = req.body.app_secret;
+        matchedDevice.apps.push(appObj[0]);
+      }
+      matchedDevice.save();
+      return res.status(200).json({is_registered: 1});
+    });
+  } else {
+    return res.status(401).json({is_registered: 0});
+  }
+};
+
+deviceInfoController.removeApp = function(req, res) {
+  if (req.body.secret == req.app.locals.secret) {
+    deviceModel.findById(req.body.id, function(err, matchedDevice) {
+      if (err) {
+        return res.status(400).json({is_unregistered: 0});
+      }
+      if (!matchedDevice) {
+        return res.status(404).json({is_unregistered: 0});
+      }
+      let appsFiltered = matchedDevice.apps.filter(function(app) {
+        return app.id !== req.body.app_id;
+      });
+      matchedDevice.apps = appsFiltered;
+      matchedDevice.save();
+      return res.status(200).json({is_unregistered: 1});
+    });
+  } else {
+    return res.status(401).json({is_unregistered: 0});
+  }
+};
+
+deviceInfoController.appSet = function(req, res) {
+  deviceModel.findById(req.body.id, function(err, matchedDevice) {
+    if (err) {
+      return res.status(400).json({is_set: 0});
+    }
+    if (!matchedDevice) {
+      return res.status(404).json({is_set: 0});
+    }
+    let appObj = matchedDevice.apps.filter(function(app) {
+      return app.id === req.body.app_id;
+    });
+    if (appObj.length == 0) {
+      return res.status(404).json({is_set: 0});
+    }
+    if (appObj[0].secret != req.body.app_secret) {
+      return res.status(404).json({is_set: 0});
+    }
+
+    if (isJSONObject(req.body.content)) {
+      let content = req.body.content;
+      let updateParameters = false;
+
+      if (content.hasOwnProperty('pppoe_user')) {
+        matchedDevice.pppoe_user = content.pppoe_user;
+        updateParameters = true;
+      }
+      if (content.hasOwnProperty('pppoe_password')) {
+        matchedDevice.pppoe_password = content.pppoe_password;
+        updateParameters = true;
+      }
+      if (content.hasOwnProperty('wifi_ssid')) {
+        matchedDevice.wifi_ssid = content.wifi_ssid;
+        updateParameters = true;
+      }
+      if (content.hasOwnProperty('wifi_password')) {
+        matchedDevice.wifi_password = content.wifi_password;
+        updateParameters = true;
+      }
+      if (content.hasOwnProperty('wifi_channel')) {
+        matchedDevice.wifi_channel = content.wifi_channel;
+        updateParameters = true;
+      }
+      if (updateParameters) {
+        matchedDevice.do_update_parameters = true;
+      }
+
+      matchedDevice.save();
+
+      // Send notification to device using MQTT
+      let client = mqtt.connect(mqttBrokerURL);
+      client.on('connect', function() {
+        client.publish(
+          'flashman/update/' + matchedDevice._id,
+          '1', {qos: 1, retain: true}); // topic, msg, options
+        client.end();
+      });
+
+      return res.status(200).json({is_set: 1});
+    } else {
+      return res.status(500).json({is_set: 0});
     }
   });
 };

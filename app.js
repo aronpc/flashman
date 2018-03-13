@@ -1,20 +1,59 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var passport = require('passport');
 
-var index = require('./routes/index');
-var deviceInfo = require('./routes/device_info');
+const fs = require('fs');
+const express = require('express');
+const path = require('path');
+const favicon = require('serve-favicon');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const fileUpload = require('express-fileupload');
+let session = require('express-session');
 
-var app = express();
+let User = require('./models/user');
+let index = require('./routes/index');
 
-mongoose.connect('mongodb://localhost:27017/flashman', {useMongoClient: true});
+let app = express();
 
-app.use(bodyParser.urlencoded({ extended: false }));
+mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman');
+
+// check administration user existence
+User.find({is_superuser: true}, function(err, matchedUsers) {
+  if (err || !matchedUsers || 0 === matchedUsers.length) {
+    let newSuperUser = new User({
+      name: process.env.FLM_ADM_USER,
+      password: process.env.FLM_ADM_PASS,
+      is_superuser: true,
+    });
+    newSuperUser.save();
+  }
+});
+
+// release dir must exists
+if (!fs.existsSync(process.env.FLM_IMG_RELEASE_DIR)) {
+  fs.mkdirSync(process.env.FLM_IMG_RELEASE_DIR);
+}
+
+// check secret file and load if available
+var companySecret = {};
+try {
+  var fileContents = fs.readFileSync('./secret.json', 'utf8');
+  companySecret = JSON.parse(fileContents);
+} catch (err) {
+  if (err.code === 'ENOENT') {
+    console.log('Shared secret file not found!');
+    companySecret['secret'] = '';
+  } else if (err.code === 'EACCES') {
+    console.log('Cannot open shared secret file!');
+    companySecret['secret'] = '';
+  } else {
+    throw err;
+  }
+}
+app.locals.secret = companySecret.secret;
+
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 // view engine setup
@@ -25,22 +64,35 @@ app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(require('express-session')
-  ({ secret: 'aSjdh%%$@asdy8ajoia7qnL&34S0))L',
-     resave: false,
-     saveUninitialized: false
-   })
+app.use(session({
+  secret: 'aSjdh%%$@asdy8ajoia7qnL&34S0))L',
+  resave: false,
+  saveUninitialized: false,
+}));
+
+// create static routes for public libraries
+app.use('/scripts/jquery',
+  express.static(path.join(__dirname, 'node_modules/jquery/dist'))
+);
+app.use('/scripts/popper',
+  express.static(path.join(__dirname, 'node_modules/popper.js/dist'))
+);
+app.use('/scripts/bootstrap',
+  express.static(path.join(__dirname, 'node_modules/bootstrap/dist'))
+);
+app.use('/scripts/mdbootstrap',
+  express.static(path.join(__dirname, 'node_modules/mdbootstrap'))
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
+app.use(fileUpload());
 
 app.use('/', index);
-app.use('/deviceinfo', deviceInfo);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
+  let err = new Error('Not Found');
   err.status = 404;
   next(err);
 });

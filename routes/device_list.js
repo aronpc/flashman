@@ -25,8 +25,8 @@ router.route('/update/:id').get(authController.ensureAPIAccess,
                                 deviceListController.getDeviceReg);
 // REST API - POST or PUT change device registry
 router.route('/update/:id').post(authController.ensureAPIAccess,
-                                 deviceListController.setDeviceReg);
-router.route('/update/:id').put(authController.ensureAPIAccess,
-                                 deviceListController.setDeviceReg);
+                                 deviceListController.setDeviceReg)
+						   .put(authController.ensureAPIAccess,
+                                deviceListController.setDeviceReg);
 
 module.exports = router;

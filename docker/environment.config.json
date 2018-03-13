@@ -1,0 +1,14 @@
+{
+  "apps": [{
+      "name": "flashman",
+      "script": "bin/www",
+      "log_date_format": "YYYY-MM-DD HH:mm Z",
+      "autorestart": true,
+      "env": {
+        "production": true,
+      },
+      "error_file": "/dev/stderr",
+      "out_file": "/dev/stdout",
+      "exec_mode": "cluster"
+    }]
+}

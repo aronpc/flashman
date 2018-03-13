@@ -1,0 +1,20 @@
+{
+  "apps": [{
+      "name": "flashman",
+      "script": "bin/www",
+      "log_date_format": "YYYY-MM-DD HH:mm Z",
+      "autorestart": true,
+      "env": {
+        "production": true,
+        "FLM_IMG_RELEASE_DIR": "./public/firmwares/",
+        "FLM_ALLOW_DEV_UPDATE_REST_DATA": false,
+        "FLM_MQTT_BROKER": "mqtt://",
+        "FLM_MONGODB_HOST": "localhost",
+        "FLM_ADM_USER": "admin",
+        "FLM_ADM_PASS": "flashman"
+      },
+      "error_file": "/dev/stderr",
+      "out_file": "/dev/stdout",
+      "exec_mode": "cluster"
+    }]
+}
