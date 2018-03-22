@@ -37,6 +37,7 @@ firmwareController.firmwares = function(req, res) {
                          limit: 10,
                          sort: {_id: 1}}, function(err, firmwares) {
     if (err) {
+      indexContent.type = 'danger';
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }

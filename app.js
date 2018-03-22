@@ -100,12 +100,24 @@ app.use(function(req, res, next) {
 // error handler
 app.use(function(err, req, res, next) {
   // set locals, only providing error in development
+  res.locals.type = 'danger';
   res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  res.locals.status = err.status;
+  res.locals.stack = process.env.production ? '' : err.stack;
 
   // render the error page
   res.status(err.status || 500);
-  res.render('error');
+  if (req.accepts('text/html') && !req.is('application/json')) {
+    res.render('error');
+  } else {
+    // REST API response
+    return res.json({
+      type: res.locals.type,
+      status: res.locals.status,
+      message: res.locals.message,
+      stack: res.locals.stack,
+    });
+  }
 });
 
 module.exports = app;

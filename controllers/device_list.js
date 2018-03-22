@@ -84,6 +84,7 @@ deviceListController.index = function(req, res) {
                             limit: 10,
                             sort: {_id: 1}}, function(err, devices) {
     if (err) {
+      indexContent.type = 'danger';
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
@@ -104,6 +105,7 @@ deviceListController.changeUpdate = function(req, res) {
   deviceModel.findById(req.params.id, function(err, matchedDevice) {
     if (err) {
       let indexContent = {};
+      indexContent.type = 'danger';
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
@@ -135,6 +137,7 @@ deviceListController.changeAllUpdates = function(req, res) {
   function(err, matchedDevices) {
     if (err) {
       let indexContent = {};
+      indexContent.type = 'danger';
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
@@ -201,6 +204,7 @@ deviceListController.searchDeviceReg = function(req, res) {
                             limit: 10,
                             sort: {_id: 1}}, function(err, matchedDevices) {
     if (err) {
+      indexContent.type = 'danger';
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
