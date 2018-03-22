@@ -22,4 +22,10 @@ html
     script(src='/scripts/popper/umd/popper.min.js')
     script(src='/scripts/bootstrap/js/bootstrap.min.js')
     script(src='/scripts/mdbootstrap/js/mdb.min.js')
+    script(src='/javascripts/modal_actions.js')
+    script.
+      var message = '#{message}';
+      if (message) {
+        $('#frame-modal-alert').modal('show');
+      }
     block scripts

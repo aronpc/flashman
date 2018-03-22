@@ -1,13 +1,13 @@
 
-if message
-  .row.justify-content-center
-    .col
-      .flash.alert.alert-dismissible.fade.show(class="alert-" + type, role='alert')= message
-        button.close(type="button", data-dismiss="alert", aria-label="Fechar")
-          span(aria-hidden="true") ×
-else
-  #flash-banner.row.justify-content-center(style={display: 'none'})
-    .col
-      .flash.alert.alert-dismissible.fade.show(role='alert')
-        button.close(type="button", data-dismiss="alert", aria-label="Fechar")
-          span(aria-hidden="true") ×
+#frame-modal-alert.modal.fade.top(tabindex="-1", role="dialog",
+  aria-labelledby="myModalLabel", aria-hidden="true"
+)
+  .modal-dialog.modal-frame.modal-top.modal-notify(
+    class="modal-" + type, role="document"
+  )
+    .modal-content
+      .modal-header
+        p.heading
+          strong.alert-message #{message}
+        button.close(type="button", data-dismiss="modal", aria-label="Close")
+          span.white-text(aria-hidden="true") &times;
