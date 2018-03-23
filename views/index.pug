@@ -85,10 +85,10 @@ block content
                           )
                             span.selected #{device.release}
                           .dropdown-menu
-                            a.dropdown-item.text-center(href="#") #{device.release}
+                            a.dropdown-item.text-center #{device.release}
                             each release, idx in releases
                               if (device.model === release.model)
-                                a.dropdown-item.text-center(href="#") #{release.id}
+                                a.dropdown-item.text-center #{release.id}
                       td.text-center.col-xs-1
                         label.switch
                           input.checkbox(
@@ -131,10 +131,10 @@ block content
             - for (var index=1; index<=pages; index++)
               - if (index == page)
                 li.active
-                  a.btn.orange.darken-2(href="#")= index
+                  a.btn.deep-orange.darken-4(href="#") #{index}
               - else
                 li
-                  a.btn.orange.darken-2(href="?content=" + lastquery + "&page=" + index)= index
+                  a.btn.orange.darken-2(href="?content=" + lastquery + "&page=" + index) #{index}
 
 block scripts
   script(src='/javascripts/update_device.js')

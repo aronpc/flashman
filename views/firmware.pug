@@ -57,13 +57,13 @@ block content
             - for (var index=1; index<=pages; index++)
               - if (index == page)
                 li.active
-                  a.btn.orange.darken-2(href="#")= index
+                  a.btn.deep-orange.darken-4(href="#") #{index}
               - else
                 li
                   if lastquery
-                    a.btn.orange.darken-2(href="?content=" + lastquery + "&page=" + index)= index
+                    a.btn.orange.darken-2(href="?content=" + lastquery + "&page=" + index) #{index}
                   else
-                    a.btn.orange.darken-2(href="?page=" + index)= index
+                    a.btn.orange.darken-2(href="?page=" + index) #{index}
 
 block scripts
   script(src='/javascripts/firmware_actions.js')
