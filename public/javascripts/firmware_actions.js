@@ -30,9 +30,7 @@ $(document).ready(function() {
             window.location.reload();
           }, 100);
         } else {
-          $('#flash-banner .flash').addClass('alert-' + res.type);
-          $('#flash-banner .flash').html(res.message);
-          $('#flash-banner').show();
+          displayAlertMsg(res);
         }
       },
     });
@@ -71,12 +69,7 @@ $(document).ready(function() {
         cache: false,
         timeout: 600000,
         success: function(res) {
-          $('#flash-banner .flash').removeClass(function(index, className) {
-              return (className.match(/(^|\s)alert-\S+/g) || []).join(' ');
-          });
-          $('#flash-banner .flash').addClass('alert-' + res.type);
-          $('#flash-banner .flash').html(res.message);
-          $('#flash-banner').show();
+          displayAlertMsg(res);
           if (res.type == 'success') {
             setTimeout(function() {
               window.location.reload();
@@ -85,9 +78,10 @@ $(document).ready(function() {
         },
       });
     } else {
-      $('#flash-banner .flash').addClass('alert-danger');
-      $('#flash-banner .flash').html('Nenhum arquivo foi selecionado');
-      $('#flash-banner').show();
+      displayAlertMsg({
+        type: 'danger',
+        message: 'Nenhum arquivo foi selecionado',
+      });
     }
 
     return false;

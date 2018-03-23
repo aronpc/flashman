@@ -3,10 +3,13 @@ let updateDevice = function(event) {
   let row = $(event.target).parents('tr');
   let id = row.prop('id');
   let release = row.find('span.selected').text();
+  let isChecked = $(event.target).parents('tr').find('.checkbox').is(':checked');
   $(event.target).prop('disabled', true);
   $.ajax({
     url: 'devicelist/update/' + id + '/' + release,
     type: 'post',
+    traditional: true,
+    data: {do_update: isChecked},
     success: function(res) {
       if (res.success) {
         $(event.target).prop('disabled', false);

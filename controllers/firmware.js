@@ -37,6 +37,7 @@ firmwareController.firmwares = function(req, res) {
                          limit: 10,
                          sort: {_id: 1}}, function(err, firmwares) {
     if (err) {
+      indexContent.type = 'danger';
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
@@ -66,12 +67,12 @@ firmwareController.delFirmware = function(req, res) {
                 message: 'Registro não encontrado',
               });
             }
-            return res.json({
-              type: 'success',
-              message: 'Deleted firmware model(s) successfully!',
-            });
           });
         });
+      });
+      return res.json({
+        type: 'success',
+        message: 'Firmware(s) deletado(s) com sucesso!',
       });
     });
   } else {
@@ -99,24 +100,47 @@ firmwareController.uploadFirmware = function(req, res) {
 
       let fnameFields = parseFilename(firmwarefile.name);
 
-      let firmware = new Firmware({
+      Firmware.findOne({
         vendor: fnameFields.vendor,
         model: fnameFields.model,
         version: fnameFields.version,
         release: fnameFields.release,
         filename: firmwarefile.name,
-      });
-      firmware.save(function(err) {
+      }, function(err, firmware) {
         if (err) {
-          let msg = '';
-          for (field in err.errors) {
-            msg += err.errors[field].message + ' ';
-          }
-          return res.json({type: 'danger', message: msg});
+          return res.json({
+            type: 'danger',
+            message: 'Erro buscar na base de dados',
+          });
+        }
+        if (!firmware) {
+          firmware = new Firmware({
+            vendor: fnameFields.vendor,
+            model: fnameFields.model,
+            version: fnameFields.version,
+            release: fnameFields.release,
+            filename: firmwarefile.name,
+          });
+        } else {
+          firmware.vendor = fnameFields.vendor;
+          firmware.model = fnameFields.model;
+          firmware.version = fnameFields.version;
+          firmware.release = fnameFields.release;
+          firmware.filename = firmwarefile.name;
         }
 
-        return res.json({type: 'success',
-                         message: 'Upload de firmware feito com sucesso!'});
+        firmware.save(function(err) {
+          if (err) {
+            let msg = '';
+            for (let field = 0; field < err.errors.length; field++) {
+              msg += err.errors[field].message + ' ';
+            }
+            return res.json({type: 'danger', message: msg});
+          }
+
+          return res.json({type: 'success',
+                           message: 'Upload de firmware feito com sucesso!'});
+        });
       });
     }
   );

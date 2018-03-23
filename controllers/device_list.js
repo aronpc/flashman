@@ -84,6 +84,7 @@ deviceListController.index = function(req, res) {
                             limit: 10,
                             sort: {_id: 1}}, function(err, devices) {
     if (err) {
+      indexContent.type = 'danger';
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
@@ -104,28 +105,31 @@ deviceListController.changeUpdate = function(req, res) {
   deviceModel.findById(req.params.id, function(err, matchedDevice) {
     if (err) {
       let indexContent = {};
+      indexContent.type = 'danger';
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
-    let oldstatus = matchedDevice.do_update;
-    if (oldstatus == true) {
-      matchedDevice.do_update = false;
-    } else {
-      matchedDevice.do_update = true;
-    }
+    matchedDevice.do_update = req.body.do_update;
     matchedDevice.release = req.params.release.trim();
-    matchedDevice.save();
+    matchedDevice.save(function(err) {
+      if (err) {
+        let indexContent = {};
+        indexContent.type = 'danger';
+        indexContent.message = err.message;
+        return res.render('error', indexContent);
+      }
 
-    // Send notification to device using MQTT
-    let client = mqtt.connect(mqttBrokerURL);
-    client.on('connect', function() {
-      client.publish(
-        'flashman/update/' + matchedDevice._id,
-        '1', {qos: 1, retain: true}); // topic, msg, options
-      client.end();
+      // Send notification to device using MQTT
+      let client = mqtt.connect(mqttBrokerURL);
+      client.on('connect', function() {
+        client.publish(
+          'flashman/update/' + matchedDevice._id,
+          '1', {qos: 1, retain: true}); // topic, msg, options
+        client.end();
+      });
+
+      return res.status(200).json({'success': true});
     });
-
-    return res.status(200).json({'success': true});
   });
 };
 
@@ -135,6 +139,7 @@ deviceListController.changeAllUpdates = function(req, res) {
   function(err, matchedDevices) {
     if (err) {
       let indexContent = {};
+      indexContent.type = 'danger';
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }
@@ -201,6 +206,7 @@ deviceListController.searchDeviceReg = function(req, res) {
                             limit: 10,
                             sort: {_id: 1}}, function(err, matchedDevices) {
     if (err) {
+      indexContent.type = 'danger';
       indexContent.message = err.message;
       return res.render('error', indexContent);
     }

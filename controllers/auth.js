@@ -74,7 +74,10 @@ exports.uiAuthenticate = function(req, res, next) {
       return res.render('login', {message: err.message, type: 'danger'});
     }
     if (!user) {
-      return res.render('login', {message: err.message, type: 'danger'});
+      return res.render('login', {
+        message: 'Usuário não encontrado',
+        type: 'danger',
+      });
     }
 
     req.logIn(user, function() {
