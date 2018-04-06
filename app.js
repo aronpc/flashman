@@ -35,23 +35,27 @@ if (!fs.existsSync(process.env.FLM_IMG_RELEASE_DIR)) {
   fs.mkdirSync(process.env.FLM_IMG_RELEASE_DIR);
 }
 
-// check secret file and load if available
-var companySecret = {};
-try {
-  var fileContents = fs.readFileSync('./secret.json', 'utf8');
-  companySecret = JSON.parse(fileContents);
-} catch (err) {
-  if (err.code === 'ENOENT') {
-    console.log('Shared secret file not found!');
-    companySecret['secret'] = '';
-  } else if (err.code === 'EACCES') {
-    console.log('Cannot open shared secret file!');
-    companySecret['secret'] = '';
-  } else {
-    throw err;
+if (process.env.FLM_COMPANY_SECRET) {
+  app.locals.secret = process.env.FLM_COMPANY_SECRET;
+} else {
+  // check secret file and load if available
+  var companySecret = {};
+  try {
+    var fileContents = fs.readFileSync('./secret.json', 'utf8');
+    companySecret = JSON.parse(fileContents);
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.log('Shared secret file not found!');
+      companySecret['secret'] = '';
+    } else if (err.code === 'EACCES') {
+      console.log('Cannot open shared secret file!');
+      companySecret['secret'] = '';
+    } else {
+      throw err;
+    }
   }
+  app.locals.secret = companySecret.secret;
 }
-app.locals.secret = companySecret.secret;
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
