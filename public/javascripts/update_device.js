@@ -6,7 +6,7 @@ let updateDevice = function(event) {
   let isChecked = $(event.target).parents('tr').find('.checkbox').is(':checked');
   $(event.target).prop('disabled', true);
   $.ajax({
-    url: 'devicelist/update/' + id + '/' + release,
+    url: '/devicelist/update/' + id + '/' + release,
     type: 'post',
     traditional: true,
     data: {do_update: isChecked},
@@ -31,7 +31,7 @@ let updateAllDevices = function(event) {
     }
   });
   $(event.target).prop('disabled', true);
-  $.post('devicelist/updateall',
+  $.post('/devicelist/updateall',
          {content: JSON.stringify({ids: idsObj, do_update: isChecked})})
     .done(function(res) {
       if (res.success) {
