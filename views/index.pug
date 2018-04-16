@@ -87,6 +87,11 @@ block content
                           .dropdown-menu
                             a.dropdown-item.text-center #{device.release}
                             each release, idx in releases
+                              if device.model.includes('/')
+                                if (device.model.replace('N/', '') === release.model)
+                                  a.dropdown-item.text-center #{release.id}
+                                else if (device.model.replace('/ND', '') === release.model)
+                                  a.dropdown-item.text-center #{release.id}
                               if (device.model === release.model)
                                 a.dropdown-item.text-center #{release.id}
                       td.text-center.col-xs-1
