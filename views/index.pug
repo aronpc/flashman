@@ -85,15 +85,16 @@ block content
                           )
                             span.selected #{device.release}
                           .dropdown-menu
-                            a.dropdown-item.text-center #{device.release}
+                            a.dropdown-item.text-center.active.orange.darken-2 #{device.release}
                             each release, idx in releases
-                              if device.model.includes('/')
-                                if (device.model.replace('N/', '') === release.model)
+                              if (device.release !== release.id)
+                                if device.model.includes('/')
+                                  if (device.model.replace('N/', '') === release.model)
+                                    a.dropdown-item.text-center #{release.id}
+                                  else if (device.model.replace('/ND', '') === release.model)
+                                    a.dropdown-item.text-center #{release.id}
+                                if (device.model === release.model)
                                   a.dropdown-item.text-center #{release.id}
-                                else if (device.model.replace('/ND', '') === release.model)
-                                  a.dropdown-item.text-center #{release.id}
-                              if (device.model === release.model)
-                                a.dropdown-item.text-center #{release.id}
                       td.text-center.col-xs-1
                         label.switch
                           input.checkbox(
