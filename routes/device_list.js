@@ -13,12 +13,16 @@ router.route('/update/:id/:release').post(authController.ensureLogin(),
 // POST change all device status
 router.route('/updateall').post(authController.ensureLogin(),
                                 deviceListController.changeAllUpdates);
-// POST delete device
-router.route('/delete/:id').post(authController.ensureLogin(),
-                                deviceListController.delDeviceReg);
+
 // POST search device
 router.route('/search').get(authController.ensureLogin(),
                              deviceListController.searchDeviceReg);
+
+// REST API or POST delete device
+router.route('/delete/:id').post(authController.ensureLogin(),
+                                 deviceListController.delDeviceReg)
+                           .delete(authController.ensureAPIAccess,
+                                   deviceListController.delDeviceReg);
 
 // REST API - GET device registry
 router.route('/update/:id').get(authController.ensureAPIAccess,
@@ -26,7 +30,11 @@ router.route('/update/:id').get(authController.ensureAPIAccess,
 // REST API - POST or PUT change device registry
 router.route('/update/:id').post(authController.ensureAPIAccess,
                                  deviceListController.setDeviceReg)
-						   .put(authController.ensureAPIAccess,
+                           .put(authController.ensureAPIAccess,
                                 deviceListController.setDeviceReg);
+
+// REST API - PUT create device registry
+router.route('/create').put(authController.ensureAPIAccess,
+                            deviceListController.createDeviceReg);
 
 module.exports = router;
