@@ -145,7 +145,8 @@ deviceInfoController.registerApp = function(req, res) {
       });
       if (appObj.length == 0) {
         matchedDevice.apps.push({id: req.body.app_id,
-                                 secret: req.body.app_secret});
+                                 secret: req.body.app_secret,
+                                 FCM: ""});
       } else {
         let objIdx = matchedDevice.apps.indexOf(appObj[0]);
         matchedDevice.apps.splice(objIdx, 1);
@@ -203,6 +204,13 @@ deviceInfoController.appSet = function(req, res) {
       let content = req.body.content;
       let updateParameters = false;
 
+      if (content.hasOwnProperty('FCMid')) {
+        let objIdx = matchedDevice.apps.indexOf(appObj[0]);
+        matchedDevice.apps.splice(objIdx, 1);
+        appObj[0].FCM = content.FCMid;
+        matchedDevice.apps.push(appObj[0]);
+      }
+
       if (content.hasOwnProperty('pppoe_user')) {
         matchedDevice.pppoe_user = content.pppoe_user;
         updateParameters = true;
@@ -229,14 +237,16 @@ deviceInfoController.appSet = function(req, res) {
 
       matchedDevice.save();
 
-      // Send notification to device using MQTT
-      let client = mqtt.connect(mqttBrokerURL);
-      client.on('connect', function() {
-        client.publish(
-          'flashman/update/' + matchedDevice._id,
-          '1', {qos: 1, retain: true}); // topic, msg, options
-        client.end();
-      });
+      if (updateParameters) {
+        // Send notification to device using MQTT
+        let client = mqtt.connect(mqttBrokerURL);
+        client.on('connect', function() {
+          client.publish(
+            'flashman/update/' + matchedDevice._id,
+            '1', {qos: 1, retain: true}); // topic, msg, options
+          client.end();
+        });
+      }
 
       return res.status(200).json({is_set: 1});
     } else {
