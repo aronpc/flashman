@@ -12,7 +12,7 @@ ENV FLM_ADM_PASS "flashman"
 
 WORKDIR /app
 
-COPY ./app.js ./LICENSE ./package.json ./docker/environment.config.json /app/
+COPY ./app.js ./LICENSE ./package.json ./docker/environment.config.json ./docker/wait-for-it.sh /app/
 COPY ./bin /app/bin
 COPY ./controllers /app/controllers
 COPY ./models /app/models
@@ -30,4 +30,4 @@ RUN npm install --production
 
 EXPOSE 8000
 
-CMD [ "pm2-docker", "start", "environment.config.json" ]
+CMD /app/wait-for-it.sh ${FLM_MONGODB_HOST}:27017 -- pm2-docker start environment.config.json

@@ -1,12 +1,14 @@
 
-var deviceModel = require('../models/device');
-var mqtt = require('mqtt');
-var deviceInfoController = {};
+const DeviceModel = require('../models/device');
+const mqtt = require('mqtt');
+let deviceInfoController = {};
 
-const deviceAllowUpdateRESTData = JSON.parse(process.env.FLM_ALLOW_DEV_UPDATE_REST_DATA);
 const mqttBrokerURL = process.env.FLM_MQTT_BROKER;
+const deviceAllowUpdateRESTData = JSON.parse(
+  process.env.FLM_ALLOW_DEV_UPDATE_REST_DATA
+);
 
-var returnObjOrEmptyStr = function(query) {
+const returnObjOrEmptyStr = function(query) {
   if (typeof query !== 'undefined' && query) {
     return query;
   } else {
@@ -14,27 +16,28 @@ var returnObjOrEmptyStr = function(query) {
   }
 };
 
-var createRegistry = function(req, res) {
+const createRegistry = function(req, res) {
   let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   if (typeof req.body.id == 'undefined') {
     return res.status(400);
   }
-  newDeviceModel = new deviceModel({'_id': req.body.id.trim().toUpperCase(),
-                                    'model': returnObjOrEmptyStr(req.body.model).trim() +
-                                             returnObjOrEmptyStr(req.body.model_ver).trim(),
-                                    'version': returnObjOrEmptyStr(req.body.version).trim(),
-                                    'release': returnObjOrEmptyStr(req.body.release_id).trim(),
-                                    'pppoe_user': returnObjOrEmptyStr(req.body.pppoe_user).trim(),
-                                    'pppoe_password': returnObjOrEmptyStr(req.body.pppoe_password).trim(),
-                                    'wifi_ssid': returnObjOrEmptyStr(req.body.wifi_ssid).trim(),
-                                    'wifi_password': returnObjOrEmptyStr(req.body.wifi_password).trim(),
-                                    'wifi_channel': returnObjOrEmptyStr(req.body.wifi_channel).trim(),
-                                    'wan_ip': returnObjOrEmptyStr(req.body.wan_ip).trim(),
-                                    'ip': ip,
-                                    'last_contact': Date.now(),
-                                    'do_update': false,
-                                    'do_update_parameters': false,
-                                  });
+  newDeviceModel = new DeviceModel({
+    '_id': req.body.id.trim().toUpperCase(),
+    'model': returnObjOrEmptyStr(req.body.model).trim() +
+             returnObjOrEmptyStr(req.body.model_ver).trim(),
+    'version': returnObjOrEmptyStr(req.body.version).trim(),
+    'release': returnObjOrEmptyStr(req.body.release_id).trim(),
+    'pppoe_user': returnObjOrEmptyStr(req.body.pppoe_user).trim(),
+    'pppoe_password': returnObjOrEmptyStr(req.body.pppoe_password).trim(),
+    'wifi_ssid': returnObjOrEmptyStr(req.body.wifi_ssid).trim(),
+    'wifi_password': returnObjOrEmptyStr(req.body.wifi_password).trim(),
+    'wifi_channel': returnObjOrEmptyStr(req.body.wifi_channel).trim(),
+    'wan_ip': returnObjOrEmptyStr(req.body.wan_ip).trim(),
+    'ip': ip,
+    'last_contact': Date.now(),
+    'do_update': false,
+    'do_update_parameters': false,
+  });
   newDeviceModel.save(function(err) {
     if (err) {
       console.log('Error creating device: ' + err);
@@ -46,13 +49,13 @@ var createRegistry = function(req, res) {
   });
 };
 
-var isJSONObject = function(val) {
+const isJSONObject = function(val) {
   return val instanceof Object ? true : false;
 };
 
 // Create new device entry or update an existing one
 deviceInfoController.updateDevicesInfo = function(req, res) {
-  deviceModel.findById(req.body.id.toUpperCase(), function(err, matchedDevice) {
+  DeviceModel.findById(req.body.id.toUpperCase(), function(err, matchedDevice) {
     if (err) {
       console.log('Error finding device: ' + err);
       return res.status(500);
@@ -98,13 +101,15 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         });
 
         matchedDevice.save();
-        return res.status(200).json({'do_update': matchedDevice.do_update,
-                                     'release_id': returnObjOrEmptyStr(matchedDevice.release),
-                                     'pppoe_user': returnObjOrEmptyStr(matchedDevice.pppoe_user),
-                                     'pppoe_password': returnObjOrEmptyStr(matchedDevice.pppoe_password),
-                                     'wifi_ssid': returnObjOrEmptyStr(matchedDevice.wifi_ssid),
-                                     'wifi_password': returnObjOrEmptyStr(matchedDevice.wifi_password),
-                                     'wifi_channel': returnObjOrEmptyStr(matchedDevice.wifi_channel)});
+        return res.status(200).json({
+          'do_update': matchedDevice.do_update,
+          'release_id': returnObjOrEmptyStr(matchedDevice.release),
+          'pppoe_user': returnObjOrEmptyStr(matchedDevice.pppoe_user),
+          'pppoe_password': returnObjOrEmptyStr(matchedDevice.pppoe_password),
+          'wifi_ssid': returnObjOrEmptyStr(matchedDevice.wifi_ssid),
+          'wifi_password': returnObjOrEmptyStr(matchedDevice.wifi_password),
+          'wifi_channel': returnObjOrEmptyStr(matchedDevice.wifi_channel),
+        });
       }
     }
   });
@@ -112,7 +117,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
 
 // Receive device firmware upgrade confirmation
 deviceInfoController.confirmDeviceUpdate = function(req, res) {
-  deviceModel.findById(req.body.id, function(err, matchedDevice) {
+  DeviceModel.findById(req.body.id, function(err, matchedDevice) {
     if (err) {
       console.log('Error finding device: ' + err);
       return res.status(500);
@@ -133,7 +138,7 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
 
 deviceInfoController.registerApp = function(req, res) {
   if (req.body.secret == req.app.locals.secret) {
-    deviceModel.findById(req.body.id, function(err, matchedDevice) {
+    DeviceModel.findById(req.body.id, function(err, matchedDevice) {
       if (err) {
         return res.status(400).json({is_registered: 0});
       }
@@ -163,7 +168,7 @@ deviceInfoController.registerApp = function(req, res) {
 
 deviceInfoController.removeApp = function(req, res) {
   if (req.body.secret == req.app.locals.secret) {
-    deviceModel.findById(req.body.id, function(err, matchedDevice) {
+    DeviceModel.findById(req.body.id, function(err, matchedDevice) {
       if (err) {
         return res.status(400).json({is_unregistered: 0});
       }
@@ -183,7 +188,7 @@ deviceInfoController.removeApp = function(req, res) {
 };
 
 deviceInfoController.appSet = function(req, res) {
-  deviceModel.findById(req.body.id, function(err, matchedDevice) {
+  DeviceModel.findById(req.body.id, function(err, matchedDevice) {
     if (err) {
       return res.status(400).json({is_set: 0});
     }
