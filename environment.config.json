@@ -8,7 +8,8 @@
         "production": true,
         "FLM_IMG_RELEASE_DIR": "./public/firmwares/",
         "FLM_ALLOW_DEV_UPDATE_REST_DATA": false,
-        "FLM_MQTT_BROKER": "mqtt://",
+        "FLM_MQTT_BROKER": "mqtts://",
+	"FLM_MQTT_CA": "",
         "FLM_MONGODB_HOST": "localhost",
         "FLM_ADM_USER": "admin",
         "FLM_ADM_PASS": "flashman"

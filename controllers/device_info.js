@@ -4,6 +4,7 @@ const mqtt = require('mqtt');
 let deviceInfoController = {};
 
 const mqttBrokerURL = process.env.FLM_MQTT_BROKER;
+const mqttBrokerCA  = process.env.FLM_MQTT_CA;
 const deviceAllowUpdateRESTData = JSON.parse(
   process.env.FLM_ALLOW_DEV_UPDATE_REST_DATA
 );
@@ -92,7 +93,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.do_update_parameters = false;
 
         // Remove notification to device using MQTT
-        let client = mqtt.connect(mqttBrokerURL);
+        let client = mqtt.connect(mqttBrokerURL, {ca : mqttBrokerCA});
         client.on('connect', function() {
           client.publish(
             'flashman/update/' + matchedDevice._id,
@@ -244,7 +245,7 @@ deviceInfoController.appSet = function(req, res) {
 
       if (updateParameters) {
         // Send notification to device using MQTT
-        let client = mqtt.connect(mqttBrokerURL);
+        let client = mqtt.connect(mqttBrokerURL, {ca : mqttBrokerCA});
         client.on('connect', function() {
           client.publish(
             'flashman/update/' + matchedDevice._id,

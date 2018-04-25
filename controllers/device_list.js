@@ -6,6 +6,7 @@ let deviceListController = {};
 const fs = require('fs');
 const imageReleasesDir = process.env.FLM_IMG_RELEASE_DIR;
 const mqttBrokerURL = process.env.FLM_MQTT_BROKER;
+const mqttBrokerCA  = process.env.FLM_MQTT_CA;
 
 const getReleases = function() {
   let releases = [];
@@ -128,7 +129,7 @@ deviceListController.changeUpdate = function(req, res) {
       }
 
       // Send notification to device using MQTT
-      let client = mqtt.connect(mqttBrokerURL);
+      let client = mqtt.connect(mqttBrokerURL, {ca : mqttBrokerCA});
       client.on('connect', function() {
         client.publish(
           'flashman/update/' + matchedDevice._id,
@@ -153,7 +154,7 @@ deviceListController.changeAllUpdates = function(req, res) {
     }
 
     // Send notification to device using MQTT
-    let client = mqtt.connect(mqttBrokerURL);
+    let client = mqtt.connect(mqttBrokerURL, {ca : mqttBrokerCA});
     client.on('connect', function() {
       for (let idx = 0; idx < matchedDevices.length; idx++) {
         matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
@@ -288,7 +289,7 @@ deviceListController.setDeviceReg = function(req, res) {
       matchedDevice.save();
 
       // Send notification to device using MQTT
-      let client = mqtt.connect(mqttBrokerURL);
+      let client = mqtt.connect(mqttBrokerURL, {ca : mqttBrokerCA});
       client.on('connect', function() {
         client.publish(
           'flashman/update/' + matchedDevice._id,
