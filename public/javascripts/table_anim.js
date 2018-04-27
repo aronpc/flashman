@@ -12,6 +12,13 @@ $(document).ready(function() {
     }
   });
 
+  $('#card-header').click(function() {
+    let plus = $(this).find('.fa-plus');
+    let cross = $(this).find('.fa-times');
+    plus.removeClass('fa-plus').addClass('fa-times');
+    cross.removeClass('fa-times').addClass('fa-plus');
+  });
+
   $('.btn-trash').click(function(event) {
     let row = $(event.target).parents('tr');
     let id = row.data('deviceid');

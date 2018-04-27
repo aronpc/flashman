@@ -1,6 +1,7 @@
 extends layout
 
 block content
+
   .row.justify-content-center
     .col-6.mt-4
       form(action="/devicelist/search")
@@ -141,6 +142,47 @@ block content
               - else
                 li
                   a.btn.orange.darken-2(href="?content=" + lastquery + "&page=" + index) #{index}
+
+  .row.justify-content-center
+    .col-6.mt-4
+      .card
+        h4.card-header.orange.darken-2.white-text(id="card-header"
+                                                  data-toggle="collapse",
+                                                  data-target="#deviceform",
+                                                  style="cursor: pointer;")
+          .row.justify-content-center
+            .col-1
+              .fas.fa-plus
+            .col-11
+              span.card-title Adicionar novo dispositivo
+        .card-body.collapse.out(action="", id="deviceform")
+          form(action="")
+            .md-form.input-group
+              label(for="mac") Endereço MAC:
+              input.col-xs-10.mt-2.form-control(type="text", id="mac")
+            .md-form.input-group
+              label(for="release") ID de release do firmware:
+              input.col-xs-10.mt-2.form-control(type="text", id="release")
+            .md-form.input-group
+              label(for="pppoe_user") Usuário PPPoE:
+              input.col-xs-10.mt-2.form-control(type="text", id="pppoe_user")
+            .md-form.input-group
+              label(for="pppoe_pass") Senha PPPoE:
+              input.col-xs-10.mt-2.form-control(type="text", id="pppoe_pass")
+            .md-form.input-group
+              label(for="wifi_ssid") SSID do wifi:
+              input.col-xs-10.mt-2.form-control(type="text", id="wifi_ssid")
+            .md-form.input-group
+              label(for="wifi_ssid") Senha do wifi:
+              input.col-xs-10.mt-2.form-control(type="text", id="wifi_pass")
+            .md-form.input-group
+              label(for="wifi_channel") Senha do wifi:
+              input.col-xs-10.mt-2.form-control(type="text", id="wifi_channel")
+            .col.mt-4.text-center
+              .form-buttons
+                button.btn.btn-lg.orange.darken-2(type="submit")
+                  .fas.fa-check.fa-lg
+                  span &nbsp Adicionar
 
 block scripts
   script(src='/javascripts/update_device.js')
