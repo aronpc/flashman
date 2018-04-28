@@ -66,7 +66,9 @@ userController.editUser = function(req, res) {
     if (err) {
       if (req.accepts('text/html') && !req.is('application/json')) {
         return res.render('changepassword',
-                          {message: err, type: 'danger'});
+                          {userid: req.user._id,
+                           message: err,
+                           type: 'danger'});
       } else {
         // REST API response
         return res.status(500).json(err);
@@ -82,7 +84,9 @@ userController.editUser = function(req, res) {
       } else {
         if (req.accepts('text/html') && !req.is('application/json')) {
           return res.render('changepassword',
-                            {message: 'As senhas estão diferentes. Digite novamente', type: 'danger'});
+                            {userid: req.user._id,
+                             message: 'As senhas estão diferentes. Digite novamente',
+                             type: 'danger'});
         } else {
           // REST API response
           return res.status(500).json({message: 'Passwords don\'t match'});
@@ -99,7 +103,9 @@ userController.editUser = function(req, res) {
         if (err) {
           if (req.accepts('text/html') && !req.is('application/json')) {
             return res.render('changepassword',
-                              {message: err, type: 'danger'});
+                              {userid: req.user._id,
+                               message: err,
+                               type: 'danger'});
           } else {
             // REST API response
             return res.status(500).json(err);
@@ -116,7 +122,9 @@ userController.editUser = function(req, res) {
     } else {
       if (req.accepts('text/html') && !req.is('application/json')) {
         return res.render('changepassword',
-                          {message: 'Permissão negada', type: 'danger'});
+                          {userid: req.user._id,
+                           message: 'Permissão negada',
+                           type: 'danger'});
       } else {
         // REST API response
         return res.status(403).json({message: 'You don\'t have permission to do it'});
