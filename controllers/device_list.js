@@ -311,7 +311,7 @@ deviceListController.createDeviceReg = function(req, res) {
     DeviceModel.findById(macAddr,
       function(err, matchedDevice) {
         if (err) {
-          return res.status(500).json({'message': 'internal server error'});
+          return res.status(500).json({'message': 'Erro interno do servidor'});
         } else {
           if (matchedDevice == null) {
             // Validate MAC Address
@@ -333,22 +333,22 @@ deviceListController.createDeviceReg = function(req, res) {
               });
               newDeviceModel.save(function(err) {
                 if (err) {
-                  return res.status(500).json({'message': 'cannot save entry'});
+                  return res.status(500).json({'message': 'Erro ao salvar registro'});
                 } else {
                   return res.status(200).json({'success': true});
                 }
               });
             } else {
-              return res.status(500).json({'message': 'invalid mac address'});
+              return res.status(500).json({'message': 'Endereço MAC inválido'});
             }
           } else {
-            return res.status(500).json({'message': 'device entry already exists'});
+            return res.status(500).json({'message': 'Endereço MAC já cadastrado'});
           }
         }
       }
     );
   } else {
-    return res.status(500).json({'message': 'error parsing json'});
+    return res.status(500).json({'message': 'Erro no json recebido'});
   }
 };
 

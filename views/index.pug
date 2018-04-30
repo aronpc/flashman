@@ -146,38 +146,47 @@ block content
   .row.justify-content-center
     .col-6.mt-4
       .card
-        h4.card-header.orange.darken-2.white-text(id="card-header"
+        h4.card-header.orange.darken-2.white-text(id="card-header",
                                                   data-toggle="collapse",
-                                                  data-target="#deviceform",
+                                                  data-target="#deviceCard",
                                                   style="cursor: pointer;")
           .row.justify-content-center
             .col-1
               .fas.fa-plus
             .col-11
               span.card-title Adicionar novo dispositivo
-        .card-body.collapse.out(action="", id="deviceform")
-          form(action="")
+        .card-body.collapse.out(id="deviceCard")
+          form(id="deviceForm")
             .md-form.input-group
-              label(for="mac") Endereço MAC:
-              input.col-xs-10.mt-2.form-control(type="text", id="mac")
+              input.col-xs-10.mt-2.form-control(type="text", id="new_mac")
+              label Endereço MAC:
             .md-form.input-group
-              label(for="release") ID de release do firmware:
-              input.col-xs-10.mt-2.form-control(type="text", id="release")
+              input.col-xs-10.mt-2.form-control(type="text",
+                                                id="new_pppoe_user",
+                                                maxlength="64")
+              label Usuário PPPoE:
             .md-form.input-group
-              label(for="pppoe_user") Usuário PPPoE:
-              input.col-xs-10.mt-2.form-control(type="text", id="pppoe_user")
+              input.col-xs-10.mt-2.form-control(type="text",
+                                                id="new_pppoe_pass",
+                                                maxlength="64")
+              label Senha PPPoE:
             .md-form.input-group
-              label(for="pppoe_pass") Senha PPPoE:
-              input.col-xs-10.mt-2.form-control(type="text", id="pppoe_pass")
+              input.col-xs-10.mt-2.form-control(type="text",
+                                                id="new_wifi_ssid",
+                                                maxlength="32")
+              label SSID do wifi:
             .md-form.input-group
-              label(for="wifi_ssid") SSID do wifi:
-              input.col-xs-10.mt-2.form-control(type="text", id="wifi_ssid")
-            .md-form.input-group
-              label(for="wifi_ssid") Senha do wifi:
-              input.col-xs-10.mt-2.form-control(type="text", id="wifi_pass")
-            .md-form.input-group
-              label(for="wifi_channel") Senha do wifi:
-              input.col-xs-10.mt-2.form-control(type="text", id="wifi_channel")
+              input.col-xs-10.mt-2.form-control(type="text",
+                                                id="new_wifi_pass",
+                                                maxlength="64")
+              label Senha do wifi:
+            .mt-3
+              label(for="new_wifi_channel") Canal do wifi:
+              select.form-control(id="new_wifi_channel")
+                option(value="auto") auto
+                option(value="1") 1
+                option(value="6") 6
+                option(value="11") 11
             .col.mt-4.text-center
               .form-buttons
                 button.btn.btn-lg.orange.darken-2(type="submit")
@@ -185,5 +194,6 @@ block content
                   span &nbsp Adicionar
 
 block scripts
+  script(src='/javascripts/new_device.js')
   script(src='/javascripts/update_device.js')
   script(src='/javascripts/table_anim.js')
