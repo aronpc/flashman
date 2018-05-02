@@ -1,11 +1,18 @@
 
 $(document).ready(function() {
-  $('.fa-chevron-right').parents('td').click(function() {
+  $('.fa-chevron-right').parents('td').click(function(event) {
+    let row = $(event.target).parents('tr');
+    let index = row.data('index');
+    let hideId = "#hide-" + index.toString() + 1;
+    let formId = "#form-" + index.toString() + 1;
     if ($(this).children().hasClass('fa-chevron-right')) {
+      $(hideId).show();
       $(this).find('.fa-chevron-right')
         .removeClass('fa-chevron-right')
         .addClass('fa-chevron-down');
     } else if ($(this).children().hasClass('fa-chevron-down')) {
+      $(hideId).hide();
+      $(formId).hide();
       $(this).find('.fa-chevron-down')
         .removeClass('fa-chevron-down')
         .addClass('fa-chevron-right');
@@ -31,5 +38,14 @@ $(document).ready(function() {
         }, 100);
       },
     });
+  });
+
+  $('.btn-edit').click(function(event) {
+    let row = $(event.target).parents('tr');
+    let index = row.data('index');
+    let hideId = "#hide-" + index.toString() + 1;
+    let formId = "#form-" + index.toString() + 1;
+    $(hideId).hide();
+    $(formId).show();
   });
 });

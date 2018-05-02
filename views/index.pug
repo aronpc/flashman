@@ -104,10 +104,8 @@ block content
                         )
                         .slider.round
                   each device, index in devices
-                    tr(id=device._id)
+                    tr(id=device._id, data-index=index)
                       td.text-center.col-xs-1(
-                        data-toggle="collapse",
-                        data-target="#hide-" + index + 1,
                         style="cursor: pointer;"
                       )
                         .fas.fa-chevron-right.fa-lg
@@ -154,9 +152,11 @@ block content
                             checked=device.do_update
                           )
                           .slider.round
-                    tr.collapse.out.table-active(
+                    tr.table-active.info-div(
                       id="hide-" + index + 1,
-                      data-deviceid=device._id
+                      data-deviceid=device._id,
+                      data-index=index
+                      style="display: none;"
                     )
                       td.text-center.col-xs-1
                         .fas.fa-info-circle.fa-lg
@@ -186,6 +186,14 @@ block content
                       td.text-center.col-xs-1
                         .fas.fa-trash.fa-lg.btn-trash(style="cursor: pointer;")
                         h6 Remover
+                    tr.table-active.form-div(
+                      id="form-" + index + 1,
+                      data-deviceid=device._id,
+                      data-index=index,
+                      style="display: none;"
+                    )
+                      td.text-center
+                        h3 hi
 
         .row.justify-content-center.mt-2
           ul.pagination
