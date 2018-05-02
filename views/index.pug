@@ -132,15 +132,30 @@ block content
                       td(style="cursor: pointer;").btn-trash.text-center.col-xs-1
                         .fas.fa-trash.fa-lg
 
-        .row.justify-content-center.mt-2
-          ul.pagination
-            - for (var index=1; index<=pages; index++)
-              - if (index == page)
-                li.active
-                  a.btn.deep-orange.darken-4(href="#") #{index}
-              - else
-                li
-                  a.btn.orange.darken-2(href="?content=" + lastquery + "&page=" + index) #{index}
+        .row.justify-content-center.mt-4
+          nav
+            ul.pagination.pagination-lg
+              - let cPage = parseInt(page);
+              - let delta = 2;
+              - for (var i=1; i<=pages; i++) {
+              -   if (i == 1 || i == pages || ((i >= cPage-delta) && (i <= cPage+delta))) {
+              -     if (i == page)
+                      li.page-item.active
+                        a.page-link.orange.darken-2(href="#") #{i}
+              -     else {
+              -       if (i == pages && (cPage+delta <= pages-delta)) {
+                        li.page-item
+                          h3.page-link.disabled ...
+              -       }
+                      li.page-item
+                        a.page-link(href="?content=" + lastquery + "&page=" + i) #{i}
+              -       if (i == 1 && (cPage-delta > delta)) {
+                        li.page-item
+                          h3.page-link.disabled ...
+              -       }
+              -     }
+              -   }
+              - }
 
 block scripts
   script(src='/javascripts/update_device.js')
