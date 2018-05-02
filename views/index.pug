@@ -170,7 +170,7 @@ block content
                         br
                         b Versão:
                         |  #{device.version}
-                      td(colspan=4).text-left
+                      td(colspan=3).text-left
                         div
                         b SSID WiFi:
                         |  #{device.wifi_ssid}
@@ -180,8 +180,12 @@ block content
                         br
                         b Canal WiFi:
                         |  #{device.wifi_channel}
-                      td(style="cursor: pointer;").btn-trash.text-center.col-xs-1
-                        .fas.fa-trash.fa-lg
+                      td.text-center.col-xs-1
+                        .fas.fa-edit.fa-lg.btn-edit(style="cursor: pointer;")
+                        h6 Editar
+                      td.text-center.col-xs-1
+                        .fas.fa-trash.fa-lg.btn-trash(style="cursor: pointer;")
+                        h6 Remover
 
         .row.justify-content-center.mt-2
           ul.pagination
@@ -194,6 +198,7 @@ block content
                   a.btn.orange.darken-2(href="?content=" + lastquery + "&page=" + index) #{index}
 
 block scripts
+  script(src='/javascripts/device_validator.js')
   script(src='/javascripts/new_device.js')
   script(src='/javascripts/update_device.js')
   script(src='/javascripts/table_anim.js')

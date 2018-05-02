@@ -1,4 +1,4 @@
-
+const Validator = require('../public/javascripts/device_validator');
 const DeviceModel = require('../models/device');
 const mqtt = require('mqtt');
 let deviceListController = {};
@@ -307,48 +307,85 @@ deviceListController.createDeviceReg = function(req, res) {
   if (isJSONObject(req.body.content)) {
     const content = req.body.content;
     const macAddr = content.mac_address.trim().toUpperCase();
+    const validator = new Validator();
 
-    DeviceModel.findById(macAddr,
-      function(err, matchedDevice) {
-        if (err) {
-          return res.status(500).json({'message': 'Erro interno do servidor'});
-        } else {
-          if (matchedDevice == null) {
-            // Validate MAC Address
-            const macRegex = /^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/;
+    let errors = [];
+    let release = returnObjOrEmptyStr(content.release_id).trim();
+    let pppoe_user = returnObjOrEmptyStr(content.pppoe_user).trim();
+    let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim()
+    let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
+    let password = returnObjOrEmptyStr(content.wifi_password).trim();
+    let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
 
-            if (macRegex.test(macAddr)) {
-              newDeviceModel = new DeviceModel({
-                '_id': macAddr,
-                'model': '',
-                'release': returnObjOrEmptyStr(content.release_id).trim(),
-                'pppoe_user': returnObjOrEmptyStr(content.pppoe_user).trim(),
-                'pppoe_password': returnObjOrEmptyStr(content.pppoe_password).trim(),
-                'wifi_ssid': returnObjOrEmptyStr(content.wifi_ssid).trim(),
-                'wifi_password': returnObjOrEmptyStr(content.wifi_password).trim(),
-                'wifi_channel': returnObjOrEmptyStr(content.wifi_channel).trim(),
-                'last_contact': new Date('January 1, 1970 01:00:00'),
-                'do_update': false,
-                'do_update_parameters': false,
+    let genericValidate = function (field, func, key) {
+      let valid_field = func(field);
+      if (!valid_field.valid) {
+        valid_field.err.forEach(function(error) {
+          let obj = {};
+          obj[key] = error;
+          errors.push(obj);
+        });
+      }
+    };
+
+    // Validate fields
+    genericValidate(macAddr, validator.validateMac, "mac");
+    genericValidate(pppoe_user, validator.validateUser, "pppoe_user");
+    genericValidate(pppoe_password, validator.validatePassword, "pppoe_password");
+    genericValidate(ssid, validator.validateSSID, "ssid");
+    genericValidate(password, validator.validateWifiPassword, "password");
+    genericValidate(channel, validator.validateChannel, "channel");
+
+    DeviceModel.findById(macAddr, function(err, matchedDevice) {
+      if (err) {
+        return res.status(500).json({
+          message: 'Erro interno do servidor',
+          errors: errors
+        });
+      }
+      else {
+        if (matchedDevice) {
+          errors.push({mac: "Endereço MAC já cadastrado"});
+        }
+        if (errors.length < 1) {
+          newDeviceModel = new DeviceModel({
+            '_id': macAddr,
+            'model': '',
+            'release': release,
+            'pppoe_user': pppoe_user,
+            'pppoe_password': pppoe_password,
+            'wifi_ssid': ssid,
+            'wifi_password': password,
+            'wifi_channel': channel,
+            'last_contact': new Date('January 1, 1970 01:00:00'),
+            'do_update': false,
+            'do_update_parameters': false,
+          });
+          newDeviceModel.save(function(err) {
+            if (err) {
+              return res.status(200).json({
+                message: 'Erro ao salvar registro',
+                errors: errors
               });
-              newDeviceModel.save(function(err) {
-                if (err) {
-                  return res.status(500).json({'message': 'Erro ao salvar registro'});
-                } else {
-                  return res.status(200).json({'success': true});
-                }
-              });
-            } else {
-              return res.status(500).json({'message': 'Endereço MAC inválido'});
             }
-          } else {
-            return res.status(500).json({'message': 'Endereço MAC já cadastrado'});
-          }
+            else {
+              return res.status(200).json({'success': true});
+            }
+          });
+        }
+        else {
+          return res.status(200).json({
+            message: 'Erro validando os campos, ver campo \"errors\"',
+            errors: errors
+          });
         }
       }
-    );
+    });
   } else {
-    return res.status(500).json({'message': 'Erro no json recebido'});
+    return res.status(200).json({
+      message: 'Erro no json recebido',
+      errors: []
+    });
   }
 };
 

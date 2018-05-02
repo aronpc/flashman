@@ -34,7 +34,9 @@ router.route('/update/:id').post(authController.ensureAPIAccess,
                                 deviceListController.setDeviceReg);
 
 // REST API - PUT create device registry
-router.route('/create').put(authController.ensureAPIAccess,
+router.route('/create').post(authController.ensureLogin(),
+                            deviceListController.createDeviceReg)
+                       .put(authController.ensureAPIAccess,
                             deviceListController.createDeviceReg);
 
 module.exports = router;

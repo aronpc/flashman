@@ -19,42 +19,9 @@ let renderDeviceErrors = function (errors) {
   }
 };
 
-let validateIdField = function(value, length, errors) {
-  if (value.length < 1) {
-    errors.messages.push("Este campo é obrigatório");
-  }
-  else {
-    if (value.length > length) {
-      let l = length.toString();
-      errors.messages.push("Este campo não pode ter mais de " + l + " caracteres");
-    }
-    if (!value.match(/^[a-zA-Z0-9\-\_\#\s]+$/)) {
-      errors.messages.push(
-        "Somente são aceitos: caracteres alfanuméricos, espaços, - e _"
-      );
-    }
-  }
-};
-
-let validatePasswordField = function(value, length, errors) {
-  if (value.length < 1) {
-    errors.messages.push("Este campo é obrigatório");
-  }
-  else {
-    if (value.length > length) {
-      let l = length.toString();
-      errors.messages.push("Este campo não pode ter mais de " + l + " caracteres");
-    }
-    if (!value.match(/^[a-zA-Z0-9\-\_\#\!\@\$\%\&\*\=\+\?]+$/)) {
-      errors.messages.push(
-        "Letras com acento, cedilha, e alguns caracteres especiais não são aceitos."
-      );
-    }
-  }
-};
-
 let validateNewDevice = function () {
   $(".form-control").blur();  // Remove focus from form
+  let validator = new Validator();
 
   // Get form values
   let mac = $("#new_mac").val();
@@ -80,22 +47,20 @@ let validateNewDevice = function () {
   // Clean previous error values from DOM
   removeDeviceErrors(errors);
 
-  // Validate MAC
-  if (!mac.match(/^([0-9A-F]{2}[:-]){5}([0-9A-F]{2})$/)) {
-    errors.mac.messages.push("Endereço MAC inválido");
-  }
+  let genericValidate = function(value, func, errors) {
+    let valid_field = func(value);
+    if (!valid_field.valid) {
+      errors.messages = valid_field.err;
+    }
+  };
 
-  // Validate PPPoE user
-  validateIdField(pppoe_user, 64, errors.pppoe_user);
-
-  // Validate PPPoE password
-  validatePasswordField(pppoe_password, 64, errors.pppoe_password);
-
-  // Validate PPPoE user
-  validateIdField(ssid, 32, errors.ssid);
-
-  // Validate PPPoE password
-  validatePasswordField(password, 64, errors.password);
+  // Validate fields
+  genericValidate(mac, validator.validateMac, errors.mac);
+  genericValidate(pppoe_user, validator.validateUser, errors.pppoe_user);
+  genericValidate(pppoe_password, validator.validatePassword, errors.pppoe_password);
+  genericValidate(ssid, validator.validateSSID, errors.ssid);
+  genericValidate(password, validator.validateWifiPassword, errors.password);
+  genericValidate(channel, validator.validateChannel, errors.channel);
 
   let hasNoErrors = function (key) {
     return errors[key].messages.length < 1;
@@ -103,13 +68,48 @@ let validateNewDevice = function () {
 
   if (Object.keys(errors).every(hasNoErrors)) {
     // If no errors present, send to backend
-    return false;
+    let data = {'content': {
+      'mac_address': mac,
+      'pppoe_user': pppoe_user,
+      'pppoe_password': pppoe_password,
+      'wifi_ssid': ssid,
+      'wifi_password': password,
+      'wifi_channel': channel
+    }};
+
+    $.ajax({
+      type: 'POST',
+      url: '/devicelist/create',
+      dataType: 'json',
+      data: JSON.stringify(data),
+      contentType: 'application/json',
+      success: function(resp) {
+        if ('errors' in resp) {
+          let keyToError = {
+            mac: errors.mac,
+            pppoe_user: errors.pppoe_user,
+            pppoe_password: errors.pppoe_password,
+            ssid: errors.ssid,
+            password: errors.password,
+            channel: errors.channel
+          };
+          resp.errors.forEach(function(pair) {
+            let key = Object.keys(pair)[0];
+            keyToError[key].messages.push(pair[key]);
+          })
+          renderDeviceErrors(errors);
+        }
+        else {
+          location.reload();
+        }
+      }
+    });
   }
   else {
     // Else, render errors on form
     renderDeviceErrors(errors);
-    return false;
   }
+  return false;
 };
 
 $(document).ready(function() {
