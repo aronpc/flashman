@@ -185,11 +185,11 @@ block content
                         br
                         b Canal WiFi:
                         |  #{device.wifi_channel}
-                      td.text-center.col-xs-1
-                        .fas.fa-edit.fa-lg.btn-edit(style="cursor: pointer;")
+                      td.text-center.col-xs-1.btn-edit(style="cursor: pointer;")
+                        .fas.fa-edit.fa-lg
                         h6 Editar
-                      td.text-center.col-xs-1
-                        .fas.fa-trash.fa-lg.btn-trash(style="cursor: pointer;")
+                      td.text-center.col-xs-1.btn-trash(style="cursor: pointer;")
+                        .fas.fa-trash.fa-lg
                         h6 Remover
                     tr.table-active.form-div(
                       id="form-" + (index + 1),
@@ -205,31 +205,31 @@ block content
                                 input.col-xs-10.mt-2.form-control(type="text",
                                                                   id="edit_pppoe_user-" + (index + 1),
                                                                   maxlength="64")
-                                label.active Usuário PPPoE:
+                                label.active Usuário PPPoE
                           .row.justify-content-center
                             .col-6.col-offset-3
                               .md-form.input-group
                                 input.col-xs-10.mt-2.form-control(type="text",
                                                                   id="edit_pppoe_pass-" + (index + 1),
                                                                   maxlength="64")
-                                label.active Senha PPPoE:
+                                label.active Senha PPPoE
                           .row.justify-content-center
                             .col-6.col-offset-3
                               .md-form.input-group
                                 input.col-xs-10.mt-2.form-control(type="text",
                                                                   id="edit_wifi_ssid-" + (index + 1),
                                                                   maxlength="32")
-                                label.active SSID do wifi:
+                                label.active SSID do WiFi
                           .row.justify-content-center
                             .col-6.col-offset-3
                               .md-form.input-group
                                 input.col-xs-10.mt-2.form-control(type="text",
                                                                   id="edit_wifi_pass-" + (index + 1),
                                                                   maxlength="64")
-                                label.active Senha do wifi:
+                                label.active Senha do WiFi
                           .row.justify-content-center.mt-3
                             .col-6.col-offset-3
-                              label(for="edit_wifi_channel-" + (index + 1)) Canal do wifi:
+                              label(for="edit_wifi_channel-" + (index + 1)) Canal do WiFi
                               select.form-control(id="edit_wifi_channel-" + (index + 1))
                                 option(value="auto") auto
                                 option(value="1") 1
