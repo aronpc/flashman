@@ -11,6 +11,29 @@ let loadDeviceInfoOnForm = function(row) {
                                           .val(row.data('wifi-pass')).change();
   $("#edit_wifi_channel-" + index.toString()).removeClass("red lighten-4")
                                              .val(row.data('channel')).change();
+  let pppoe_user = row.data('user');
+  let pppoe_pass = row.data('pass');
+  if (pppoe_user === "" && pppoe_pass === "") {
+    $("#edit_connect_type-" + index.toString()).val("DHCP");
+    $("#edit_pppoe_user-" + index.toString()).parent().hide();
+    $("#edit_pppoe_pass-" + index.toString()).parent().hide();
+  }
+  else {
+    $("#edit_connect_type-" + index.toString()).val("PPPoE");
+    $("#edit_pppoe_user-" + index.toString()).parent().show();
+    $("#edit_pppoe_pass-" + index.toString()).parent().show();
+  }
+
+  $("#edit_connect_type-" + index.toString()).change(function () {
+    if ($("#edit_connect_type-" + index.toString()).val() === "PPPoE") {
+      $("#edit_pppoe_user-" + index.toString()).parent().show();
+      $("#edit_pppoe_pass-" + index.toString()).parent().show();
+    }
+    else {
+      $("#edit_pppoe_user-" + index.toString()).parent().hide();
+      $("#edit_pppoe_pass-" + index.toString()).parent().hide();
+    }
+  });
 }
 
 $(document).ready(function() {

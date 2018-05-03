@@ -24,6 +24,7 @@ let validateNewDevice = function () {
   let validator = new Validator();
 
   // Get form values
+  let pppoe = $("#new_connect_type").val() === "PPPoE";
   let mac = $("#new_mac").val();
   let pppoe_user = $("#new_pppoe_user").val();
   let pppoe_password = $("#new_pppoe_pass").val();
@@ -56,8 +57,10 @@ let validateNewDevice = function () {
 
   // Validate fields
   genericValidate(mac, validator.validateMac, errors.mac);
-  genericValidate(pppoe_user, validator.validateUser, errors.pppoe_user);
-  genericValidate(pppoe_password, validator.validatePassword, errors.pppoe_password);
+  if (pppoe){
+    genericValidate(pppoe_user, validator.validateUser, errors.pppoe_user);
+    genericValidate(pppoe_password, validator.validatePassword, errors.pppoe_password);
+  }
   genericValidate(ssid, validator.validateSSID, errors.ssid);
   genericValidate(password, validator.validateWifiPassword, errors.password);
   genericValidate(channel, validator.validateChannel, errors.channel);
@@ -70,8 +73,8 @@ let validateNewDevice = function () {
     // If no errors present, send to backend
     let data = {'content': {
       'mac_address': mac,
-      'pppoe_user': pppoe_user,
-      'pppoe_password': pppoe_password,
+      'pppoe_user': (pppoe) ? pppoe_user : "",
+      'pppoe_password': (pppoe) ? pppoe_password : "",
       'wifi_ssid': ssid,
       'wifi_password': password,
       'wifi_channel': channel
@@ -95,6 +98,7 @@ let validateNewDevice = function () {
           };
           resp.errors.forEach(function(pair) {
             let key = Object.keys(pair)[0];
+            console.log(key);
             keyToError[key].messages.push(pair[key]);
           })
           renderDeviceErrors(errors);
@@ -123,4 +127,18 @@ $(document).ready(function() {
       $("#new_mac").val(mac.toUpperCase());
     }
   });
+
+  $("#new_connect_type").change(function () {
+    if ($("#new_connect_type").val() === "PPPoE") {
+      $("#new_pppoe_user").parent().show();
+      $("#new_pppoe_pass").parent().show();
+    }
+    else {
+      $("#new_pppoe_user").parent().hide();
+      $("#new_pppoe_pass").parent().hide();
+    }
+  });
+
+  $("#new_pppoe_user").parent().hide();
+  $("#new_pppoe_pass").parent().hide();
 });

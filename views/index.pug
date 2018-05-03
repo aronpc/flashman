@@ -26,6 +26,11 @@ block content
               span.card-title Adicionar novo dispositivo
         .card-body.collapse.out(id="deviceCard")
           form(id="deviceForm")
+            .mt-4
+              label(for="new_connect_type") Tipo de Conexão
+              select.form-control(id="new_connect_type")
+                option(value="DHCP") DHCP
+                option(value="PPPoE") PPPoE
             .md-form
               input.col-xs-10.form-control(type="text", id="new_mac")
               label Endereço MAC
@@ -199,6 +204,12 @@ block content
                     )
                       td(colspan=9).grey.lighten-5
                         form.edit-form(id="editDeviceForm-" + (index + 1))
+                          .row.justify-content-center.mt-3
+                            .col-6.col-offset-3
+                              label(for="edit_connect_type-" + (index + 1)) Tipo de Conexão
+                              select.form-control(id="edit_connect_type-" + (index + 1))
+                                option(value="DHCP") DHCP
+                                option(value="PPPoE") PPPoE
                           .row.justify-content-center
                             .col-6.col-offset-3
                               .md-form

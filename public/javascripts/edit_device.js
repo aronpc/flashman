@@ -28,6 +28,7 @@ let validateEditDevice = function (event) {
 
   // Get form values
   let mac = row.data('deviceid');
+  let pppoe = $("#edit_connect_type-" + index.toString()).val() === "PPPoE";
   let pppoe_user = $("#edit_pppoe_user-" + index.toString()).val();
   let pppoe_password = $("#edit_pppoe_pass-" + index.toString()).val();
   let ssid = $("#edit_wifi_ssid-" + index.toString()).val();
@@ -57,8 +58,10 @@ let validateEditDevice = function (event) {
   };
 
   // Validate fields
-  genericValidate(pppoe_user, validator.validateUser, errors.pppoe_user);
-  genericValidate(pppoe_password, validator.validatePassword, errors.pppoe_password);
+  if (pppoe) {
+    genericValidate(pppoe_user, validator.validateUser, errors.pppoe_user);
+    genericValidate(pppoe_password, validator.validatePassword, errors.pppoe_password);
+  }
   genericValidate(ssid, validator.validateSSID, errors.ssid);
   genericValidate(password, validator.validateWifiPassword, errors.password);
   genericValidate(channel, validator.validateChannel, errors.channel);
@@ -70,8 +73,8 @@ let validateEditDevice = function (event) {
   if (Object.keys(errors).every(hasNoErrors)) {
     // If no errors present, send to backend
     let data = {'content': {
-      'pppoe_user': pppoe_user,
-      'pppoe_password': pppoe_password,
+      'pppoe_user': (pppoe) ? pppoe_user : "",
+      'pppoe_password': (pppoe) ? pppoe_password : "",
       'wifi_ssid': ssid,
       'wifi_password': password,
       'wifi_channel': channel

@@ -274,6 +274,7 @@ deviceListController.setDeviceReg = function(req, res) {
       let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
       let password = returnObjOrEmptyStr(content.wifi_password).trim();
       let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
+      let pppoe = (pppoe_user !== "" && pppoe_password !== "");
 
       let genericValidate = function (field, func, key) {
         let valid_field = func(field);
@@ -287,8 +288,10 @@ deviceListController.setDeviceReg = function(req, res) {
       };
 
       // Validate fields
-      genericValidate(pppoe_user, validator.validateUser, "pppoe_user");
-      genericValidate(pppoe_password, validator.validatePassword, "pppoe_password");
+      if (pppoe) {
+        genericValidate(pppoe_user, validator.validateUser, "pppoe_user");
+        genericValidate(pppoe_password, validator.validatePassword, "pppoe_password");
+      }
       genericValidate(ssid, validator.validateSSID, "ssid");
       genericValidate(password, validator.validateWifiPassword, "password");
       genericValidate(channel, validator.validateChannel, "channel");
@@ -359,6 +362,7 @@ deviceListController.createDeviceReg = function(req, res) {
     let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
     let password = returnObjOrEmptyStr(content.wifi_password).trim();
     let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
+    let pppoe = (pppoe_user !== "" && pppoe_password !== "");
 
     let genericValidate = function (field, func, key) {
       let valid_field = func(field);
@@ -373,8 +377,10 @@ deviceListController.createDeviceReg = function(req, res) {
 
     // Validate fields
     genericValidate(macAddr, validator.validateMac, "mac");
-    genericValidate(pppoe_user, validator.validateUser, "pppoe_user");
-    genericValidate(pppoe_password, validator.validatePassword, "pppoe_password");
+    if (pppoe) {
+      genericValidate(pppoe_user, validator.validateUser, "pppoe_user");
+      genericValidate(pppoe_password, validator.validatePassword, "pppoe_password");
+    }
     genericValidate(ssid, validator.validateSSID, "ssid");
     genericValidate(password, validator.validateWifiPassword, "password");
     genericValidate(channel, validator.validateChannel, "channel");
