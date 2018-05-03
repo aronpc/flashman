@@ -26,30 +26,30 @@ block content
               span.card-title Adicionar novo dispositivo
         .card-body.collapse.out(id="deviceCard")
           form(id="deviceForm")
-            .md-form.input-group
-              input.col-xs-10.mt-2.form-control(type="text", id="new_mac")
+            .md-form
+              input.col-xs-10.form-control(type="text", id="new_mac")
               label Endereço MAC
-            .md-form.input-group
-              input.col-xs-10.mt-2.form-control(type="text",
+            .md-form
+              input.col-xs-10.form-control(type="text",
                                                 id="new_pppoe_user",
                                                 maxlength="64")
               label Usuário PPPoE
-            .md-form.input-group
-              input.col-xs-10.mt-2.form-control(type="text",
+            .md-form
+              input.col-xs-10.form-control(type="text",
                                                 id="new_pppoe_pass",
                                                 maxlength="64")
               label Senha PPPoE
-            .md-form.input-group
-              input.col-xs-10.mt-2.form-control(type="text",
+            .md-form
+              input.col-xs-10.form-control(type="text",
                                                 id="new_wifi_ssid",
                                                 maxlength="32")
               label SSID do WiFi
-            .md-form.input-group
-              input.col-xs-10.mt-2.form-control(type="text",
+            .md-form
+              input.col-xs-10.form-control(type="text",
                                                 id="new_wifi_pass",
                                                 maxlength="64")
               label Senha do WiFi
-            .mt-3
+            .mt-4
               label(for="new_wifi_channel") Canal do WiFi
               select.form-control(id="new_wifi_channel")
                 option(value="auto") auto
@@ -197,33 +197,33 @@ block content
                       data-index=(index + 1)
                       style="display: none;"
                     )
-                      td(colspan=9).text-center.grey.lighten-5
+                      td(colspan=9).grey.lighten-5
                         form.edit-form(id="editDeviceForm-" + (index + 1))
                           .row.justify-content-center
                             .col-6.col-offset-3
-                              .md-form.input-group
-                                input.col-xs-10.mt-2.form-control(type="text",
+                              .md-form
+                                input.col-xs-10.form-control(type="text",
                                                                   id="edit_pppoe_user-" + (index + 1),
                                                                   maxlength="64")
                                 label.active Usuário PPPoE
                           .row.justify-content-center
                             .col-6.col-offset-3
-                              .md-form.input-group
-                                input.col-xs-10.mt-2.form-control(type="text",
+                              .md-form
+                                input.col-xs-10.form-control(type="text",
                                                                   id="edit_pppoe_pass-" + (index + 1),
                                                                   maxlength="64")
                                 label.active Senha PPPoE
                           .row.justify-content-center
                             .col-6.col-offset-3
-                              .md-form.input-group
-                                input.col-xs-10.mt-2.form-control(type="text",
+                              .md-form
+                                input.col-xs-10.form-control(type="text",
                                                                   id="edit_wifi_ssid-" + (index + 1),
                                                                   maxlength="32")
                                 label.active SSID do WiFi
                           .row.justify-content-center
                             .col-6.col-offset-3
-                              .md-form.input-group
-                                input.col-xs-10.mt-2.form-control(type="text",
+                              .md-form
+                                input.col-xs-10.form-control(type="text",
                                                                   id="edit_wifi_pass-" + (index + 1),
                                                                   maxlength="64")
                                 label.active Senha do WiFi
@@ -235,15 +235,14 @@ block content
                                 option(value="1") 1
                                 option(value="6") 6
                                 option(value="11") 11
-                          .row.justify-content-center.mt-3
-                            .form-buttons.col-3.mt-4
+                          .row.justify-content-center.mt-4
+                            .form-buttons
                               button.btn.btn-lg.orange.darken-2(type="submit")
                                 .fas.fa-check.fa-lg
                                 span &nbsp Editar
-                            .col-3.mt-4
-                              button.btn-cancel.btn.btn-lg.orange.darken-2(type="reset")
-                                .fas.fa-times.fa-lg
-                                span &nbsp Cancelar
+                            button.btn-cancel.btn.btn-lg.orange.darken-2(type="reset")
+                              .fas.fa-times.fa-lg
+                              span &nbsp Cancelar
 
         .row.justify-content-center.mt-2
           ul.pagination
