@@ -13,16 +13,16 @@ block content
               .fas.fa-search.fa-lg
 
   .row.justify-content-center
-    .col-6.mt-4
+    .col-6.mt-5
       .card
         h4.card-header.orange.darken-2.white-text(id="card-header",
                                                   data-toggle="collapse",
                                                   data-target="#deviceCard",
                                                   style="cursor: pointer;")
-          .row.justify-content-center
+          .row
             .col-1
               .fas.fa-plus
-            .col-11
+            .col-10.text-center
               span.card-title Adicionar novo dispositivo
         .card-body.collapse.out(id="deviceCard")
           form(id="deviceForm")
@@ -63,7 +63,7 @@ block content
                   span &nbsp Adicionar
 
   .row.justify-content-center
-    .col-12.mt-4
+    .col-12.mt-1
       if ! devices || devices.length == 0
         h3.text-center Nenhum dispositivo registrado
       else
