@@ -63,4 +63,13 @@ $(document).ready(function() {
     $(hideId).hide();
     $(formId).show();
   });
+
+  $('.btn-cancel').click(function(event) {
+    let row = $(event.target).parents('tr');
+    let index = row.data('index');
+    let hideId = "#hide-" + index.toString();
+    let formId = "#form-" + index.toString();
+    $(formId).hide();
+    $(hideId).show();
+  });
 });

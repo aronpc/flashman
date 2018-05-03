@@ -235,11 +235,15 @@ block content
                                 option(value="1") 1
                                 option(value="6") 6
                                 option(value="11") 11
-                          .col.mt-4.text-center
-                            .form-buttons
+                          .row.justify-content-center.mt-3
+                            .form-buttons.col-3.mt-4
                               button.btn.btn-lg.orange.darken-2(type="submit")
                                 .fas.fa-check.fa-lg
                                 span &nbsp Editar
+                            .col-3.mt-4
+                              button.btn-cancel.btn.btn-lg.orange.darken-2(type="reset")
+                                .fas.fa-times.fa-lg
+                                span &nbsp Cancelar
 
         .row.justify-content-center.mt-2
           ul.pagination
