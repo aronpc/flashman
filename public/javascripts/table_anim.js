@@ -1,10 +1,24 @@
+let loadDeviceInfoOnForm = function(row) {
+  let index = row.data('index');
+  $("#editDeviceForm-" + index.toString()).find("p").remove();
+  $("#edit_pppoe_user-" + index.toString()).removeClass("red lighten-4")
+                                           .val(row.data('user')).change();
+  $("#edit_pppoe_pass-" + index.toString()).removeClass("red lighten-4")
+                                           .val(row.data('pass')).change();
+  $("#edit_wifi_ssid-" + index.toString()).removeClass("red lighten-4")
+                                          .val(row.data('ssid')).change();
+  $("#edit_wifi_pass-" + index.toString()).removeClass("red lighten-4")
+                                          .val(row.data('wifi-pass')).change();
+  $("#edit_wifi_channel-" + index.toString()).removeClass("red lighten-4")
+                                             .val(row.data('channel')).change();
+}
 
 $(document).ready(function() {
   $('.fa-chevron-right').parents('td').click(function(event) {
     let row = $(event.target).parents('tr');
     let index = row.data('index');
-    let hideId = "#hide-" + index.toString() + 1;
-    let formId = "#form-" + index.toString() + 1;
+    let hideId = "#hide-" + index.toString();
+    let formId = "#form-" + index.toString();
     if ($(this).children().hasClass('fa-chevron-right')) {
       $(hideId).show();
       $(this).find('.fa-chevron-right')
@@ -43,8 +57,9 @@ $(document).ready(function() {
   $('.btn-edit').click(function(event) {
     let row = $(event.target).parents('tr');
     let index = row.data('index');
-    let hideId = "#hide-" + index.toString() + 1;
-    let formId = "#form-" + index.toString() + 1;
+    let hideId = "#hide-" + index.toString();
+    let formId = "#form-" + index.toString();
+    loadDeviceInfoOnForm(row);
     $(hideId).hide();
     $(formId).show();
   });

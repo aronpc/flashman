@@ -251,54 +251,97 @@ deviceListController.getDeviceReg = function(req, res) {
 deviceListController.setDeviceReg = function(req, res) {
   DeviceModel.findById(req.params.id, function(err, matchedDevice) {
     if (err) {
-      return res.status(500).json({'message': 'internal server error'});
+      return res.status(200).json({
+        message: 'internal server error',
+        errors: []
+      });
     }
     if (matchedDevice == null) {
-      return res.status(404).json({'message': 'device not found'});
+      return res.status(404).json({
+        message: 'device not found',
+        errors: []
+      });
     }
 
     if (isJSONObject(req.body.content)) {
       let content = req.body.content;
       let updateParameters = false;
+      let validator = new Validator();
 
-      if (content.hasOwnProperty('pppoe_user')) {
-        matchedDevice.pppoe_user = content.pppoe_user;
-        updateParameters = true;
-      }
-      if (content.hasOwnProperty('pppoe_password')) {
-        matchedDevice.pppoe_password = content.pppoe_password;
-        updateParameters = true;
-      }
-      if (content.hasOwnProperty('wifi_ssid')) {
-        matchedDevice.wifi_ssid = content.wifi_ssid;
-        updateParameters = true;
-      }
-      if (content.hasOwnProperty('wifi_password')) {
-        matchedDevice.wifi_password = content.wifi_password;
-        updateParameters = true;
-      }
-      if (content.hasOwnProperty('wifi_channel')) {
-        matchedDevice.wifi_channel = content.wifi_channel;
-        updateParameters = true;
-      }
-      if (updateParameters) {
-        matchedDevice.do_update_parameters = true;
-      }
+      let errors = [];
+      let pppoe_user = returnObjOrEmptyStr(content.pppoe_user).trim();
+      let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim()
+      let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
+      let password = returnObjOrEmptyStr(content.wifi_password).trim();
+      let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
 
-      matchedDevice.save();
+      let genericValidate = function (field, func, key) {
+        let valid_field = func(field);
+        if (!valid_field.valid) {
+          valid_field.err.forEach(function(error) {
+            let obj = {};
+            obj[key] = error;
+            errors.push(obj);
+          });
+        }
+      };
 
-      // Send notification to device using MQTT
-      let client = mqtt.connect(mqttBrokerURL);
-      client.on('connect', function() {
-        client.publish(
-          'flashman/update/' + matchedDevice._id,
-          '1', {qos: 1, retain: true}); // topic, msg, options
-        client.end();
-      });
+      // Validate fields
+      genericValidate(pppoe_user, validator.validateUser, "pppoe_user");
+      genericValidate(pppoe_password, validator.validatePassword, "pppoe_password");
+      genericValidate(ssid, validator.validateSSID, "ssid");
+      genericValidate(password, validator.validateWifiPassword, "password");
+      genericValidate(channel, validator.validateChannel, "channel");
 
-      return res.status(200).json(matchedDevice);
+      if (errors.length < 1) {
+        if (content.hasOwnProperty('pppoe_user')) {
+          matchedDevice.pppoe_user = content.pppoe_user;
+          updateParameters = true;
+        }
+        if (content.hasOwnProperty('pppoe_password')) {
+          matchedDevice.pppoe_password = content.pppoe_password;
+          updateParameters = true;
+        }
+        if (content.hasOwnProperty('wifi_ssid')) {
+          matchedDevice.wifi_ssid = content.wifi_ssid;
+          updateParameters = true;
+        }
+        if (content.hasOwnProperty('wifi_password')) {
+          matchedDevice.wifi_password = content.wifi_password;
+          updateParameters = true;
+        }
+        if (content.hasOwnProperty('wifi_channel')) {
+          matchedDevice.wifi_channel = content.wifi_channel;
+          updateParameters = true;
+        }
+        if (updateParameters) {
+          matchedDevice.do_update_parameters = true;
+        }
+
+        matchedDevice.save();
+
+        // Send notification to device using MQTT
+        let client = mqtt.connect(mqttBrokerURL);
+        client.on('connect', function() {
+          client.publish(
+            'flashman/update/' + matchedDevice._id,
+            '1', {qos: 1, retain: true}); // topic, msg, options
+          client.end();
+        });
+
+        return res.status(200).json(matchedDevice);
+      }
+      else {
+        return res.status(200).json({
+          message: "Erro validando os campos, ver campo \"errors\"",
+          errors: errors
+        })
+      }
     } else {
-      return res.status(500).json({'message': 'error parsing json'});
+      return res.status(200).json({
+        message: 'error parsing json',
+        errors: []
+      });
     }
   });
 };

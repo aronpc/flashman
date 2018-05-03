@@ -104,12 +104,12 @@ block content
                         )
                         .slider.round
                   each device, index in devices
-                    tr(id=device._id, data-index=index)
+                    tr(id=device._id, data-index=(index + 1))
                       td.text-center.col-xs-1(
                         style="cursor: pointer;"
                       )
                         .fas.fa-chevron-right.fa-lg
-                      td.text-center.col-xs-1=index + 1
+                      td.text-center.col-xs-1=(index + 1)
                       td.text-center.col-xs-1
                         .fas.fa-circle.fa-lg(
                           class=status.devices[device._id],
@@ -153,9 +153,14 @@ block content
                           )
                           .slider.round
                     tr.table-active.info-div(
-                      id="hide-" + index + 1,
+                      id="hide-" + (index + 1),
                       data-deviceid=device._id,
-                      data-index=index
+                      data-index=(index + 1),
+                      data-user=device.pppoe_user,
+                      data-pass=device.pppoe_password,
+                      data-ssid=device.wifi_ssid,
+                      data-wifi-pass=device.wifi_password,
+                      data-channel=device.wifi_channel
                       style="display: none;"
                     )
                       td.text-center.col-xs-1
@@ -187,13 +192,54 @@ block content
                         .fas.fa-trash.fa-lg.btn-trash(style="cursor: pointer;")
                         h6 Remover
                     tr.table-active.form-div(
-                      id="form-" + index + 1,
+                      id="form-" + (index + 1),
                       data-deviceid=device._id,
-                      data-index=index,
+                      data-index=(index + 1)
                       style="display: none;"
                     )
-                      td.text-center
-                        h3 hi
+                      td(colspan=9).text-center.grey.lighten-5
+                        form.edit-form(id="editDeviceForm-" + (index + 1))
+                          .row.justify-content-center
+                            .col-6.col-offset-3
+                              .md-form.input-group
+                                input.col-xs-10.mt-2.form-control(type="text",
+                                                                  id="edit_pppoe_user-" + (index + 1),
+                                                                  maxlength="64")
+                                label.active Usuário PPPoE:
+                          .row.justify-content-center
+                            .col-6.col-offset-3
+                              .md-form.input-group
+                                input.col-xs-10.mt-2.form-control(type="text",
+                                                                  id="edit_pppoe_pass-" + (index + 1),
+                                                                  maxlength="64")
+                                label.active Senha PPPoE:
+                          .row.justify-content-center
+                            .col-6.col-offset-3
+                              .md-form.input-group
+                                input.col-xs-10.mt-2.form-control(type="text",
+                                                                  id="edit_wifi_ssid-" + (index + 1),
+                                                                  maxlength="32")
+                                label.active SSID do wifi:
+                          .row.justify-content-center
+                            .col-6.col-offset-3
+                              .md-form.input-group
+                                input.col-xs-10.mt-2.form-control(type="text",
+                                                                  id="edit_wifi_pass-" + (index + 1),
+                                                                  maxlength="64")
+                                label.active Senha do wifi:
+                          .row.justify-content-center.mt-3
+                            .col-6.col-offset-3
+                              label(for="edit_wifi_channel-" + (index + 1)) Canal do wifi:
+                              select.form-control(id="edit_wifi_channel-" + (index + 1))
+                                option(value="auto") auto
+                                option(value="1") 1
+                                option(value="6") 6
+                                option(value="11") 11
+                          .col.mt-4.text-center
+                            .form-buttons
+                              button.btn.btn-lg.orange.darken-2(type="submit")
+                                .fas.fa-check.fa-lg
+                                span &nbsp Editar
 
         .row.justify-content-center.mt-2
           ul.pagination
@@ -208,5 +254,6 @@ block content
 block scripts
   script(src='/javascripts/device_validator.js')
   script(src='/javascripts/new_device.js')
+  script(src='/javascripts/edit_device.js')
   script(src='/javascripts/update_device.js')
   script(src='/javascripts/table_anim.js')
