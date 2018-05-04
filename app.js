@@ -6,11 +6,13 @@ const favicon = require('serve-favicon');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const schedule = require('node-schedule');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const fileUpload = require('express-fileupload');
 let session = require('express-session');
 
+let updater = require('./controllers/update_flashman');
 let User = require('./models/user');
 let index = require('./routes/index');
 
@@ -125,6 +127,15 @@ app.use(function(err, req, res, next) {
       stack: res.locals.stack,
     });
   }
+});
+
+app.listen(3000, function() {
+  var rule = new schedule.RecurrenceRule();
+  rule.hour = 20;
+  rule.minute = 0;
+  var s = schedule.scheduleJob(rule, function() {
+    updater.updateFlashman();
+  });
 });
 
 module.exports = app;
