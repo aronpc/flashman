@@ -37,6 +37,23 @@ let loadDeviceInfoOnForm = function(row) {
   });
 };
 
+let refreshExtRefType = function(event) {
+  let selectedSpan = $(event.target).closest('.input-group-btn').find('span.selected');
+  let selectedItem = $(event.target).closest('#ext_ref_type').find('.active');
+  let inputField = $(event.target).closest('.input-group').find('input');
+  selectedSpan.text($(this).text());
+  selectedItem.removeClass('active orange darken-2');
+  $(event.target).addClass('active orange darken-2');
+
+  if ($(this).text() == 'CPF') {
+    inputField.mask('000.000.000-009').keyup();
+  } else if ($(this).text() == 'CNPJ') {
+    inputField.mask('00.000.000/0000-00').keyup();
+  } else {
+    inputField.unmask();
+  }
+};
+
 $(document).ready(function() {
   $('.fa-chevron-right').parents('td').click(function(event) {
     let row = $(event.target).parents('tr');
@@ -96,4 +113,7 @@ $(document).ready(function() {
     $(formId).hide();
     $(hideId).show();
   });
+
+  $('#ext_ref_type a').on('click', refreshExtRefType);
+  $('.ext-ref-input').mask('000.000.000-009').keyup();
 });
