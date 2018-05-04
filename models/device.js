@@ -5,6 +5,7 @@ let Schema = mongoose.Schema;
 
 let deviceSchema = new Schema({
   _id: String,
+  external_reference: String,
   model: String,
   version: String,
   release: String,

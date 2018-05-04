@@ -26,6 +26,22 @@ block content
               span.card-title Adicionar novo dispositivo
         .card-body.collapse.out(id="deviceCard")
           form(id="deviceForm")
+            .md-form.input-group
+              .input-group-btn
+                button.btn.orange.darken-2.dropdown-toggle.ml-0.my-0(
+                  type="button",
+                  data-toggle="dropdown"
+                )
+                  span.selected CPF
+                #new_ext_ref_type.dropdown-menu
+                  a.dropdown-item.text-center.active.orange.darken-2 CPF
+                  a.dropdown-item.text-center RG
+                  a.dropdown-item.text-center Número do cliente
+              input.col-xs-10.form-control.py-0.added-margin(
+                type="text",
+                id="new_external_reference",
+                placeholder="Identificação do cliente"
+              )
             .mt-4
               label(for="new_connect_type") Tipo de Conexão
               select.form-control(id="new_connect_type")
@@ -165,7 +181,8 @@ block content
                       data-pass=device.pppoe_password,
                       data-ssid=device.wifi_ssid,
                       data-wifi-pass=device.wifi_password,
-                      data-channel=device.wifi_channel
+                      data-channel=device.wifi_channel,
+                      data-external-ref=device.external_reference,
                       style="display: none;"
                     )
                       td.text-center.col-xs-1
@@ -210,6 +227,13 @@ block content
                               select.form-control(id="edit_connect_type-" + (index + 1))
                                 option(value="DHCP") DHCP
                                 option(value="PPPoE") PPPoE
+                          .row.justify-content-center
+                            .col-6.col-offset-3
+                              .md-form
+                                input.col-xs-10.form-control(type="text",
+                                                                  id="edit_external_reference-" + (index + 1),
+                                                                  maxlength="64")
+                                label Identificação do cliente
                           .row.justify-content-center
                             .col-6.col-offset-3
                               .md-form
