@@ -31,7 +31,8 @@ let validateNewDevice = function() {
   let ssid = $('#new_wifi_ssid').val();
   let password = $('#new_wifi_pass').val();
   let channel = $('#new_wifi_channel').val();
-  let external_reference = $('#new_external_reference').val();
+  let external_reference_type = $('#new_ext_ref_type_selected').html();
+  let external_reference_data = $('#new_external_reference').val();
 
   // Initialize error structure
   let errors = {
@@ -79,7 +80,10 @@ let validateNewDevice = function() {
       'wifi_ssid': ssid,
       'wifi_password': password,
       'wifi_channel': channel,
-      'external_reference': external_reference,
+      'external_reference': {
+        kind: external_reference_type,
+        data: external_reference_data,
+      },
     }};
 
     $.ajax({

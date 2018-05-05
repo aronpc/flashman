@@ -11,6 +11,9 @@ let loadDeviceInfoOnForm = function(row) {
                                           .val(row.data('wifi-pass')).change();
   $('#edit_wifi_channel-' + index.toString()).removeClass('red lighten-4')
                                              .val(row.data('channel')).change();
+  $('#edit_ext_ref_type_selected-' + index.toString())
+    .closest('.input-group-btn').find('#ext_ref_type a:contains("' +
+      row.data('external-ref-type') + '")').click();
   $('#edit_external_reference-' + index.toString())
     .val(row.data('external-ref')).change();
 

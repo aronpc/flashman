@@ -32,7 +32,7 @@ block content
                   type="button",
                   data-toggle="dropdown"
                 )
-                  span.selected CPF
+                  span#new_ext_ref_type_selected.selected CPF
                 #ext_ref_type.dropdown-menu
                   a.dropdown-item.text-center.active.orange.darken-2 CPF
                   a.dropdown-item.text-center CNPJ
@@ -87,7 +87,7 @@ block content
   .row.justify-content-center
     .col-12.mt-1
       if ! devices || devices.length == 0
-        h3.text-center Nenhum dispositivo registrado
+        h3.mt-5.text-center Nenhum dispositivo registrado
       else
         .card.mt-3
           .card-body
@@ -183,7 +183,8 @@ block content
                       data-ssid=device.wifi_ssid,
                       data-wifi-pass=device.wifi_password,
                       data-channel=device.wifi_channel,
-                      data-external-ref=device.external_reference,
+                      data-external-ref-type=device.external_reference.kind,
+                      data-external-ref=device.external_reference.data,
                       style="display: none;"
                     )
                       td.text-center.col-xs-1
@@ -198,7 +199,7 @@ block content
                         br
                         b Versão:
                         |  #{device.version}
-                      td(colspan=3).text-left
+                      td(colspan=2).text-left
                         div
                         b SSID WiFi:
                         |  #{device.wifi_ssid}
@@ -208,6 +209,10 @@ block content
                         br
                         b Canal WiFi:
                         |  #{device.wifi_channel}
+                      td.text-left
+                        div
+                        b Cliente:
+                        |  #{device.external_reference.data}
                       td.text-center.col-xs-1.btn-edit(style="cursor: pointer;")
                         .fas.fa-edit.fa-lg
                         h6 Editar
@@ -223,14 +228,14 @@ block content
                       td(colspan=9).grey.lighten-5
                         form.edit-form(id="editDeviceForm-" + (index + 1))
                           .row.justify-content-center
-                            .col-6.col-offset-3
+                            .col-6
                               .md-form.input-group
                                 .input-group-btn
                                   button.btn.orange.darken-2.dropdown-toggle.ml-0.my-0(
                                     type="button",
                                     data-toggle="dropdown"
                                   )
-                                    span.selected CPF
+                                    span.selected(id="edit_ext_ref_type_selected-" + (index + 1)) CPF
                                   #ext_ref_type.dropdown-menu
                                     a.dropdown-item.text-center.active.orange.darken-2 CPF
                                     a.dropdown-item.text-center CNPJ
@@ -242,13 +247,13 @@ block content
                                   maxlength="64"
                                 )
                           .row.justify-content-center.mt-3
-                            .col-6.col-offset-3
+                            .col-6
                               label(for="edit_connect_type-" + (index + 1)) Tipo de Conexão
                               select.form-control(id="edit_connect_type-" + (index + 1))
                                 option(value="DHCP") DHCP
                                 option(value="PPPoE") PPPoE
                           .row.justify-content-center.mt-3
-                            .col-6.col-offset-3
+                            .col-6
                               label(for="edit_wifi_channel-" + (index + 1)) Canal do WiFi
                               select.form-control(id="edit_wifi_channel-" + (index + 1))
                                 option(value="auto") auto
@@ -256,28 +261,28 @@ block content
                                 option(value="6") 6
                                 option(value="11") 11
                           .row.justify-content-center
-                            .col-6.col-offset-3
+                            .col-6
                               .md-form
                                 input.col-xs-10.form-control(type="text",
                                                                   id="edit_wifi_ssid-" + (index + 1),
                                                                   maxlength="32")
                                 label.active SSID do WiFi
                           .row.justify-content-center
-                            .col-6.col-offset-3
+                            .col-6
                               .md-form
                                 input.col-xs-10.form-control(type="text",
                                                                   id="edit_wifi_pass-" + (index + 1),
                                                                   maxlength="64")
                                 label.active Senha do WiFi
                           .row.justify-content-center
-                            .col-6.col-offset-3
+                            .col-6
                               .md-form
                                 input.col-xs-10.form-control(type="text",
                                                                   id="edit_pppoe_user-" + (index + 1),
                                                                   maxlength="64")
                                 label.active Usuário PPPoE
                           .row.justify-content-center
-                            .col-6.col-offset-3
+                            .col-6
                               .md-form
                                 input.col-xs-10.form-control(type="text",
                                                                   id="edit_pppoe_pass-" + (index + 1),

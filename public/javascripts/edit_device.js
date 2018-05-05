@@ -34,7 +34,8 @@ let validateEditDevice = function(event) {
   let ssid = $('#edit_wifi_ssid-' + index.toString()).val();
   let password = $('#edit_wifi_pass-' + index.toString()).val();
   let channel = $('#edit_wifi_channel-' + index.toString()).val();
-  let external_reference = $('#edit_external_reference-' + index.toString()).val();
+  let external_reference_type = $('#edit_ext_ref_type_selected-' + index.toString()).html();
+  let external_reference_data = $('#edit_external_reference-' + index.toString()).val();
 
   // Initialize error structure
   let errors = {
@@ -79,7 +80,10 @@ let validateEditDevice = function(event) {
       'wifi_ssid': ssid,
       'wifi_password': password,
       'wifi_channel': channel,
-      'external_reference': external_reference,
+      'external_reference': {
+        kind: external_reference_type,
+        data: external_reference_data,
+      },
     }};
 
     $.ajax({

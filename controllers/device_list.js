@@ -356,11 +356,11 @@ deviceListController.createDeviceReg = function(req, res) {
   if (isJSONObject(req.body.content)) {
     const content = req.body.content;
     const macAddr = content.mac_address.trim().toUpperCase();
-    const extReference = content.external_reference.trim();
+    const extReference = content.external_reference;
     const validator = new Validator();
 
     let errors = [];
-    let release = returnObjOrEmptyStr(content.release_id).trim();
+    let release = returnObjOrEmptyStr(content.release).trim();
     let pppoe_user = returnObjOrEmptyStr(content.pppoe_user).trim();
     let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim();
     let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
