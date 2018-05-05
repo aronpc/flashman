@@ -78,6 +78,9 @@ app.use(session({
 app.use('/scripts/jquery',
   express.static(path.join(__dirname, 'node_modules/jquery/dist'))
 );
+app.use('/scripts/jquery-mask',
+  express.static(path.join(__dirname, 'node_modules/jquery-mask-plugin/dist'))
+);
 app.use('/scripts/popper',
   express.static(path.join(__dirname, 'node_modules/popper.js/dist'))
 );

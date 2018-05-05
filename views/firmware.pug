@@ -53,17 +53,34 @@ block content
                       td.text-center #{firmware.version}
                       td.text-center #{firmware.release}
         .row.justify-content-center.mt-2
-          ul.pagination
-            - for (var index=1; index<=pages; index++)
-              - if (index == page)
-                li.active
-                  a.btn.deep-orange.darken-4(href="#") #{index}
-              - else
-                li
-                  if lastquery
-                    a.btn.orange.darken-2(href="?content=" + lastquery + "&page=" + index) #{index}
-                  else
-                    a.btn.orange.darken-2(href="?page=" + index) #{index}
+          nav
+            ul.pagination.pagination-lg
+              - let cPage = parseInt(page);
+              - let delta = 2;
+              - for (var i=1; i<=pages; i++) {
+              -   if (i == 1 || i == pages || ((i >= cPage-delta) && (i <= cPage+delta))) {
+              -     if (i == page)
+                      li.page-item.active
+                        a.page-link.orange.darken-2(href="#") #{i}
+              -     else {
+              -       if (i == pages && (cPage+delta <= pages-delta)) {
+                        li.page-item
+                          h3.page-link.disabled ...
+              -       }
+              -       if (lastquery) {
+                        li.page-item
+                          a.page-link(href="?content=" + lastquery + "&page=" + i) #{i}
+              -       } else {
+                        li.page-item
+                          a.page-link(href="?page=" + i) #{i}
+              -       }
+              -       if (i == 1 && (cPage-delta > delta)) {
+                        li.page-item
+                          h3.page-link.disabled ...
+              -       }
+              -     }
+              -   }
+              - }
 
 block scripts
   script(src='/javascripts/firmware_actions.js')

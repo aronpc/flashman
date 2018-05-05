@@ -1,8 +1,9 @@
 extends layout
 
 block content
+
   .row.justify-content-center
-    .col-6.mt-4
+    .col-12.col-md-6.mt-4
       form(action="/devicelist/search")
         .md-form.input-group
           input.form-control(type="search", name="content",
@@ -12,9 +13,81 @@ block content
               .fas.fa-search.fa-lg
 
   .row.justify-content-center
-    .col-12.mt-4
+    .col-12.col-lg-6.mt-5
+      .card
+        h4.card-header.orange.darken-2.white-text(id="card-header",
+                                                  data-toggle="collapse",
+                                                  data-target="#deviceCard",
+                                                  style="cursor: pointer;")
+          .row
+            .col-1
+              .fas.fa-plus
+            .col-10.text-center
+              span.card-title Adicionar novo dispositivo
+        .card-body.collapse.out(id="deviceCard")
+          form(id="deviceForm")
+            .md-form.input-group
+              .input-group-btn
+                button.btn.orange.darken-2.dropdown-toggle.ml-0.my-0(
+                  type="button",
+                  data-toggle="dropdown"
+                )
+                  span#new_ext_ref_type_selected.selected CPF
+                #ext_ref_type.dropdown-menu
+                  a.dropdown-item.text-center.active.orange.darken-2 CPF
+                  a.dropdown-item.text-center CNPJ
+                  a.dropdown-item.text-center Outro
+              input.col-xs-10.form-control.py-0.added-margin.ext-ref-input(
+                type="text",
+                id="new_external_reference",
+                placeholder="Identificação do cliente (opcional)",
+                maxlength="64"
+              )
+            .mt-4
+              label(for="new_connect_type") Tipo de Conexão
+              select.form-control(id="new_connect_type")
+                option(value="DHCP") DHCP
+                option(value="PPPoE") PPPoE
+            .mt-4
+              label(for="new_wifi_channel") Canal do WiFi
+              select.form-control(id="new_wifi_channel")
+                option(value="auto") auto
+                option(value="1") 1
+                option(value="6") 6
+                option(value="11") 11
+            .md-form
+              input.col-xs-10.form-control(type="text",
+                                                id="new_wifi_ssid",
+                                                maxlength="32")
+              label SSID do WiFi
+            .md-form
+              input.col-xs-10.form-control(type="text",
+                                                id="new_wifi_pass",
+                                                maxlength="64")
+              label Senha do WiFi
+            .md-form
+              input.col-xs-10.form-control(type="text", id="new_mac")
+              label Endereço MAC
+            .md-form
+              input.col-xs-10.form-control(type="text",
+                                                id="new_pppoe_user",
+                                                maxlength="64")
+              label Usuário PPPoE
+            .md-form
+              input.col-xs-10.form-control(type="text",
+                                                id="new_pppoe_pass",
+                                                maxlength="64")
+              label Senha PPPoE
+            .col.mt-4.text-center
+              .form-buttons
+                button.btn.btn-lg.orange.darken-2(type="submit")
+                  .fas.fa-check.fa-lg
+                  span &nbsp Adicionar
+
+  .row.justify-content-center
+    .col-12.mt-1
       if ! devices || devices.length == 0
-        h3.text-center Nenhum dispositivo registrado
+        h3.mt-5.text-center Nenhum dispositivo registrado
       else
         .card.mt-3
           .card-body
@@ -53,14 +126,12 @@ block content
                         )
                         .slider.round
                   each device, index in devices
-                    tr(id=device._id)
+                    tr(id=device._id, data-index=(index + 1))
                       td.text-center.col-xs-1(
-                        data-toggle="collapse",
-                        data-target="#hide-" + index + 1,
                         style="cursor: pointer;"
                       )
                         .fas.fa-chevron-right.fa-lg
-                      td.text-center.col-xs-1=index + 1
+                      td.text-center.col-xs-1=(index + 1)
                       td.text-center.col-xs-1
                         .fas.fa-circle.fa-lg(
                           class=status.devices[device._id],
@@ -103,9 +174,18 @@ block content
                             checked=device.do_update
                           )
                           .slider.round
-                    tr.collapse.out.table-active(
-                      id="hide-" + index + 1,
-                      data-deviceid=device._id
+                    tr.table-active.info-div(
+                      id="hide-" + (index + 1),
+                      data-deviceid=device._id,
+                      data-index=(index + 1),
+                      data-user=device.pppoe_user,
+                      data-pass=device.pppoe_password,
+                      data-ssid=device.wifi_ssid,
+                      data-wifi-pass=device.wifi_password,
+                      data-channel=device.wifi_channel,
+                      data-external-ref-type=device.external_reference.kind,
+                      data-external-ref=device.external_reference.data,
+                      style="display: none;"
                     )
                       td.text-center.col-xs-1
                         .fas.fa-info-circle.fa-lg
@@ -119,7 +199,7 @@ block content
                         br
                         b Versão:
                         |  #{device.version}
-                      td(colspan=4).text-left
+                      td(colspan=2).text-left
                         div
                         b SSID WiFi:
                         |  #{device.wifi_ssid}
@@ -129,19 +209,122 @@ block content
                         br
                         b Canal WiFi:
                         |  #{device.wifi_channel}
-                      td(style="cursor: pointer;").btn-trash.text-center.col-xs-1
+                      td.text-left
+                        div
+                        b Cliente:
+                        |  #{device.external_reference.data}
+                      td.text-center.col-xs-1.btn-edit(style="cursor: pointer;")
+                        .fas.fa-edit.fa-lg
+                        h6 Editar
+                      td.text-center.col-xs-1.btn-trash(style="cursor: pointer;")
                         .fas.fa-trash.fa-lg
+                        h6 Remover
+                    tr.table-active.form-div(
+                      id="form-" + (index + 1),
+                      data-deviceid=device._id,
+                      data-index=(index + 1)
+                      style="display: none;"
+                    )
+                      td(colspan=9).grey.lighten-5
+                        form.edit-form(id="editDeviceForm-" + (index + 1))
+                          .row.justify-content-center
+                            .col-6
+                              .md-form.input-group
+                                .input-group-btn
+                                  button.btn.orange.darken-2.dropdown-toggle.ml-0.my-0(
+                                    type="button",
+                                    data-toggle="dropdown"
+                                  )
+                                    span.selected(id="edit_ext_ref_type_selected-" + (index + 1)) CPF
+                                  #ext_ref_type.dropdown-menu
+                                    a.dropdown-item.text-center.active.orange.darken-2 CPF
+                                    a.dropdown-item.text-center CNPJ
+                                    a.dropdown-item.text-center Outro
+                                input.col-xs-10.form-control.py-0.added-margin.ext-ref-input(
+                                  type="text",
+                                  id="edit_external_reference-" + (index + 1),
+                                  placeholder="Identificação do cliente (opcional)",
+                                  maxlength="64"
+                                )
+                          .row.justify-content-center.mt-3
+                            .col-6
+                              label(for="edit_connect_type-" + (index + 1)) Tipo de Conexão
+                              select.form-control(id="edit_connect_type-" + (index + 1))
+                                option(value="DHCP") DHCP
+                                option(value="PPPoE") PPPoE
+                          .row.justify-content-center.mt-3
+                            .col-6
+                              label(for="edit_wifi_channel-" + (index + 1)) Canal do WiFi
+                              select.form-control(id="edit_wifi_channel-" + (index + 1))
+                                option(value="auto") auto
+                                option(value="1") 1
+                                option(value="6") 6
+                                option(value="11") 11
+                          .row.justify-content-center
+                            .col-6
+                              .md-form
+                                input.col-xs-10.form-control(type="text",
+                                                                  id="edit_wifi_ssid-" + (index + 1),
+                                                                  maxlength="32")
+                                label.active SSID do WiFi
+                          .row.justify-content-center
+                            .col-6
+                              .md-form
+                                input.col-xs-10.form-control(type="text",
+                                                                  id="edit_wifi_pass-" + (index + 1),
+                                                                  maxlength="64")
+                                label.active Senha do WiFi
+                          .row.justify-content-center
+                            .col-6
+                              .md-form
+                                input.col-xs-10.form-control(type="text",
+                                                                  id="edit_pppoe_user-" + (index + 1),
+                                                                  maxlength="64")
+                                label.active Usuário PPPoE
+                          .row.justify-content-center
+                            .col-6
+                              .md-form
+                                input.col-xs-10.form-control(type="text",
+                                                                  id="edit_pppoe_pass-" + (index + 1),
+                                                                  maxlength="64")
+                                label.active Senha PPPoE
+                          .row.justify-content-center.mt-4
+                            .form-buttons
+                              button.btn.btn-lg.orange.darken-2(type="submit")
+                                .fas.fa-check.fa-lg
+                                span &nbsp Editar
+                            button.btn-cancel.btn.btn-lg.orange.darken-2(type="reset")
+                              .fas.fa-times.fa-lg
+                              span &nbsp Cancelar
 
-        .row.justify-content-center.mt-2
-          ul.pagination
-            - for (var index=1; index<=pages; index++)
-              - if (index == page)
-                li.active
-                  a.btn.deep-orange.darken-4(href="#") #{index}
-              - else
-                li
-                  a.btn.orange.darken-2(href="?content=" + lastquery + "&page=" + index) #{index}
+        .row.justify-content-center.mt-4
+          nav
+            ul.pagination.pagination-lg
+              - let cPage = parseInt(page);
+              - let delta = 2;
+              - for (var i=1; i<=pages; i++) {
+              -   if (i == 1 || i == pages || ((i >= cPage-delta) && (i <= cPage+delta))) {
+              -     if (i == page)
+                      li.page-item.active
+                        a.page-link.orange.darken-2(href="#") #{i}
+              -     else {
+              -       if (i == pages && (cPage+delta <= pages-delta)) {
+                        li.page-item
+                          h3.page-link.disabled ...
+              -       }
+                      li.page-item
+                        a.page-link(href="?content=" + lastquery + "&page=" + i) #{i}
+              -       if (i == 1 && (cPage-delta > delta)) {
+                        li.page-item
+                          h3.page-link.disabled ...
+              -       }
+              -     }
+              -   }
+              - }
 
 block scripts
+  script(src='/javascripts/device_validator.js')
+  script(src='/javascripts/new_device.js')
+  script(src='/javascripts/edit_device.js')
   script(src='/javascripts/update_device.js')
   script(src='/javascripts/table_anim.js')

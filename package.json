@@ -17,6 +17,7 @@
     "express-fileupload": "^0.4.0",
     "express-session": "^1.14.1",
     "jquery": "^3.3.1",
+    "jquery-mask-plugin": "^1.14.15",
     "mdbootstrap": "^4.5.0",
     "mongoose": "^5.0.2",
     "mongoose-paginate": "^5.0.3",
