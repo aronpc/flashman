@@ -253,13 +253,13 @@ deviceListController.setDeviceReg = function(req, res) {
     if (err) {
       return res.status(200).json({
         message: 'internal server error',
-        errors: []
+        errors: [],
       });
     }
     if (matchedDevice == null) {
       return res.status(404).json({
         message: 'device not found',
-        errors: []
+        errors: [],
       });
     }
 
@@ -270,13 +270,13 @@ deviceListController.setDeviceReg = function(req, res) {
 
       let errors = [];
       let pppoe_user = returnObjOrEmptyStr(content.pppoe_user).trim();
-      let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim()
+      let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim();
       let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
       let password = returnObjOrEmptyStr(content.wifi_password).trim();
       let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
-      let pppoe = (pppoe_user !== "" && pppoe_password !== "");
+      let pppoe = (pppoe_user !== '' && pppoe_password !== '');
 
-      let genericValidate = function (field, func, key) {
+      let genericValidate = function(field, func, key) {
         let valid_field = func(field);
         if (!valid_field.valid) {
           valid_field.err.forEach(function(error) {
@@ -289,12 +289,12 @@ deviceListController.setDeviceReg = function(req, res) {
 
       // Validate fields
       if (pppoe) {
-        genericValidate(pppoe_user, validator.validateUser, "pppoe_user");
-        genericValidate(pppoe_password, validator.validatePassword, "pppoe_password");
+        genericValidate(pppoe_user, validator.validateUser, 'pppoe_user');
+        genericValidate(pppoe_password, validator.validatePassword, 'pppoe_password');
       }
-      genericValidate(ssid, validator.validateSSID, "ssid");
-      genericValidate(password, validator.validateWifiPassword, "password");
-      genericValidate(channel, validator.validateChannel, "channel");
+      genericValidate(ssid, validator.validateSSID, 'ssid');
+      genericValidate(password, validator.validateWifiPassword, 'password');
+      genericValidate(channel, validator.validateChannel, 'channel');
 
       if (errors.length < 1) {
         if (content.hasOwnProperty('pppoe_user')) {
@@ -317,6 +317,10 @@ deviceListController.setDeviceReg = function(req, res) {
           matchedDevice.wifi_channel = content.wifi_channel;
           updateParameters = true;
         }
+        if (content.hasOwnProperty('external_reference')) {
+          matchedDevice.external_reference = content.external_reference;
+          updateParameters = true;
+        }
         if (updateParameters) {
           matchedDevice.do_update_parameters = true;
         }
@@ -333,17 +337,16 @@ deviceListController.setDeviceReg = function(req, res) {
         });
 
         return res.status(200).json(matchedDevice);
-      }
-      else {
+      } else {
         return res.status(200).json({
-          message: "Erro validando os campos, ver campo \"errors\"",
-          errors: errors
-        })
+          message: 'Erro validando os campos, ver campo "errors"',
+          errors: errors,
+        });
       }
     } else {
       return res.status(200).json({
         message: 'error parsing json',
-        errors: []
+        errors: [],
       });
     }
   });
@@ -353,18 +356,19 @@ deviceListController.createDeviceReg = function(req, res) {
   if (isJSONObject(req.body.content)) {
     const content = req.body.content;
     const macAddr = content.mac_address.trim().toUpperCase();
+    const extReference = content.external_reference;
     const validator = new Validator();
 
     let errors = [];
-    let release = returnObjOrEmptyStr(content.release_id).trim();
+    let release = returnObjOrEmptyStr(content.release).trim();
     let pppoe_user = returnObjOrEmptyStr(content.pppoe_user).trim();
-    let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim()
+    let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim();
     let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
     let password = returnObjOrEmptyStr(content.wifi_password).trim();
     let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
-    let pppoe = (pppoe_user !== "" && pppoe_password !== "");
+    let pppoe = (pppoe_user !== '' && pppoe_password !== '');
 
-    let genericValidate = function (field, func, key) {
+    let genericValidate = function(field, func, key) {
       let valid_field = func(field);
       if (!valid_field.valid) {
         valid_field.err.forEach(function(error) {
@@ -376,29 +380,29 @@ deviceListController.createDeviceReg = function(req, res) {
     };
 
     // Validate fields
-    genericValidate(macAddr, validator.validateMac, "mac");
+    genericValidate(macAddr, validator.validateMac, 'mac');
     if (pppoe) {
-      genericValidate(pppoe_user, validator.validateUser, "pppoe_user");
-      genericValidate(pppoe_password, validator.validatePassword, "pppoe_password");
+      genericValidate(pppoe_user, validator.validateUser, 'pppoe_user');
+      genericValidate(pppoe_password, validator.validatePassword, 'pppoe_password');
     }
-    genericValidate(ssid, validator.validateSSID, "ssid");
-    genericValidate(password, validator.validateWifiPassword, "password");
-    genericValidate(channel, validator.validateChannel, "channel");
+    genericValidate(ssid, validator.validateSSID, 'ssid');
+    genericValidate(password, validator.validateWifiPassword, 'password');
+    genericValidate(channel, validator.validateChannel, 'channel');
 
     DeviceModel.findById(macAddr, function(err, matchedDevice) {
       if (err) {
         return res.status(500).json({
           message: 'Erro interno do servidor',
-          errors: errors
+          errors: errors,
         });
-      }
-      else {
+      } else {
         if (matchedDevice) {
-          errors.push({mac: "Endereço MAC já cadastrado"});
+          errors.push({mac: 'Endereço MAC já cadastrado'});
         }
         if (errors.length < 1) {
           newDeviceModel = new DeviceModel({
             '_id': macAddr,
+            'external_reference': extReference,
             'model': '',
             'release': release,
             'pppoe_user': pppoe_user,
@@ -414,18 +418,16 @@ deviceListController.createDeviceReg = function(req, res) {
             if (err) {
               return res.status(200).json({
                 message: 'Erro ao salvar registro',
-                errors: errors
+                errors: errors,
               });
-            }
-            else {
+            } else {
               return res.status(200).json({'success': true});
             }
           });
-        }
-        else {
+        } else {
           return res.status(200).json({
             message: 'Erro validando os campos, ver campo \"errors\"',
-            errors: errors
+            errors: errors,
           });
         }
       }
@@ -433,7 +435,7 @@ deviceListController.createDeviceReg = function(req, res) {
   } else {
     return res.status(200).json({
       message: 'Erro no json recebido',
-      errors: []
+      errors: [],
     });
   }
 };
