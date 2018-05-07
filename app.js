@@ -13,12 +13,24 @@ const fileUpload = require('express-fileupload');
 let session = require('express-session');
 
 let updater = require('./controllers/update_flashman');
+let Config = require('./models/config');
 let User = require('./models/user');
 let index = require('./routes/index');
 
 let app = express();
 
 mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman');
+
+// check config existence
+Config.findOne({is_default: true}, function(err, matchedConfig) {
+  if (err || !matchedConfig) {
+    let newConfig = new Config({
+      is_default: true,
+      autoUpdate: true
+    });
+    newConfig.save();
+  }
+});
 
 // check administration user existence
 User.find({is_superuser: true}, function(err, matchedUsers) {
@@ -133,9 +145,12 @@ app.listen(3000, function() {
   var rule = new schedule.RecurrenceRule();
   rule.hour = 20;
   rule.minute = 0;
+  // Schedule automatic update
   var s = schedule.scheduleJob(rule, function() {
-    updater.updateFlashman();
+    updater.update();
   });
+  // Force an update check to alert user on app startup
+  updater.checkUpdate();
 });
 
 module.exports = app;

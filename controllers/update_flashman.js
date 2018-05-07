@@ -1,8 +1,9 @@
 const AutoUpdater = require('auto-updater');
-var updateController = {};
+let Config = require('../models/config');
+let updateController = {};
 
-updateController.updateFlashman = function () {
-  var updater = new AutoUpdater({
+let updateFlashman = function(automatic) {
+  let updater = new AutoUpdater({
     pathToJson: '',
     autoupdate: false,
     checkgit: false,
@@ -12,37 +13,70 @@ updateController.updateFlashman = function () {
     devmode: false
   });
 
-  updater.on('git-clone', function() {
-    console.log("You have a clone of the repository. Use 'git pull' to be up-to-date");
-  });
   updater.on('check.up-to-date', function(v) {
-    console.log("You have the latest version: " + v);
+    // Latest version installed, nothing to do
   });
+
   updater.on('check.out-dated', function(v_old, v) {
-    console.log("Your version is outdated. " + v_old + " of " + v);
-    updater.fire('download-update');
+    // Old version installed, need to download update
+    Config.findOne({is_default: true}, function(err, matchedConfig) {
+      if (!err && matchedConfig) {
+        matchedConfig.hasUpdate = true;
+        matchedConfig.save();
+        if (automatic) {
+          updater.fire('download-update');
+        }
+      }
+    });
   });
+
   updater.on('update.downloaded', function() {
-    console.log("Update downloaded and ready for install");
+    // Download ready, need to extract
     updater.fire('extract');
   });
+
   updater.on('update.not-installed', function() {
-    console.log("The Update was already in your folder! It's read for install");
+    // Download was ready already, need to extract
     updater.fire('extract');
   });
+
   updater.on('update.extracted', function() {
-    console.log("Update extracted successfully!");
-    console.log("RESTART THE APP!");
+    // Extracting complete, reload pm2
   });
+
   updater.on('end', function() {
-    console.log("The app is ready to function");
+    // Everything ok
+    Config.findOne({is_default: true}, function(err, matchedConfig) {
+      if (!err && matchedConfig) {
+        matchedConfig.hasUpdate = false;
+        matchedConfig.save();
+      }
+    });
   });
+
   updater.on('error', function(name, e) {
+    // Some error occured
     console.log(name, e);
   });
 
   // Start checking
   updater.fire('check');
+}
+
+updateController.update = function () {
+  Config.findOne({is_default: true}, function(err, matchedConfig) {
+    if (!err && matchedConfig) {
+      updateFlashman(matchedConfig.autoUpdate);
+    }
+  });
 };
+
+updateController.checkUpdate = function() {
+  updateFlashman(false);
+}
+
+updateController.forcedUpdate = function() {
+  updateFlashman(true);
+}
 
 module.exports = updateController;
