@@ -9,7 +9,6 @@
     "repo":"anlix-io/flashman",
     "branch":"master"
   },
-
   "dependencies": {
     "auto-updater": "^1.0.2",
     "bcrypt-nodejs": "0.0.3",
@@ -37,7 +36,8 @@
     "popper.js": "^1.12.9",
     "prompt": "^1.0.0",
     "pug": "~2.0.0-beta11",
-    "serve-favicon": "~2.4.2"
+    "serve-favicon": "~2.4.2",
+    "sweetalert2": "~7.19.3"
   },
   "devDependencies": {
     "eslint-config-google": "^0.9.1"
