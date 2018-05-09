@@ -16,9 +16,9 @@ let updateFlashman = function(automatic, res) {
 
   updater.on('check.up-to-date', function(v) {
     // Latest version installed, nothing to do
-    // if (res) {
-    //   res.status(200).json({hasUpdate: false, updated: false});
-    // }
+    if (res) {
+      res.status(200).json({hasUpdate: false, updated: false});
+    }
   });
 
   updater.on('check.out-dated', function(v_old, v) {
@@ -30,9 +30,9 @@ let updateFlashman = function(automatic, res) {
         if (automatic) {
           updater.fire('download-update');
         }
-        // else if (res) {
-        //   res.status(200).json({hasUpdate: true, updated: false});
-        // }
+        else if (res) {
+          res.status(200).json({hasUpdate: true, updated: false});
+        }
       }
     });
   });
@@ -62,9 +62,9 @@ let updateFlashman = function(automatic, res) {
         matchedConfig.save();
       }
     });
-    // if (res) {
-    //   res.status(200).json({hasUpdate: false, updated: true});
-    // }
+    if (res) {
+      res.status(200).json({hasUpdate: false, updated: true});
+    }
   });
 
   updater.on('error', function(name, e) {
