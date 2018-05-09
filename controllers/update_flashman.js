@@ -57,6 +57,9 @@ let updateFlashman = function(automatic, res) {
     exec("pm2 stop flashman", (err, stdout, stderr) => {});
     exec("npm intall --production", (err, stdout, stderr) => {});
     exec("pm2 start flashman", (err, stdout, stderr) => {});
+    if (res) {
+      res.status(200).json({hasUpdate: false, updated: true});
+    }
   });
 
   updater.on('end', function() {
@@ -68,9 +71,6 @@ let updateFlashman = function(automatic, res) {
         matchedConfig.save();
       }
     });
-    if (res) {
-      res.status(200).json({hasUpdate: false, updated: true});
-    }
   });
 
   updater.on('error', function(name, e) {

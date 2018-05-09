@@ -14,7 +14,7 @@ let forceUpdateFlashman = function () {
     contentType: 'application/json',
     success: function(resp) {
       swal.close();
-      if (!resp.updated) {
+      if (resp.updated) {
         swal({
           type: 'success',
           title: 'Atualização feita com sucesso!',
@@ -49,7 +49,7 @@ let checkUpdateFlashman = function () {
     contentType: 'application/json',
     success: function(resp) {
       swal.close();
-      if (!resp.hasUpdate) {
+      if (resp.hasUpdate) {
         swal({
           type: 'warning',
           title: 'Atualização disponível!',

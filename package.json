@@ -7,7 +7,7 @@
   },
   "auto-updater": {
     "repo":"anlix-io/flashman",
-    "branch":"master"
+    "branch":"feature/auto-update"
   },
   "dependencies": {
     "auto-updater": "^1.0.2",
