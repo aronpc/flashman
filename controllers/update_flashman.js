@@ -55,11 +55,12 @@ let updateFlashman = function(automatic, res) {
     // Extracting complete, reload pm2
     console.log("extracted");
     exec("npm install --production", function (err, stdout, stderr) {
-      exec("pm2 reload environment.config.json", (err, stdout, stderr) => {});
+      exec("pm2 reload environment.config.json", function (err, stdout, stderr) {
+        if (res) {
+          res.status(200).json({hasUpdate: false, updated: true});
+        }
+      });
     });
-    if (res) {
-      res.status(200).json({hasUpdate: false, updated: true});
-    }
   });
 
   updater.on('end', function() {

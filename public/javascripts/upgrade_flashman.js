@@ -20,7 +20,7 @@ let forceUpdateFlashman = function () {
           title: 'Atualização feita com sucesso!',
           text: 'Você precisará fazer login novamente'
         }).then(function () {
-          location.reload();
+          window.location.href = "/logout";
         });
       }
       else {
