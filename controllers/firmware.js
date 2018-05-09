@@ -1,4 +1,5 @@
-
+var User = require('../models/user');
+var Config = require('../models/config');
 var Firmware = require('../models/firmware');
 
 const fs = require('fs');
@@ -28,24 +29,33 @@ firmwareController.firmwares = function(req, res) {
   let reqPage = 1;
   let indexContent = {};
   indexContent.username = req.user.name;
+  User.findOne({name: req.user.name}, function(err, user) {
+    if (err || !user) { indexContent.superuser = false; }
+    else { indexContent.superuser = user.is_superuser; }
 
-  if (req.query.page) {
-    reqPage = req.query.page;
-  }
+    Config.findOne({is_default: true}, function(err, matchedConfig) {
+      if (err || !matchedConfig) { indexContent.update = false; }
+      else { indexContent.update = matchedConfig.hasUpdate; }
 
-  Firmware.paginate({}, {page: reqPage,
-                         limit: 10,
-                         sort: {_id: 1}}, function(err, firmwares) {
-    if (err) {
-      indexContent.type = 'danger';
-      indexContent.message = err.message;
-      return res.render('error', indexContent);
-    }
-    indexContent.firmwares = firmwares.docs;
-    indexContent.page = firmwares.page;
-    indexContent.pages = firmwares.pages;
+      if (req.query.page) {
+        reqPage = req.query.page;
+      }
 
-    return res.render('firmware', indexContent);
+      Firmware.paginate({}, {page: reqPage,
+                             limit: 10,
+                             sort: {_id: 1}}, function(err, firmwares) {
+        if (err) {
+          indexContent.type = 'danger';
+          indexContent.message = err.message;
+          return res.render('error', indexContent);
+        }
+        indexContent.firmwares = firmwares.docs;
+        indexContent.page = firmwares.page;
+        indexContent.pages = firmwares.pages;
+
+        return res.render('firmware', indexContent);
+      });
+    });
   });
 };
 

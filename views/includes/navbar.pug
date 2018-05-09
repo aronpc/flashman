@@ -1,9 +1,13 @@
 nav.navbar.navbar-expand-lg.navbar-dark.orange.darken-2
-  a.navbar-brand(href="/")
+  a.navbar-brand(href="/").col-2
     .image-block
       img(alt="brand", src="/images/logo.png", width="50", height="50")
       span &nbsp FlashMan
-  button.navbar-toggler(type="button", data-toggle="collapse",
+  if (update)
+    .update.text-white.col-6(style="cursor: pointer;")
+      .fas.fa-arrow-circle-down.fa-lg
+      span &nbsp Atualização Disponível
+  button.navbar-toggler.col-4(type="button", data-toggle="collapse",
                         data-target="#navbar-menu", aria-controls="#navbar-menu",
                         aria-expanded="false", aria-label="Alternar navegação")
     span.navbar-toggler-icon
@@ -11,13 +15,17 @@ nav.navbar.navbar-expand-lg.navbar-dark.orange.darken-2
   #navbar-menu.navbar-default.navbar-collapse.collapse
     if (username)
       ul.navbar-nav.ml-auto
-        li.nav-item.dropdown
+        li.nav-item.dropdown.col-10
           a#navbarDropdown.nav-link.dropdown-toggle(data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false")
             | Olá, #{username}
           .dropdown-menu(aria-labelledby="navbarDropdown")
             a.dropdown-item(href="/firmware")
               .fas.fa-hdd.fa-lg
               span &nbsp Firmwares
+            if (superuser)
+              a.dropdown-item.update
+                .fas.fa-arrow-circle-down.fa-lg
+                span &nbsp Atualizar Flashman
         li.nav-item
           a.nav-link(href="/logout")
             .fas.fa-sign-out-alt.fa-lg

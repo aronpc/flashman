@@ -104,6 +104,9 @@ app.use('/scripts/bootstrap',
 app.use('/scripts/mdbootstrap',
   express.static(path.join(__dirname, 'node_modules/mdbootstrap'))
 );
+app.use('/scripts/sweetalert2',
+  express.static(path.join(__dirname, 'node_modules/sweetalert2/dist'))
+);
 
 app.use(passport.initialize());
 app.use(passport.session());

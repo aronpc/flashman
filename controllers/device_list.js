@@ -1,5 +1,7 @@
 const Validator = require('../public/javascripts/device_validator');
 const DeviceModel = require('../models/device');
+const User = require('../models/user');
+const Config = require('../models/config');
 const mqtt = require('mqtt');
 let deviceListController = {};
 
@@ -105,7 +107,17 @@ deviceListController.index = function(req, res) {
     indexContent.page = devices.page;
     indexContent.pages = devices.pages;
 
-    return res.render('index', indexContent);
+    User.findOne({name: req.user.name}, function(err, user) {
+      if (err || !user) { indexContent.superuser = false; }
+      else { indexContent.superuser = user.is_superuser; }
+
+      Config.findOne({is_default: true}, function(err, matchedConfig) {
+        if (err || !matchedConfig) { indexContent.update = false; }
+        else { indexContent.update = matchedConfig.hasUpdate; }
+
+        return res.render('index', indexContent);
+      });
+    });
   });
 };
 
@@ -219,7 +231,17 @@ deviceListController.searchDeviceReg = function(req, res) {
     indexContent.pages = matchedDevices.pages;
     indexContent.lastquery = req.query.content;
 
-    return res.render('index', indexContent);
+    User.findOne({name: req.user.name}, function(err, user) {
+      if (err || !user) { indexContent.superuser = false; }
+      else { indexContent.superuser = user.is_superuser; }
+
+      Config.findOne({is_default: true}, function(err, matchedConfig) {
+        if (err || !matchedConfig) { indexContent.update = false; }
+        else { indexContent.update = matchedConfig.hasUpdate; }
+
+        return res.render('index', indexContent);
+      });
+    });
   });
 };
 
