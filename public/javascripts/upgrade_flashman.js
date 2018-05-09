@@ -73,6 +73,39 @@ let checkUpdateFlashman = function () {
   });
 };
 
+let configFlashman = function() {
+  $.ajax({
+    type: 'GET',
+    url: '/upgrade/config',
+    success: function(resp) {
+      swal({
+        title: 'Configurações',
+        input: 'checkbox',
+        inputValue: (resp.auto === true) ? true : false,  // needed since can be null
+        inputPlaceholder: 'Deixar que o Flashman se atualize automaticamente',
+        confirmButtonText: 'Salvar Alterações'
+      }).then(function (result) {
+        if ('value' in result) {
+          $.ajax({
+            type: "POST",
+            url: '/upgrade/config',
+            dataType: 'json',
+            data: JSON.stringify({auto: result.value}),
+            contentType: 'application/json',
+            success: function(resp) {
+              swal({
+                type: 'success',
+                title: 'Alterações feitas com sucesso'
+              });
+            }
+          });
+        }
+      });
+    }
+  });
+};
+
 $(document).ready(function() {
   $(".update").click(checkUpdateFlashman);
+  $(".config").click(configFlashman);
 });
