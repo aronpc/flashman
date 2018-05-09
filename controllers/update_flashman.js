@@ -16,6 +16,7 @@ let updateFlashman = function(automatic, res) {
 
   updater.on('check.up-to-date', function(v) {
     // Latest version installed, nothing to do
+    console.log("up to date");
     if (res) {
       res.status(200).json({hasUpdate: false, updated: false});
     }
@@ -23,6 +24,7 @@ let updateFlashman = function(automatic, res) {
 
   updater.on('check.out-dated', function(v_old, v) {
     // Old version installed, need to download update
+    console.log("out dated");
     Config.findOne({is_default: true}, function(err, matchedConfig) {
       if (!err && matchedConfig) {
         matchedConfig.hasUpdate = true;
@@ -39,16 +41,19 @@ let updateFlashman = function(automatic, res) {
 
   updater.on('update.downloaded', function() {
     // Download ready, need to extract
+    console.log("downloaded");
     updater.fire('extract');
   });
 
   updater.on('update.not-installed', function() {
     // Download was ready already, need to extract
+    console.log("already downloaded");
     updater.fire('extract');
   });
 
   updater.on('update.extracted', function() {
     // Extracting complete, reload pm2
+    console.log("extracted");
     exec("pm2 stop flashman", (err, stdout, stderr) => {});
     exec("npm intall --production", (err, stdout, stderr) => {});
     exec("pm2 start flashman", (err, stdout, stderr) => {});
@@ -56,6 +61,7 @@ let updateFlashman = function(automatic, res) {
 
   updater.on('end', function() {
     // Everything ok
+    console.log("end");
     Config.findOne({is_default: true}, function(err, matchedConfig) {
       if (!err && matchedConfig) {
         matchedConfig.hasUpdate = false;
