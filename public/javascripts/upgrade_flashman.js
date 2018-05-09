@@ -33,6 +33,21 @@ let forceUpdateFlashman = function () {
   });
 };
 
+let alertUpdateFlashman = function () {
+  swal({
+    type: 'warning',
+    title: 'Atualização disponível!',
+    text: 'Deseja instalar a nova versão agora?',
+    confirmButtonText: 'Atualizar',
+    cancelButtonText: 'Agora não',
+    showCancelButton: true
+  }).then(function (result) {
+    if (result.value) {
+      forceUpdateFlashman();
+    }
+  });
+};
+
 let checkUpdateFlashman = function () {
   swal({
     title: 'Buscando atualizações...',
@@ -50,18 +65,7 @@ let checkUpdateFlashman = function () {
     success: function(resp) {
       swal.close();
       if (resp.hasUpdate) {
-        swal({
-          type: 'warning',
-          title: 'Atualização disponível!',
-          text: 'Deseja instalar a nova versão agora?',
-          confirmButtonText: 'Atualizar',
-          cancelButtonText: 'Agora não',
-          showCancelButton: true
-        }).then(function (result) {
-          if (result.value) {
-            forceUpdateFlashman();
-          }
-        });
+        alertUpdateFlashman();
       }
       else {
         swal({

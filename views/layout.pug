@@ -31,4 +31,9 @@ html
       if (message) {
         $('#frame-modal-alert').modal('show');
       }
+    script.
+      let update = '#{update}' === "true";
+      if (update && Math.random() < 0.3) {
+        alertUpdateFlashman();
+      }
     block scripts
