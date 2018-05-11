@@ -6,17 +6,31 @@ const favicon = require('serve-favicon');
 const logger = require('morgan');
 const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
+const schedule = require('node-schedule');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const fileUpload = require('express-fileupload');
 let session = require('express-session');
 
+let updater = require('./controllers/update_flashman');
+let Config = require('./models/config');
 let User = require('./models/user');
 let index = require('./routes/index');
 
 let app = express();
 
 mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman');
+
+// check config existence
+Config.findOne({is_default: true}, function(err, matchedConfig) {
+  if (err || !matchedConfig) {
+    let newConfig = new Config({
+      is_default: true,
+      autoUpdate: true
+    });
+    newConfig.save();
+  }
+});
 
 // check administration user existence
 User.find({is_superuser: true}, function(err, matchedUsers) {
@@ -90,6 +104,9 @@ app.use('/scripts/bootstrap',
 app.use('/scripts/mdbootstrap',
   express.static(path.join(__dirname, 'node_modules/mdbootstrap'))
 );
+app.use('/scripts/sweetalert2',
+  express.static(path.join(__dirname, 'node_modules/sweetalert2/dist'))
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -125,6 +142,18 @@ app.use(function(err, req, res, next) {
       stack: res.locals.stack,
     });
   }
+});
+
+app.listen(3000, function() {
+  var rule = new schedule.RecurrenceRule();
+  rule.hour = 20;
+  rule.minute = 0;
+  // Schedule automatic update
+  var s = schedule.scheduleJob(rule, function() {
+    updater.update();
+  });
+  // Force an update check to alert user on app startup
+  updater.checkUpdate();
 });
 
 module.exports = app;

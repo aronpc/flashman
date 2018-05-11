@@ -16,17 +16,24 @@ html
     .container
       include includes/flash
       block content
-    p.version-label 0.6.1
+    p.version-label 0.7.0
 
     script(src='/scripts/jquery/jquery.min.js')
     script(src='/scripts/jquery-mask/jquery.mask.min.js')
     script(src='/scripts/popper/umd/popper.min.js')
     script(src='/scripts/bootstrap/js/bootstrap.min.js')
     script(src='/scripts/mdbootstrap/js/mdb.min.js')
+    script(src='/scripts/sweetalert2/sweetalert2.all.min.js')
     script(src='/javascripts/modal_actions.js')
+    script(src='/javascripts/upgrade_flashman.js')
     script.
       var message = '#{message}';
       if (message) {
         $('#frame-modal-alert').modal('show');
+      }
+    script.
+      let update = '#{update}' === "true";
+      if (update && Math.random() < 0.3) {
+        alertUpdateFlashman();
       }
     block scripts

@@ -7,6 +7,7 @@ router.use('/devicelist', require('./device_list'));
 router.use('/deviceinfo', require('./device_info'));
 router.use('/user', require('./user'));
 router.use('/firmware', require('./firmware'));
+router.use('/upgrade', require('./upgrade'));
 
 router.get('/', function(req, res) {
     res.redirect('/devicelist');
