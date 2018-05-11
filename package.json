@@ -1,13 +1,13 @@
 {
   "name": "flashman",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
   },
   "auto-updater": {
     "repo": "anlix-io/flashman",
-    "branch": "feature/auto-update"
+    "branch": "master"
   },
   "dependencies": {
     "auto-updater": "^1.0.2",
