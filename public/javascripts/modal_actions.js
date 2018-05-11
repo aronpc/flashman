@@ -1,4 +1,3 @@
-
 const displayAlertMsg = function(res) {
   $('#frame-modal-alert .modal-dialog').removeClass(
     'modal-success modal-danger'

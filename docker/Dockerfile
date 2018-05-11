@@ -30,4 +30,4 @@ RUN npm install --production
 
 EXPOSE 8000
 
-CMD /app/wait-for-it.sh ${FLM_MONGODB_HOST}:27017 -- pm2-docker start environment.config.json
+CMD bash /app/wait-for-it.sh ${FLM_MONGODB_HOST}:27017 -- pm2-docker start environment.config.json

@@ -15,6 +15,7 @@ var userSchema = new mongoose.Schema({
     },
     lastLogin: { type: Date },
     createdAt: { type: Date, default: new Date()},
+    autoUpdate: { type: Boolean, default: true },
     is_superuser: {type: Boolean, default: false}
 });
 
