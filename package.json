@@ -6,8 +6,8 @@
     "start": "node ./bin/www"
   },
   "auto-updater": {
-    "repo":"anlix-io/flashman",
-    "branch":"feature/auto-update"
+    "repo": "anlix-io/flashman",
+    "branch": "feature/auto-update"
   },
   "dependencies": {
     "auto-updater": "^1.0.2",
