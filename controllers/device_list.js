@@ -248,7 +248,8 @@ deviceListController.searchDeviceReg = function(req, res) {
 deviceListController.delDeviceReg = function(req, res) {
   DeviceModel.remove({_id: req.params.id}, function(err) {
     if (err) {
-      return res.status(500).json({'message': 'device cannot be removed'});
+      return res.status(500).json({'success': false,
+                                   'message': 'device cannot be removed'});
     }
     return res.status(200).json({'success': true});
   });
@@ -261,11 +262,14 @@ deviceListController.delDeviceReg = function(req, res) {
 deviceListController.getDeviceReg = function(req, res) {
   DeviceModel.findById(req.params.id, function(err, matchedDevice) {
     if (err) {
-      return res.status(500).json({'message': 'internal server error'});
+      return res.status(500).json({'success': false,
+                                   'message': 'internal server error'});
     }
     if (matchedDevice == null) {
-      return res.status(404).json({'message': 'device not found'});
+      return res.status(404).json({'success': false,
+                                   'message': 'device not found'});
     }
+    matchedDevice.success = true;
     return res.status(200).json(matchedDevice);
   });
 };
@@ -274,12 +278,14 @@ deviceListController.setDeviceReg = function(req, res) {
   DeviceModel.findById(req.params.id, function(err, matchedDevice) {
     if (err) {
       return res.status(500).json({
+        success: false,
         message: 'internal server error',
         errors: [],
       });
     }
     if (matchedDevice == null) {
       return res.status(404).json({
+        success: false,
         message: 'device not found',
         errors: [],
       });
@@ -357,16 +363,18 @@ deviceListController.setDeviceReg = function(req, res) {
             '1', {qos: 1, retain: true}); // topic, msg, options
           client.end();
         });
-
+        matchedDevice.success = true;
         return res.status(200).json(matchedDevice);
       } else {
         return res.status(500).json({
+          success: false,
           message: 'Erro validando os campos, ver campo "errors"',
           errors: errors,
         });
       }
     } else {
       return res.status(500).json({
+        success: false,
         message: 'error parsing json',
         errors: [],
       });
@@ -414,6 +422,7 @@ deviceListController.createDeviceReg = function(req, res) {
     DeviceModel.findById(macAddr, function(err, matchedDevice) {
       if (err) {
         return res.status(500).json({
+          success: false,
           message: 'Erro interno do servidor',
           errors: errors,
         });
@@ -439,6 +448,7 @@ deviceListController.createDeviceReg = function(req, res) {
           newDeviceModel.save(function(err) {
             if (err) {
               return res.status(500).json({
+                success: false,
                 message: 'Erro ao salvar registro',
                 errors: errors,
               });
@@ -448,6 +458,7 @@ deviceListController.createDeviceReg = function(req, res) {
           });
         } else {
           return res.status(500).json({
+            success: false,
             message: 'Erro validando os campos, ver campo \"errors\"',
             errors: errors,
           });
@@ -456,6 +467,7 @@ deviceListController.createDeviceReg = function(req, res) {
     });
   } else {
     return res.status(500).json({
+      success: false,
       message: 'Erro no json recebido',
       errors: [],
     });
