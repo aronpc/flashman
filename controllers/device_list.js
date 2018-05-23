@@ -108,12 +108,18 @@ deviceListController.index = function(req, res) {
     indexContent.pages = devices.pages;
 
     User.findOne({name: req.user.name}, function(err, user) {
-      if (err || !user) { indexContent.superuser = false; }
-      else { indexContent.superuser = user.is_superuser; }
+      if (err || !user) {
+        indexContent.superuser = false;
+      } else {
+        indexContent.superuser = user.is_superuser;
+      }
 
       Config.findOne({is_default: true}, function(err, matchedConfig) {
-        if (err || !matchedConfig) { indexContent.update = false; }
-        else { indexContent.update = matchedConfig.hasUpdate; }
+        if (err || !matchedConfig) {
+          indexContent.update = false;
+        } else {
+          indexContent.update = matchedConfig.hasUpdate;
+        }
 
         return res.render('index', indexContent);
       });
@@ -232,12 +238,18 @@ deviceListController.searchDeviceReg = function(req, res) {
     indexContent.lastquery = req.query.content;
 
     User.findOne({name: req.user.name}, function(err, user) {
-      if (err || !user) { indexContent.superuser = false; }
-      else { indexContent.superuser = user.is_superuser; }
+      if (err || !user) {
+        indexContent.superuser = false;
+      } else {
+        indexContent.superuser = user.is_superuser;
+      }
 
       Config.findOne({is_default: true}, function(err, matchedConfig) {
-        if (err || !matchedConfig) { indexContent.update = false; }
-        else { indexContent.update = matchedConfig.hasUpdate; }
+        if (err || !matchedConfig) {
+          indexContent.update = false;
+        } else {
+          indexContent.update = matchedConfig.hasUpdate;
+        }
 
         return res.render('index', indexContent);
       });
@@ -297,17 +309,17 @@ deviceListController.setDeviceReg = function(req, res) {
       let validator = new Validator();
 
       let errors = [];
-      let pppoe_user = returnObjOrEmptyStr(content.pppoe_user).trim();
-      let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim();
+      let pppoeUser = returnObjOrEmptyStr(content.pppoe_user).trim();
+      let pppoePassword = returnObjOrEmptyStr(content.pppoe_password).trim();
       let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
       let password = returnObjOrEmptyStr(content.wifi_password).trim();
       let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
-      let pppoe = (pppoe_user !== '' && pppoe_password !== '');
+      let pppoe = (pppoeUser !== '' && pppoePassword !== '');
 
       let genericValidate = function(field, func, key) {
-        let valid_field = func(field);
-        if (!valid_field.valid) {
-          valid_field.err.forEach(function(error) {
+        let validField = func(field);
+        if (!validField.valid) {
+          validField.err.forEach(function(error) {
             let obj = {};
             obj[key] = error;
             errors.push(obj);
@@ -317,8 +329,9 @@ deviceListController.setDeviceReg = function(req, res) {
 
       // Validate fields
       if (pppoe) {
-        genericValidate(pppoe_user, validator.validateUser, 'pppoe_user');
-        genericValidate(pppoe_password, validator.validatePassword, 'pppoe_password');
+        genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
+        genericValidate(pppoePassword, validator.validatePassword,
+                        'pppoe_password');
       }
       genericValidate(ssid, validator.validateSSID, 'ssid');
       genericValidate(password, validator.validateWifiPassword, 'password');
@@ -326,23 +339,23 @@ deviceListController.setDeviceReg = function(req, res) {
 
       if (errors.length < 1) {
         if (content.hasOwnProperty('pppoe_user')) {
-          matchedDevice.pppoe_user = content.pppoe_user;
+          matchedDevice.pppoe_user = pppoeUser;
           updateParameters = true;
         }
         if (content.hasOwnProperty('pppoe_password')) {
-          matchedDevice.pppoe_password = content.pppoe_password;
+          matchedDevice.pppoe_password = pppoePassword;
           updateParameters = true;
         }
         if (content.hasOwnProperty('wifi_ssid')) {
-          matchedDevice.wifi_ssid = content.wifi_ssid;
+          matchedDevice.wifi_ssid = ssid;
           updateParameters = true;
         }
         if (content.hasOwnProperty('wifi_password')) {
-          matchedDevice.wifi_password = content.wifi_password;
+          matchedDevice.wifi_password = password;
           updateParameters = true;
         }
         if (content.hasOwnProperty('wifi_channel')) {
-          matchedDevice.wifi_channel = content.wifi_channel;
+          matchedDevice.wifi_channel = channel;
           updateParameters = true;
         }
         if (content.hasOwnProperty('external_reference')) {
@@ -391,17 +404,17 @@ deviceListController.createDeviceReg = function(req, res) {
 
     let errors = [];
     let release = returnObjOrEmptyStr(content.release).trim();
-    let pppoe_user = returnObjOrEmptyStr(content.pppoe_user).trim();
-    let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim();
+    let pppoeUser = returnObjOrEmptyStr(content.pppoe_user).trim();
+    let pppoePassword = returnObjOrEmptyStr(content.pppoe_password).trim();
     let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
     let password = returnObjOrEmptyStr(content.wifi_password).trim();
     let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
-    let pppoe = (pppoe_user !== '' && pppoe_password !== '');
+    let pppoe = (pppoeUser !== '' && pppoePassword !== '');
 
     let genericValidate = function(field, func, key) {
-      let valid_field = func(field);
-      if (!valid_field.valid) {
-        valid_field.err.forEach(function(error) {
+      let validField = func(field);
+      if (!validField.valid) {
+        validField.err.forEach(function(error) {
           let obj = {};
           obj[key] = error;
           errors.push(obj);
@@ -412,8 +425,9 @@ deviceListController.createDeviceReg = function(req, res) {
     // Validate fields
     genericValidate(macAddr, validator.validateMac, 'mac');
     if (pppoe) {
-      genericValidate(pppoe_user, validator.validateUser, 'pppoe_user');
-      genericValidate(pppoe_password, validator.validatePassword, 'pppoe_password');
+      genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
+      genericValidate(pppoePassword, validator.validatePassword,
+                      'pppoe_password');
     }
     genericValidate(ssid, validator.validateSSID, 'ssid');
     genericValidate(password, validator.validateWifiPassword, 'password');
@@ -436,8 +450,8 @@ deviceListController.createDeviceReg = function(req, res) {
             'external_reference': extReference,
             'model': '',
             'release': release,
-            'pppoe_user': pppoe_user,
-            'pppoe_password': pppoe_password,
+            'pppoe_user': pppoeUser,
+            'pppoe_password': pppoePassword,
             'wifi_ssid': ssid,
             'wifi_password': password,
             'wifi_channel': channel,

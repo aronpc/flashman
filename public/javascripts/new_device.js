@@ -1,7 +1,9 @@
 let removeDeviceErrors = function(errors) {
   $('#deviceForm').find('p').remove();
   for (let key in errors) {
-    $(errors[key].field).removeClass('red lighten-4');
+    if (Object.prototype.hasOwnProperty.call(errors, key)) {
+      $(errors[key].field).removeClass('red lighten-4');
+    }
   }
 };
 
@@ -26,13 +28,13 @@ let validateNewDevice = function() {
   // Get form values
   let pppoe = $('#new_connect_type').val() === 'PPPoE';
   let mac = $('#new_mac').val();
-  let pppoe_user = $('#new_pppoe_user').val();
-  let pppoe_password = $('#new_pppoe_pass').val();
+  let pppoeUser = $('#new_pppoe_user').val();
+  let pppoePassword = $('#new_pppoe_pass').val();
   let ssid = $('#new_wifi_ssid').val();
   let password = $('#new_wifi_pass').val();
   let channel = $('#new_wifi_channel').val();
-  let external_reference_type = $('#new_ext_ref_type_selected').html();
-  let external_reference_data = $('#new_external_reference').val();
+  let externalReferenceType = $('#new_ext_ref_type_selected').html();
+  let externalReferenceData = $('#new_external_reference').val();
 
   // Initialize error structure
   let errors = {
@@ -44,24 +46,27 @@ let validateNewDevice = function() {
     channel: {field: '#new_wifi_channel'},
   };
   for (let key in errors) {
-    errors[key]['messages'] = [];
+    if (Object.prototype.hasOwnProperty.call(errors, key)) {
+      errors[key]['messages'] = [];
+    }
   }
 
   // Clean previous error values from DOM
   removeDeviceErrors(errors);
 
   let genericValidate = function(value, func, errors) {
-    let valid_field = func(value);
-    if (!valid_field.valid) {
-      errors.messages = valid_field.err;
+    let validField = func(value);
+    if (!validField.valid) {
+      errors.messages = validField.err;
     }
   };
 
   // Validate fields
   genericValidate(mac, validator.validateMac, errors.mac);
   if (pppoe) {
-    genericValidate(pppoe_user, validator.validateUser, errors.pppoe_user);
-    genericValidate(pppoe_password, validator.validatePassword, errors.pppoe_password);
+    genericValidate(pppoeUser, validator.validateUser, errors.pppoe_user);
+    genericValidate(pppoePassword, validator.validatePassword,
+                    errors.pppoe_password);
   }
   genericValidate(ssid, validator.validateSSID, errors.ssid);
   genericValidate(password, validator.validateWifiPassword, errors.password);
@@ -75,14 +80,14 @@ let validateNewDevice = function() {
     // If no errors present, send to backend
     let data = {'content': {
       'mac_address': mac,
-      'pppoe_user': (pppoe) ? pppoe_user : '',
-      'pppoe_password': (pppoe) ? pppoe_password : '',
+      'pppoe_user': (pppoe) ? pppoeUser : '',
+      'pppoe_password': (pppoe) ? pppoePassword : '',
       'wifi_ssid': ssid,
       'wifi_password': password,
       'wifi_channel': channel,
       'external_reference': {
-        kind: external_reference_type,
-        data: external_reference_data,
+        kind: externalReferenceType,
+        data: externalReferenceData,
       },
     }};
 
