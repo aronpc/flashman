@@ -93,6 +93,10 @@ let validateNewDevice = function() {
       data: JSON.stringify(data),
       contentType: 'application/json',
       success: function(resp) {
+        location.reload();
+      },
+      error: function(xhr, status, error) {
+        let resp = JSON.parse(xhr.responseText);
         if ('errors' in resp) {
           let keyToError = {
             mac: errors.mac,
@@ -104,12 +108,9 @@ let validateNewDevice = function() {
           };
           resp.errors.forEach(function(pair) {
             let key = Object.keys(pair)[0];
-            console.log(key);
             keyToError[key].messages.push(pair[key]);
           });
           renderDeviceErrors(errors);
-        } else {
-          location.reload();
         }
       },
     });

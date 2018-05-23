@@ -273,7 +273,7 @@ deviceListController.getDeviceReg = function(req, res) {
 deviceListController.setDeviceReg = function(req, res) {
   DeviceModel.findById(req.params.id, function(err, matchedDevice) {
     if (err) {
-      return res.status(200).json({
+      return res.status(500).json({
         message: 'internal server error',
         errors: [],
       });
@@ -360,13 +360,13 @@ deviceListController.setDeviceReg = function(req, res) {
 
         return res.status(200).json(matchedDevice);
       } else {
-        return res.status(200).json({
+        return res.status(500).json({
           message: 'Erro validando os campos, ver campo "errors"',
           errors: errors,
         });
       }
     } else {
-      return res.status(200).json({
+      return res.status(500).json({
         message: 'error parsing json',
         errors: [],
       });
@@ -438,7 +438,7 @@ deviceListController.createDeviceReg = function(req, res) {
           });
           newDeviceModel.save(function(err) {
             if (err) {
-              return res.status(200).json({
+              return res.status(500).json({
                 message: 'Erro ao salvar registro',
                 errors: errors,
               });
@@ -447,7 +447,7 @@ deviceListController.createDeviceReg = function(req, res) {
             }
           });
         } else {
-          return res.status(200).json({
+          return res.status(500).json({
             message: 'Erro validando os campos, ver campo \"errors\"',
             errors: errors,
           });
@@ -455,7 +455,7 @@ deviceListController.createDeviceReg = function(req, res) {
       }
     });
   } else {
-    return res.status(200).json({
+    return res.status(500).json({
       message: 'Erro no json recebido',
       errors: [],
     });

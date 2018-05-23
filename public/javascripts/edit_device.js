@@ -93,6 +93,10 @@ let validateEditDevice = function(event) {
       data: JSON.stringify(data),
       contentType: 'application/json',
       success: function(resp) {
+        location.reload();
+      },
+      error: function(xhr, status, error) {
+        let resp = JSON.parse(xhr.responseText);
         if ('errors' in resp) {
           let keyToError = {
             pppoe_user: errors.pppoe_user,
@@ -106,8 +110,6 @@ let validateEditDevice = function(event) {
             keyToError[key].messages.push(pair[key]);
           });
           renderDeviceErrors(errors);
-        } else {
-          location.reload();
         }
       },
     });
