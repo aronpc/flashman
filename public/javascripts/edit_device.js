@@ -1,7 +1,9 @@
 let removeEditErrors = function(errors, index) {
   $('#editDeviceForm-' + index.toString()).find('p').remove();
   for (let key in errors) {
-    $(errors[key].field).removeClass('red lighten-4');
+    if (Object.prototype.hasOwnProperty.call(errors, key)) {
+      $(errors[key].field).removeClass('red lighten-4');
+    }
   }
 };
 
@@ -29,13 +31,15 @@ let validateEditDevice = function(event) {
   // Get form values
   let mac = row.data('deviceid');
   let pppoe = $('#edit_connect_type-' + index.toString()).val() === 'PPPoE';
-  let pppoe_user = $('#edit_pppoe_user-' + index.toString()).val();
-  let pppoe_password = $('#edit_pppoe_pass-' + index.toString()).val();
+  let pppoeUser = $('#edit_pppoe_user-' + index.toString()).val();
+  let pppoePassword = $('#edit_pppoe_pass-' + index.toString()).val();
   let ssid = $('#edit_wifi_ssid-' + index.toString()).val();
   let password = $('#edit_wifi_pass-' + index.toString()).val();
   let channel = $('#edit_wifi_channel-' + index.toString()).val();
-  let external_reference_type = $('#edit_ext_ref_type_selected-' + index.toString()).html();
-  let external_reference_data = $('#edit_external_reference-' + index.toString()).val();
+  let externalReferenceType = $('#edit_ext_ref_type_selected-' +
+                                index.toString()).html();
+  let externalReferenceData = $('#edit_external_reference-' +
+                                index.toString()).val();
 
   // Initialize error structure
   let errors = {
@@ -46,23 +50,26 @@ let validateEditDevice = function(event) {
     channel: {field: '#edit_wifi_channel-' + index.toString()},
   };
   for (let key in errors) {
-    errors[key]['messages'] = [];
+    if (Object.prototype.hasOwnProperty.call(errors, key)) {
+      errors[key]['messages'] = [];
+    }
   }
 
   // Clean previous error values from DOM
   removeEditErrors(errors, index);
 
   let genericValidate = function(value, func, errors) {
-    let valid_field = func(value);
-    if (!valid_field.valid) {
-      errors.messages = valid_field.err;
+    let validField = func(value);
+    if (!validField.valid) {
+      errors.messages = validField.err;
     }
   };
 
   // Validate fields
   if (pppoe) {
-    genericValidate(pppoe_user, validator.validateUser, errors.pppoe_user);
-    genericValidate(pppoe_password, validator.validatePassword, errors.pppoe_password);
+    genericValidate(pppoeUser, validator.validateUser, errors.pppoe_user);
+    genericValidate(pppoePassword, validator.validatePassword,
+                    errors.pppoe_password);
   }
   genericValidate(ssid, validator.validateSSID, errors.ssid);
   genericValidate(password, validator.validateWifiPassword, errors.password);
@@ -75,14 +82,14 @@ let validateEditDevice = function(event) {
   if (Object.keys(errors).every(hasNoErrors)) {
     // If no errors present, send to backend
     let data = {'content': {
-      'pppoe_user': (pppoe) ? pppoe_user : '',
-      'pppoe_password': (pppoe) ? pppoe_password : '',
+      'pppoe_user': (pppoe) ? pppoeUser : '',
+      'pppoe_password': (pppoe) ? pppoePassword : '',
       'wifi_ssid': ssid,
       'wifi_password': password,
       'wifi_channel': channel,
       'external_reference': {
-        kind: external_reference_type,
-        data: external_reference_data,
+        kind: externalReferenceType,
+        data: externalReferenceData,
       },
     }};
 
@@ -93,6 +100,10 @@ let validateEditDevice = function(event) {
       data: JSON.stringify(data),
       contentType: 'application/json',
       success: function(resp) {
+        location.reload();
+      },
+      error: function(xhr, status, error) {
+        let resp = JSON.parse(xhr.responseText);
         if ('errors' in resp) {
           let keyToError = {
             pppoe_user: errors.pppoe_user,
@@ -106,8 +117,6 @@ let validateEditDevice = function(event) {
             keyToError[key].messages.push(pair[key]);
           });
           renderDeviceErrors(errors);
-        } else {
-          location.reload();
         }
       },
     });
