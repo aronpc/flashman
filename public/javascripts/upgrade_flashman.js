@@ -19,7 +19,7 @@ let forceUpdateFlashman = function() {
           type: 'success',
           title: 'Atualização feita com sucesso!',
           text: 'Você precisará fazer login novamente',
-          confirmButtonColor: '#f57c00',
+          confirmButtonColor: '#4db6ac',
         }).then(function() {
           window.location.href = '/logout';
         });
@@ -27,7 +27,7 @@ let forceUpdateFlashman = function() {
         swal({
           type: 'error',
           title: 'Erro ao atualizar',
-          confirmButtonColor: '#f57c00',
+          confirmButtonColor: '#4db6ac',
         });
       }
     },
@@ -40,7 +40,7 @@ let alertUpdateFlashman = function() {
     title: 'Atualização disponível!',
     text: 'Deseja instalar a nova versão agora?',
     confirmButtonText: 'Atualizar',
-    confirmButtonColor: '#f57c00',
+    confirmButtonColor: '#4db6ac',
     cancelButtonText: 'Agora não',
     cancelButtonColor: '#f2ab63',
     showCancelButton: true,
@@ -73,7 +73,7 @@ let checkUpdateFlashman = function() {
         swal({
           type: 'error',
           title: 'Nenhuma atualização encontrada',
-          confirmButtonColor: '#f57c00',
+          confirmButtonColor: '#4db6ac',
         });
       }
     },
@@ -91,7 +91,7 @@ let configFlashman = function() {
         inputValue: (resp.auto === true) ? true : false, // needed since can be null
         inputPlaceholder: 'Deixar que o Flashman se atualize automaticamente',
         confirmButtonText: 'Salvar Alterações',
-        confirmButtonColor: '#f57c00',
+        confirmButtonColor: '#4db6ac',
       }).then(function(result) {
         if ('value' in result) {
           $.ajax({
@@ -104,7 +104,7 @@ let configFlashman = function() {
               swal({
                 type: 'success',
                 title: 'Alterações feitas com sucesso',
-                confirmButtonColor: '#f57c00',
+                confirmButtonColor: '#4db6ac',
               });
             },
           });

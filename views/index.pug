@@ -9,13 +9,13 @@ block content
           input.form-control(type="search", name="content",
                              placeholder="Buscar...")
           .input-group-btn
-            button.my-0.btn.orange.darken-2(type="submit")
+            button.my-0.btn.teal.lighten-2(type="submit")
               .fas.fa-search.fa-lg
 
   .row.justify-content-center
     .col-12.col-lg-6.mt-5
       .card
-        h4.card-header.orange.darken-2.white-text(id="card-header",
+        h4.card-header.teal.lighten-2.white-text(id="card-header",
                                                   data-toggle="collapse",
                                                   data-target="#deviceCard",
                                                   style="cursor: pointer;")
@@ -28,13 +28,13 @@ block content
           form(id="deviceForm")
             .md-form.input-group
               .input-group-btn
-                button.btn.orange.darken-2.dropdown-toggle.ml-0.my-0(
+                button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
                   type="button",
                   data-toggle="dropdown"
                 )
                   span#new_ext_ref_type_selected.selected CPF
                 #ext_ref_type.dropdown-menu
-                  a.dropdown-item.text-center.active.orange.darken-2 CPF
+                  a.dropdown-item.text-center.active.teal.lighten-2 CPF
                   a.dropdown-item.text-center CNPJ
                   a.dropdown-item.text-center Outro
               input.col-xs-10.form-control.py-0.added-margin.ext-ref-input(
@@ -80,7 +80,7 @@ block content
               label Senha PPPoE
             .col.mt-4.text-center
               .form-buttons
-                button.btn.btn-lg.orange.darken-2(type="submit")
+                button.btn.btn-lg.teal.lighten-2(type="submit")
                   .fas.fa-check.fa-lg
                   span &nbsp Adicionar
 
@@ -148,7 +148,7 @@ block content
                         | #{device.ip}
                       td.text-center.col-xs-1
                         .btn-group
-                          button.btn.btn-sm.orange.darken-2.dropdown-toggle(
+                          button.btn.btn-sm.teal.lighten-2.dropdown-toggle(
                             type="button",
                             data-toggle="dropdown",
                             aria-haspopup="true",
@@ -156,7 +156,7 @@ block content
                           )
                             span.selected #{device.release}
                           .dropdown-menu
-                            a.dropdown-item.text-center.active.orange.darken-2 #{device.release}
+                            a.dropdown-item.text-center.active.teal.lighten-2 #{device.release}
                             each release, idx in releases
                               if (device.release !== release.id)
                                 if device.model.includes('/')
@@ -231,13 +231,13 @@ block content
                             .col-6
                               .md-form.input-group
                                 .input-group-btn
-                                  button.btn.orange.darken-2.dropdown-toggle.ml-0.my-0(
+                                  button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
                                     type="button",
                                     data-toggle="dropdown"
                                   )
                                     span.selected(id="edit_ext_ref_type_selected-" + (index + 1)) CPF
                                   #ext_ref_type.dropdown-menu
-                                    a.dropdown-item.text-center.active.orange.darken-2 CPF
+                                    a.dropdown-item.text-center.active.teal.lighten-2 CPF
                                     a.dropdown-item.text-center CNPJ
                                     a.dropdown-item.text-center Outro
                                 input.col-xs-10.form-control.py-0.added-margin.ext-ref-input(
@@ -290,10 +290,10 @@ block content
                                 label.active Senha PPPoE
                           .row.justify-content-center.mt-4
                             .form-buttons
-                              button.btn.btn-lg.orange.darken-2(type="submit")
+                              button.btn.btn-lg.teal.lighten-2(type="submit")
                                 .fas.fa-check.fa-lg
                                 span &nbsp Editar
-                            button.btn-cancel.btn.btn-lg.orange.darken-2(type="reset")
+                            button.btn-cancel.btn.btn-lg.teal.lighten-2(type="reset")
                               .fas.fa-times.fa-lg
                               span &nbsp Cancelar
 
@@ -306,7 +306,7 @@ block content
               -   if (i == 1 || i == pages || ((i >= cPage-delta) && (i <= cPage+delta))) {
               -     if (i == page)
                       li.page-item.active
-                        a.page-link.orange.darken-2(href="#") #{i}
+                        a.page-link.teal.lighten-2(href="#") #{i}
               -     else {
               -       if (i == pages && (cPage+delta <= pages-delta)) {
                         li.page-item
