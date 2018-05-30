@@ -81,9 +81,13 @@ const returnObjOrEmptyStr = function(query) {
 deviceListController.index = function(req, res) {
   let indexContent = {};
   let reqPage = 1;
+  let elementsPerPage = 10;
 
   if (req.query.page) {
     reqPage = req.query.page;
+  }
+  if (req.user.maxElementsPerPage) {
+    elementsPerPage = req.user.maxElementsPerPage;
   }
   // Counters
   let status = {};
@@ -91,7 +95,7 @@ deviceListController.index = function(req, res) {
   getTotalCount({}, status);
 
   DeviceModel.paginate({}, {page: reqPage,
-                            limit: 10,
+                            limit: elementsPerPage,
                             sort: {_id: 1}}, function(err, devices) {
     if (err) {
       indexContent.type = 'danger';
@@ -101,6 +105,7 @@ deviceListController.index = function(req, res) {
     let releases = getReleases();
     status.devices = getStatus(devices.docs);
     indexContent.username = req.user.name;
+    indexContent.elementsperpage = req.user.maxElementsPerPage;
     indexContent.devices = devices.docs;
     indexContent.releases = releases;
     indexContent.status = status;
@@ -199,6 +204,7 @@ deviceListController.searchDeviceReg = function(req, res) {
   let queryArray = [];
   let indexContent = {};
   let reqPage = 1;
+  let elementsPerPage = 10;
 
   for (let property in DeviceModel.schema.paths) {
     if (DeviceModel.schema.paths.hasOwnProperty(property) &&
@@ -214,13 +220,16 @@ deviceListController.searchDeviceReg = function(req, res) {
   if (req.query.page) {
     reqPage = req.query.page;
   }
+  if (req.user.maxElementsPerPage) {
+    elementsPerPage = req.user.maxElementsPerPage;
+  }
   // Counters
   let status = {};
   getOnlineCount(query, status);
   getTotalCount(query, status);
 
   DeviceModel.paginate(query, {page: reqPage,
-                            limit: 10,
+                            limit: elementsPerPage,
                             sort: {_id: 1}}, function(err, matchedDevices) {
     if (err) {
       indexContent.type = 'danger';
@@ -230,6 +239,7 @@ deviceListController.searchDeviceReg = function(req, res) {
     let releases = getReleases();
     status.devices = getStatus(matchedDevices.docs);
     indexContent.username = req.user.name;
+    indexContent.elementsperpage = req.user.maxElementsPerPage;
     indexContent.devices = matchedDevices.docs;
     indexContent.releases = releases;
     indexContent.status = status;
