@@ -117,6 +117,22 @@ $(document).ready(function() {
     $(hideId).show();
   });
 
+  $('#btn-elements-per-page').click(function(event) {
+    $.ajax({
+      type: 'POST',
+      url: '/user/elementsperpage',
+      traditional: true,
+      data: {elementsperpage: $('#input-elements-pp').val()},
+      success: function(res) {
+        if (res.type == 'success') {
+          window.location.reload();
+        } else {
+          displayAlertMsg(res);
+        }
+      },
+    });
+  });
+
   $('#ext_ref_type a').on('click', refreshExtRefType);
   $('.ext-ref-input').mask('000.000.000-009').keyup();
 });
