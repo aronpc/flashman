@@ -85,11 +85,24 @@ block content
                   span &nbsp Adicionar
 
   .row.justify-content-center
-    .col-12.mt-1
+    .col-12.mt-4
       if ! devices || devices.length == 0
-        h3.mt-5.text-center Nenhum dispositivo registrado
+        h3.mt-2.text-center Nenhum dispositivo registrado
       else
-        .card.mt-3
+        .row
+          .col-3.offset-9
+            .md-form.input-group
+              input.form-control.col-xs-10(
+                type="text",
+                id="input-elements-pp",
+                maxlength="4",
+                value=elementsperpage)
+              label Registros por página
+              .input-group-btn
+                button.btn.teal.lighten-2.mr-0.my-0(
+                  type="button",
+                  id="btn-elements-per-page") Ok
+        .card.mt-2
           .card-body
             .table-responsive
               table.table.devices-table

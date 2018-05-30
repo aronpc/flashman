@@ -1,27 +1,28 @@
 
-var mongoose = require('mongoose');
-var bcrypt = require('bcrypt-nodejs');
+const mongoose = require('mongoose');
+const bcrypt = require('bcrypt-nodejs');
 
-var userSchema = new mongoose.Schema({
-    name : {
+let userSchema = new mongoose.Schema({
+    name: {
         type: String,
         unique: true,
-        required: true
+        required: true,
     },
-    password : {
+    password: {
         type: String,
         unique: true,
-        required: true
+        required: true,
     },
-    lastLogin: { type: Date },
-    createdAt: { type: Date, default: new Date()},
-    autoUpdate: { type: Boolean, default: true },
-    is_superuser: {type: Boolean, default: false}
+    lastLogin: {type: Date},
+    createdAt: {type: Date, default: new Date()},
+    autoUpdate: {type: Boolean, default: true},
+    maxElementsPerPage: {type: Number, default: 10},
+    is_superuser: {type: Boolean, default: false},
 });
 
 // Execute before each user.save() call
 userSchema.pre('save', function(callback) {
-  var user = this;
+  let user = this;
   // Break out if the password hasn't changed
   if (!user.isModified('password')) return callback();
   // Password changed so we need to hash it again
