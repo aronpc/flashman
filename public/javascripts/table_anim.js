@@ -58,6 +58,13 @@ let refreshExtRefType = function(event) {
 };
 
 $(document).ready(function() {
+  // Enable tags on search input
+  [].forEach.call(document.querySelectorAll('input[type="tags"]'), tagsInput);
+  // The code below related to tags is because the tags-input plugin resets
+  // all classes after loading
+  $('.tags-input').addClass('form-control');
+  $('.tags-input input').css('cssText', 'margin-top: 10px !important;');
+
   $('.fa-chevron-right').parents('td').click(function(event) {
     let row = $(event.target).parents('tr');
     let index = row.data('index');
