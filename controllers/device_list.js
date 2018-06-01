@@ -211,12 +211,26 @@ deviceListController.searchDeviceReg = function(req, res) {
     let queryInput = new RegExp(queryContents[idx], 'i');
     let queryArray = [];
 
-    for (let property in DeviceModel.schema.paths) {
-      if (DeviceModel.schema.paths.hasOwnProperty(property) &&
-          DeviceModel.schema.paths[property].instance === 'String') {
-        let field = {};
-        field[property] = queryInput;
-        queryArray.push(field);
+    if (queryContents[idx].toLowerCase() == 'online') {
+      let field = {};
+      let yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      field['last_contact'] = {$gte: yesterday};
+      queryArray.push(field);
+    } else if (queryContents[idx].toLowerCase() == 'offline') {
+      let field = {};
+      let yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      field['last_contact'] = {$lt: yesterday};
+      queryArray.push(field);
+    } else {
+      for (let property in DeviceModel.schema.paths) {
+        if (DeviceModel.schema.paths.hasOwnProperty(property) &&
+            DeviceModel.schema.paths[property].instance === 'String') {
+          let field = {};
+          field[property] = queryInput;
+          queryArray.push(field);
+        }
       }
     }
     let query = {
