@@ -58,6 +58,13 @@ let refreshExtRefType = function(event) {
 };
 
 $(document).ready(function() {
+  // Enable tags on search input
+  [].forEach.call(document.querySelectorAll('input[type="tags"]'), tagsInput);
+  // The code below related to tags is because the tags-input plugin resets
+  // all classes after loading
+  $('.tags-input').addClass('form-control');
+  $('.tags-input input').css('cssText', 'margin-top: 10px !important;');
+
   $('.fa-chevron-right').parents('td').click(function(event) {
     let row = $(event.target).parents('tr');
     let index = row.data('index');
@@ -115,6 +122,22 @@ $(document).ready(function() {
     let formId = '#form-' + index.toString();
     $(formId).hide();
     $(hideId).show();
+  });
+
+  $('#btn-elements-per-page').click(function(event) {
+    $.ajax({
+      type: 'POST',
+      url: '/user/elementsperpage',
+      traditional: true,
+      data: {elementsperpage: $('#input-elements-pp').val()},
+      success: function(res) {
+        if (res.type == 'success') {
+          window.location.reload();
+        } else {
+          displayAlertMsg(res);
+        }
+      },
+    });
   });
 
   $('#ext_ref_type a').on('click', refreshExtRefType);

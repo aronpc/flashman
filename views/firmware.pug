@@ -2,14 +2,14 @@ extends layout
 
 block content
   .card.mt-4
-    h4.card-header.orange.darken-2.white-text
+    h4.card-header.teal.lighten-2.white-text
       span.card-title Upload de novo firmware
     .card-body
       form(method="post", action="/firmware/upload", name="firmwareform")
         .col
           .input-group
             label.input-group-btn
-              label.btn.orange.darken-2.btn-file
+              label.btn.teal.lighten-2.btn-file
                 | Arquivo...
                 input.form-control(type="file", name="firmwarefile",
                                    style="display:none;")
@@ -17,10 +17,15 @@ block content
 
         .col.mt-4.text-center
           .form-buttons
-            button.btn.btn-lg.orange.darken-2(type="submit") Upload
+            button.btn.btn-lg.teal.lighten-2(
+              type="submit",
+              id="btn-submit-upload"
+            )
+              .fas.fa-upload.fa-lg(id="btn-submit-icon")
+              span &nbsp Upload
 
   .card.mt-4
-    h4.card-header.orange.darken-2.white-text
+    h4.card-header.teal.lighten-2.white-text
       .fas.fa-hdd.fa-lg
       span &nbsp Firmwares
     .card-body
@@ -61,7 +66,7 @@ block content
               -   if (i == 1 || i == pages || ((i >= cPage-delta) && (i <= cPage+delta))) {
               -     if (i == page)
                       li.page-item.active
-                        a.page-link.orange.darken-2(href="#") #{i}
+                        a.page-link.teal.lighten-2(href="#") #{i}
               -     else {
               -       if (i == pages && (cPage+delta <= pages-delta)) {
                         li.page-item

@@ -21,6 +21,11 @@
   font-size: 10px;
 }
 
+.md-addon {
+  background-color: transparent;
+  border-color: transparent;
+}
+
 /* Rounded sliders */
 
 .switch {
@@ -57,11 +62,11 @@
 }
 
 input:checked + .slider {
-  background-color: #f57c00;
+  background-color: #4db6ac;
 }
 
 input:focus + .slider {
-  box-shadow: 0 0 1px #337ab7;
+  box-shadow: 0 0 1px #4db6ac;
 }
 
 input:checked + .slider:before {
@@ -79,6 +84,7 @@ input:checked + .slider:before {
 }
 
 /* File input */
+
 .btn-file {
   position: relative;
   overflow: hidden;
@@ -97,4 +103,16 @@ input:checked + .slider:before {
   background: white;
   cursor: inherit;
   display: block;
+}
+
+.flashbox-color {
+  background-color: #4db6ac!important;
+}
+
+/* tags search input */
+
+.tags-input {
+  border: none;
+  border-bottom: 1px solid #ced4da;
+  box-shadow: none;
 }

@@ -81,9 +81,13 @@ const returnObjOrEmptyStr = function(query) {
 deviceListController.index = function(req, res) {
   let indexContent = {};
   let reqPage = 1;
+  let elementsPerPage = 10;
 
   if (req.query.page) {
     reqPage = req.query.page;
+  }
+  if (req.user.maxElementsPerPage) {
+    elementsPerPage = req.user.maxElementsPerPage;
   }
   // Counters
   let status = {};
@@ -91,7 +95,7 @@ deviceListController.index = function(req, res) {
   getTotalCount({}, status);
 
   DeviceModel.paginate({}, {page: reqPage,
-                            limit: 10,
+                            limit: elementsPerPage,
                             sort: {_id: 1}}, function(err, devices) {
     if (err) {
       indexContent.type = 'danger';
@@ -101,6 +105,7 @@ deviceListController.index = function(req, res) {
     let releases = getReleases();
     status.devices = getStatus(devices.docs);
     indexContent.username = req.user.name;
+    indexContent.elementsperpage = req.user.maxElementsPerPage;
     indexContent.devices = devices.docs;
     indexContent.releases = releases;
     indexContent.status = status;
@@ -108,12 +113,18 @@ deviceListController.index = function(req, res) {
     indexContent.pages = devices.pages;
 
     User.findOne({name: req.user.name}, function(err, user) {
-      if (err || !user) { indexContent.superuser = false; }
-      else { indexContent.superuser = user.is_superuser; }
+      if (err || !user) {
+        indexContent.superuser = false;
+      } else {
+        indexContent.superuser = user.is_superuser;
+      }
 
       Config.findOne({is_default: true}, function(err, matchedConfig) {
-        if (err || !matchedConfig) { indexContent.update = false; }
-        else { indexContent.update = matchedConfig.hasUpdate; }
+        if (err || !matchedConfig) {
+          indexContent.update = false;
+        } else {
+          indexContent.update = matchedConfig.hasUpdate;
+        }
 
         return res.render('index', indexContent);
       });
@@ -202,32 +213,62 @@ deviceListController.changeAllUpdates = function(req, res) {
 };
 
 deviceListController.searchDeviceReg = function(req, res) {
-  let queryInput = new RegExp(req.query.content, 'i');
-  let queryArray = [];
+  let finalQuery = {};
+  let finalQueryArray = [];
   let indexContent = {};
   let reqPage = 1;
+  let elementsPerPage = 10;
+  let queryContents = req.query.content.split(',');
 
-  for (let property in DeviceModel.schema.paths) {
-    if (DeviceModel.schema.paths.hasOwnProperty(property) &&
-        DeviceModel.schema.paths[property].instance === 'String') {
+  for (let idx=0; idx < queryContents.length; idx++) {
+    let queryInput = new RegExp(queryContents[idx], 'i');
+    let queryArray = [];
+
+    if (queryContents[idx].toLowerCase() == 'online') {
       let field = {};
-      field[property] = queryInput;
+      let yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      field['last_contact'] = {$gte: yesterday};
       queryArray.push(field);
+    } else if (queryContents[idx].toLowerCase() == 'offline') {
+      let field = {};
+      let yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      field['last_contact'] = {$lt: yesterday};
+      queryArray.push(field);
+    } else {
+      for (let property in DeviceModel.schema.paths) {
+        if (DeviceModel.schema.paths.hasOwnProperty(property) &&
+            DeviceModel.schema.paths[property].instance === 'String') {
+          let field = {};
+          field[property] = queryInput;
+          queryArray.push(field);
+        }
+      }
     }
+    let query = {
+      $or: queryArray,
+    };
+    finalQueryArray.push(query);
   }
-  let query = {
-    $or: queryArray,
+
+  finalQuery = {
+    $and: finalQueryArray,
   };
+
   if (req.query.page) {
     reqPage = req.query.page;
   }
+  if (req.user.maxElementsPerPage) {
+    elementsPerPage = req.user.maxElementsPerPage;
+  }
   // Counters
   let status = {};
-  getOnlineCount(query, status);
-  getTotalCount(query, status);
+  getOnlineCount(finalQuery, status);
+  getTotalCount(finalQuery, status);
 
-  DeviceModel.paginate(query, {page: reqPage,
-                            limit: 10,
+  DeviceModel.paginate(finalQuery, {page: reqPage,
+                            limit: elementsPerPage,
                             sort: {_id: 1}}, function(err, matchedDevices) {
     if (err) {
       indexContent.type = 'danger';
@@ -237,6 +278,7 @@ deviceListController.searchDeviceReg = function(req, res) {
     let releases = getReleases();
     status.devices = getStatus(matchedDevices.docs);
     indexContent.username = req.user.name;
+    indexContent.elementsperpage = req.user.maxElementsPerPage;
     indexContent.devices = matchedDevices.docs;
     indexContent.releases = releases;
     indexContent.status = status;
@@ -245,12 +287,18 @@ deviceListController.searchDeviceReg = function(req, res) {
     indexContent.lastquery = req.query.content;
 
     User.findOne({name: req.user.name}, function(err, user) {
-      if (err || !user) { indexContent.superuser = false; }
-      else { indexContent.superuser = user.is_superuser; }
+      if (err || !user) {
+        indexContent.superuser = false;
+      } else {
+        indexContent.superuser = user.is_superuser;
+      }
 
       Config.findOne({is_default: true}, function(err, matchedConfig) {
-        if (err || !matchedConfig) { indexContent.update = false; }
-        else { indexContent.update = matchedConfig.hasUpdate; }
+        if (err || !matchedConfig) {
+          indexContent.update = false;
+        } else {
+          indexContent.update = matchedConfig.hasUpdate;
+        }
 
         return res.render('index', indexContent);
       });
@@ -261,7 +309,8 @@ deviceListController.searchDeviceReg = function(req, res) {
 deviceListController.delDeviceReg = function(req, res) {
   DeviceModel.remove({_id: req.params.id}, function(err) {
     if (err) {
-      return res.status(500).json({'message': 'device cannot be removed'});
+      return res.status(500).json({'success': false,
+                                   'message': 'device cannot be removed'});
     }
     return res.status(200).json({'success': true});
   });
@@ -274,11 +323,14 @@ deviceListController.delDeviceReg = function(req, res) {
 deviceListController.getDeviceReg = function(req, res) {
   DeviceModel.findById(req.params.id, function(err, matchedDevice) {
     if (err) {
-      return res.status(500).json({'message': 'internal server error'});
+      return res.status(500).json({'success': false,
+                                   'message': 'internal server error'});
     }
     if (matchedDevice == null) {
-      return res.status(404).json({'message': 'device not found'});
+      return res.status(404).json({'success': false,
+                                   'message': 'device not found'});
     }
+    matchedDevice.success = true;
     return res.status(200).json(matchedDevice);
   });
 };
@@ -286,13 +338,15 @@ deviceListController.getDeviceReg = function(req, res) {
 deviceListController.setDeviceReg = function(req, res) {
   DeviceModel.findById(req.params.id, function(err, matchedDevice) {
     if (err) {
-      return res.status(200).json({
+      return res.status(500).json({
+        success: false,
         message: 'internal server error',
         errors: [],
       });
     }
     if (matchedDevice == null) {
       return res.status(404).json({
+        success: false,
         message: 'device not found',
         errors: [],
       });
@@ -304,17 +358,17 @@ deviceListController.setDeviceReg = function(req, res) {
       let validator = new Validator();
 
       let errors = [];
-      let pppoe_user = returnObjOrEmptyStr(content.pppoe_user).trim();
-      let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim();
+      let pppoeUser = returnObjOrEmptyStr(content.pppoe_user).trim();
+      let pppoePassword = returnObjOrEmptyStr(content.pppoe_password).trim();
       let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
       let password = returnObjOrEmptyStr(content.wifi_password).trim();
       let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
-      let pppoe = (pppoe_user !== '' && pppoe_password !== '');
+      let pppoe = (pppoeUser !== '' && pppoePassword !== '');
 
       let genericValidate = function(field, func, key) {
-        let valid_field = func(field);
-        if (!valid_field.valid) {
-          valid_field.err.forEach(function(error) {
+        let validField = func(field);
+        if (!validField.valid) {
+          validField.err.forEach(function(error) {
             let obj = {};
             obj[key] = error;
             errors.push(obj);
@@ -324,8 +378,9 @@ deviceListController.setDeviceReg = function(req, res) {
 
       // Validate fields
       if (pppoe) {
-        genericValidate(pppoe_user, validator.validateUser, 'pppoe_user');
-        genericValidate(pppoe_password, validator.validatePassword, 'pppoe_password');
+        genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
+        genericValidate(pppoePassword, validator.validatePassword,
+                        'pppoe_password');
       }
       genericValidate(ssid, validator.validateSSID, 'ssid');
       genericValidate(password, validator.validateWifiPassword, 'password');
@@ -333,23 +388,23 @@ deviceListController.setDeviceReg = function(req, res) {
 
       if (errors.length < 1) {
         if (content.hasOwnProperty('pppoe_user')) {
-          matchedDevice.pppoe_user = content.pppoe_user;
+          matchedDevice.pppoe_user = pppoeUser;
           updateParameters = true;
         }
         if (content.hasOwnProperty('pppoe_password')) {
-          matchedDevice.pppoe_password = content.pppoe_password;
+          matchedDevice.pppoe_password = pppoePassword;
           updateParameters = true;
         }
         if (content.hasOwnProperty('wifi_ssid')) {
-          matchedDevice.wifi_ssid = content.wifi_ssid;
+          matchedDevice.wifi_ssid = ssid;
           updateParameters = true;
         }
         if (content.hasOwnProperty('wifi_password')) {
-          matchedDevice.wifi_password = content.wifi_password;
+          matchedDevice.wifi_password = password;
           updateParameters = true;
         }
         if (content.hasOwnProperty('wifi_channel')) {
-          matchedDevice.wifi_channel = content.wifi_channel;
+          matchedDevice.wifi_channel = channel;
           updateParameters = true;
         }
         if (content.hasOwnProperty('external_reference')) {
@@ -362,28 +417,31 @@ deviceListController.setDeviceReg = function(req, res) {
 
         matchedDevice.save();
 
-      if(process.env.FLM_MQTT_BROKER) {
-        // Send notification to device using external MQTT server
-        let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
-        client.on('connect', function() {
-          client.publish(
-            'flashman/update/' + matchedDevice._id,
-            '1', {qos: 1, retain: true}); // topic, msg, options
-          client.end();
-        });
-      } else {
-        mqtt.anlix_message_router_update(matchedDevice._id);
-      }
+        if(process.env.FLM_MQTT_BROKER) {
+          // Send notification to device using external MQTT server
+          let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
+          client.on('connect', function() {
+            client.publish(
+              'flashman/update/' + matchedDevice._id,
+              '1', {qos: 1, retain: true}); // topic, msg, options
+            client.end();
+          });
+        } else {
+          mqtt.anlix_message_router_update(matchedDevice._id);
+        }
 
+        matchedDevice.success = true;
         return res.status(200).json(matchedDevice);
       } else {
-        return res.status(200).json({
+        return res.status(500).json({
+          success: false,
           message: 'Erro validando os campos, ver campo "errors"',
           errors: errors,
         });
       }
     } else {
-      return res.status(200).json({
+      return res.status(500).json({
+        success: false,
         message: 'error parsing json',
         errors: [],
       });
@@ -400,17 +458,17 @@ deviceListController.createDeviceReg = function(req, res) {
 
     let errors = [];
     let release = returnObjOrEmptyStr(content.release).trim();
-    let pppoe_user = returnObjOrEmptyStr(content.pppoe_user).trim();
-    let pppoe_password = returnObjOrEmptyStr(content.pppoe_password).trim();
+    let pppoeUser = returnObjOrEmptyStr(content.pppoe_user).trim();
+    let pppoePassword = returnObjOrEmptyStr(content.pppoe_password).trim();
     let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
     let password = returnObjOrEmptyStr(content.wifi_password).trim();
     let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
-    let pppoe = (pppoe_user !== '' && pppoe_password !== '');
+    let pppoe = (pppoeUser !== '' && pppoePassword !== '');
 
     let genericValidate = function(field, func, key) {
-      let valid_field = func(field);
-      if (!valid_field.valid) {
-        valid_field.err.forEach(function(error) {
+      let validField = func(field);
+      if (!validField.valid) {
+        validField.err.forEach(function(error) {
           let obj = {};
           obj[key] = error;
           errors.push(obj);
@@ -421,8 +479,9 @@ deviceListController.createDeviceReg = function(req, res) {
     // Validate fields
     genericValidate(macAddr, validator.validateMac, 'mac');
     if (pppoe) {
-      genericValidate(pppoe_user, validator.validateUser, 'pppoe_user');
-      genericValidate(pppoe_password, validator.validatePassword, 'pppoe_password');
+      genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
+      genericValidate(pppoePassword, validator.validatePassword,
+                      'pppoe_password');
     }
     genericValidate(ssid, validator.validateSSID, 'ssid');
     genericValidate(password, validator.validateWifiPassword, 'password');
@@ -431,6 +490,7 @@ deviceListController.createDeviceReg = function(req, res) {
     DeviceModel.findById(macAddr, function(err, matchedDevice) {
       if (err) {
         return res.status(500).json({
+          success: false,
           message: 'Erro interno do servidor',
           errors: errors,
         });
@@ -444,8 +504,8 @@ deviceListController.createDeviceReg = function(req, res) {
             'external_reference': extReference,
             'model': '',
             'release': release,
-            'pppoe_user': pppoe_user,
-            'pppoe_password': pppoe_password,
+            'pppoe_user': pppoeUser,
+            'pppoe_password': pppoePassword,
             'wifi_ssid': ssid,
             'wifi_password': password,
             'wifi_channel': channel,
@@ -455,7 +515,8 @@ deviceListController.createDeviceReg = function(req, res) {
           });
           newDeviceModel.save(function(err) {
             if (err) {
-              return res.status(200).json({
+              return res.status(500).json({
+                success: false,
                 message: 'Erro ao salvar registro',
                 errors: errors,
               });
@@ -464,7 +525,8 @@ deviceListController.createDeviceReg = function(req, res) {
             }
           });
         } else {
-          return res.status(200).json({
+          return res.status(500).json({
+            success: false,
             message: 'Erro validando os campos, ver campo \"errors\"',
             errors: errors,
           });
@@ -472,7 +534,8 @@ deviceListController.createDeviceReg = function(req, res) {
       }
     });
   } else {
-    return res.status(200).json({
+    return res.status(500).json({
+      success: false,
       message: 'Erro no json recebido',
       errors: [],
     });

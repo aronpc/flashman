@@ -10,6 +10,32 @@ userController.changePassword = function(req, res) {
                       type: 'danger'});
 };
 
+userController.changeElementsPerPage = function(req, res) {
+  // Use the User model to find a specific user
+  User.findById(req.user._id, function(err, user) {
+    if (err) {
+      return res.json({
+        type: 'danger',
+        message: 'Erro ao encontrar usuário',
+      });
+    }
+
+    user.maxElementsPerPage = req.body.elementsperpage;
+    user.save(function(err) {
+      if (err) {
+        return res.json({
+          type: 'danger',
+          message: 'Erro gravar alteração',
+        });
+      }
+      return res.json({
+        type: 'success',
+        message: 'Alteração feita com sucesso!',
+      });
+    });
+  });
+};
+
 userController.postUser = function(req, res) {
   if (req.user.is_superuser) {
     let user = new User({
@@ -19,8 +45,8 @@ userController.postUser = function(req, res) {
     });
     user.save(function(err) {
       if (err) {
-return res.json(err);
-}
+        return res.json(err);
+      }
       return res.json({message: 'User successfully created!'});
     });
   } else {
