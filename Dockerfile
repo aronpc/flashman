@@ -16,7 +16,7 @@ ENV FLM_ADM_PASS "flashman"
 
 WORKDIR /app
 
-COPY /app.js /LICENSE /package.json /docker/environment.config.json /docker/wait-for-it.sh /app/
+COPY /app.js /mqtts.js /LICENSE /package.json /docker/environment.config.json /docker/wait-for-it.sh /app/
 COPY /bin /app/bin
 COPY /controllers /app/controllers
 COPY /models /app/models
