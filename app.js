@@ -26,7 +26,7 @@ Config.findOne({is_default: true}, function(err, matchedConfig) {
   if (err || !matchedConfig) {
     let newConfig = new Config({
       is_default: true,
-      autoUpdate: true
+      autoUpdate: true,
     });
     newConfig.save();
   }
@@ -107,6 +107,9 @@ app.use('/scripts/mdbootstrap',
 app.use('/scripts/sweetalert2',
   express.static(path.join(__dirname, 'node_modules/sweetalert2/dist'))
 );
+app.use('/scripts/tags-input',
+  express.static(path.join(__dirname, 'node_modules/tags-input'))
+);
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -145,11 +148,11 @@ app.use(function(err, req, res, next) {
 });
 
 app.listen(3000, function() {
-  var rule = new schedule.RecurrenceRule();
+  let rule = new schedule.RecurrenceRule();
   rule.hour = 20;
   rule.minute = 0;
   // Schedule automatic update
-  var s = schedule.scheduleJob(rule, function() {
+  let s = schedule.scheduleJob(rule, function() {
     updater.update();
   });
   // Force an update check to alert user on app startup
