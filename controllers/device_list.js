@@ -2,12 +2,12 @@ const Validator = require('../public/javascripts/device_validator');
 const DeviceModel = require('../models/device');
 const User = require('../models/user');
 const Config = require('../models/config');
-const mqtt = require('mqtt');
+const mqtt = require('../mqtts');
+const extern_mqtt = require('mqtt');
 let deviceListController = {};
 
 const fs = require('fs');
 const imageReleasesDir = process.env.FLM_IMG_RELEASE_DIR;
-const mqttBrokerURL = process.env.FLM_MQTT_BROKER;
 
 const getReleases = function() {
   let releases = [];
@@ -139,14 +139,18 @@ deviceListController.changeUpdate = function(req, res) {
         return res.render('error', indexContent);
       }
 
-      // Send notification to device using MQTT
-      let client = mqtt.connect(mqttBrokerURL);
-      client.on('connect', function() {
-        client.publish(
-          'flashman/update/' + matchedDevice._id,
-          '1', {qos: 1, retain: true}); // topic, msg, options
-        client.end();
-      });
+      if(process.env.FLM_MQTT_BROKER) {
+        // Send notification to device using external MQTT server
+        let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
+        client.on('connect', function() {
+          client.publish(
+            'flashman/update/' + matchedDevice._id,
+            '1', {qos: 1, retain: true}); // topic, msg, options
+          client.end();
+        });
+      } else {
+        mqtt.anlix_message_router_update(matchedDevice._id);
+      }
 
       return res.status(200).json({'success': true});
     });
@@ -164,26 +168,35 @@ deviceListController.changeAllUpdates = function(req, res) {
       return res.render('error', indexContent);
     }
 
-    // Send notification to device using MQTT
-    let client = mqtt.connect(mqttBrokerURL);
-    client.on('connect', function() {
+    if(process.env.FLM_MQTT_BROKER) {
+      // Send notification to device using external MQTT server
+      let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
+      client.on('connect', function() {
+        for (let idx = 0; idx < matchedDevices.length; idx++) {
+          matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
+          matchedDevices[idx].do_update = form.do_update;
+          matchedDevices[idx].save();
+
+          client.publish(
+            'flashman/update/' + matchedDevices[idx]._id,
+            '1', {qos: 1, retain: true},
+            function(err) {
+              if (idx == (matchedDevices.length - 1)) {
+                client.end();
+              }
+            }
+          ); // topic, msg, options, callback
+        }
+      });
+    } else {
       for (let idx = 0; idx < matchedDevices.length; idx++) {
         matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
         matchedDevices[idx].do_update = form.do_update;
         matchedDevices[idx].save();
-
-        client.publish(
-          'flashman/update/' + matchedDevices[idx]._id,
-          '1', {qos: 1, retain: true},
-          function(err) {
-            if (idx == (matchedDevices.length - 1)) {
-              client.end();
-            }
-          }
-        ); // topic, msg, options, callback
+        mqtt.anlix_message_router_update(matchedDevices[idx]._id);
       }
-    });
-
+    }
+      
     return res.status(200).json({'success': true});
   });
 };
@@ -349,14 +362,18 @@ deviceListController.setDeviceReg = function(req, res) {
 
         matchedDevice.save();
 
-        // Send notification to device using MQTT
-        let client = mqtt.connect(mqttBrokerURL);
+      if(process.env.FLM_MQTT_BROKER) {
+        // Send notification to device using external MQTT server
+        let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
         client.on('connect', function() {
           client.publish(
             'flashman/update/' + matchedDevice._id,
             '1', {qos: 1, retain: true}); // topic, msg, options
           client.end();
         });
+      } else {
+        mqtt.anlix_message_router_update(matchedDevice._id);
+      }
 
         return res.status(200).json(matchedDevice);
       } else {
