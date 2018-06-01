@@ -200,23 +200,49 @@ deviceListController.changeAllUpdates = function(req, res) {
 };
 
 deviceListController.searchDeviceReg = function(req, res) {
-  let queryInput = new RegExp(req.query.content, 'i');
-  let queryArray = [];
+  let finalQuery = {};
+  let finalQueryArray = [];
   let indexContent = {};
   let reqPage = 1;
   let elementsPerPage = 10;
+  let queryContents = req.query.content.split(',');
 
-  for (let property in DeviceModel.schema.paths) {
-    if (DeviceModel.schema.paths.hasOwnProperty(property) &&
-        DeviceModel.schema.paths[property].instance === 'String') {
+  for (let idx=0; idx < queryContents.length; idx++) {
+    let queryInput = new RegExp(queryContents[idx], 'i');
+    let queryArray = [];
+
+    if (queryContents[idx].toLowerCase() == 'online') {
       let field = {};
-      field[property] = queryInput;
+      let yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      field['last_contact'] = {$gte: yesterday};
       queryArray.push(field);
+    } else if (queryContents[idx].toLowerCase() == 'offline') {
+      let field = {};
+      let yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      field['last_contact'] = {$lt: yesterday};
+      queryArray.push(field);
+    } else {
+      for (let property in DeviceModel.schema.paths) {
+        if (DeviceModel.schema.paths.hasOwnProperty(property) &&
+            DeviceModel.schema.paths[property].instance === 'String') {
+          let field = {};
+          field[property] = queryInput;
+          queryArray.push(field);
+        }
+      }
     }
+    let query = {
+      $or: queryArray,
+    };
+    finalQueryArray.push(query);
   }
-  let query = {
-    $or: queryArray,
+
+  finalQuery = {
+    $and: finalQueryArray,
   };
+
   if (req.query.page) {
     reqPage = req.query.page;
   }
@@ -225,10 +251,10 @@ deviceListController.searchDeviceReg = function(req, res) {
   }
   // Counters
   let status = {};
-  getOnlineCount(query, status);
-  getTotalCount(query, status);
+  getOnlineCount(finalQuery, status);
+  getTotalCount(finalQuery, status);
 
-  DeviceModel.paginate(query, {page: reqPage,
+  DeviceModel.paginate(finalQuery, {page: reqPage,
                             limit: elementsPerPage,
                             sort: {_id: 1}}, function(err, matchedDevices) {
     if (err) {

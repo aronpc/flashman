@@ -21,6 +21,11 @@
   font-size: 10px;
 }
 
+.md-addon {
+  background-color: transparent;
+  border-color: transparent;
+}
+
 /* Rounded sliders */
 
 .switch {
@@ -79,6 +84,7 @@ input:checked + .slider:before {
 }
 
 /* File input */
+
 .btn-file {
   position: relative;
   overflow: hidden;
@@ -101,4 +107,12 @@ input:checked + .slider:before {
 
 .flashbox-color {
   background-color: #4db6ac!important;
+}
+
+/* tags search input */
+
+.tags-input {
+  border: none;
+  border-bottom: 1px solid #ced4da;
+  box-shadow: none;
 }

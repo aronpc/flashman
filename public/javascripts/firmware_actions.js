@@ -59,6 +59,10 @@ $(document).ready(function() {
 
   $('form[name=firmwareform]').submit(function() {
     if ($('input[name=firmwarefile]').val().trim()) {
+      $('#btn-submit-upload').prop('disabled', true);
+      $('#btn-submit-icon')
+        .removeClass('fa-upload')
+        .addClass('fa-spinner fa-pulse');
       $.ajax({
         type: 'POST',
         enctype: 'multipart/form-data',
@@ -69,6 +73,10 @@ $(document).ready(function() {
         cache: false,
         timeout: 600000,
         success: function(res) {
+          $('#btn-submit-upload').prop('disabled', false);
+          $('#btn-submit-icon')
+            .addClass('fa-upload')
+            .removeClass('fa-spinner fa-pulse');
           displayAlertMsg(res);
           if (res.type == 'success') {
             setTimeout(function() {
