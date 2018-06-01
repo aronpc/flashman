@@ -17,7 +17,12 @@ block content
 
         .col.mt-4.text-center
           .form-buttons
-            button.btn.btn-lg.teal.lighten-2(type="submit") Upload
+            button.btn.btn-lg.teal.lighten-2(
+              type="submit",
+              id="btn-submit-upload"
+            )
+              .fas.fa-upload.fa-lg(id="btn-submit-icon")
+              span &nbsp Upload
 
   .card.mt-4
     h4.card-header.teal.lighten-2.white-text
