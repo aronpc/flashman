@@ -139,6 +139,28 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
   });
 };
 
+deviceInfoController.registerMqtt = function(req, res) {
+  if (req.body.secret == req.app.locals.secret) {
+    DeviceModel.findById(req.body.id, function(err, matchedDevice) {
+      if (err) {
+        console.log("Attempt to register MQTT secret for device " + req.body.id + " failed: Cant get device profile.");
+        return res.status(400).json({is_registered: 0});
+      }
+      if (!matchedDevice) {
+        console.log("Attempt to register MQTT secret for device " + req.body.id + " failed: No device found.");
+        return res.status(404).json({is_registered: 0});
+      }
+      matchedDevice.mqtt_secret = req.body.mqttsecret;
+      matchedDevice.save();
+      console.log("Device " + req.body.id + " register MQTT secret successfully.");
+      return res.status(200).json({is_registered: 1});
+    });
+  } else {
+    console.log("Attempt to register MQTT secret for device " + req.body.id + " failed: App Secret not match!");
+    return res.status(401).json({is_registered: 0});
+  }
+};
+
 deviceInfoController.registerApp = function(req, res) {
   if (req.body.secret == req.app.locals.secret) {
     DeviceModel.findById(req.body.id, function(err, matchedDevice) {
