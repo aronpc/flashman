@@ -38,7 +38,7 @@ if (!process.env.FLM_MQTT_BROKER) {
 
 	var mqtts_domain = '';
 	var mqtts_options = {};
-  var mqtt_secure = false;
+  	var mqtt_secure = false;
 	if (process.env.FLM_MQTTS_DOMAIN) {
 	  mqtts_domain = process.env.FLM_MQTTS_DOMAIN;
 	} else {
@@ -113,6 +113,15 @@ if (!process.env.FLM_MQTT_BROKER) {
 	mqtt_server.listen(mqtts_port, function () {
 	  console.log('MQTT started and listening on port ' + mqtts_port.toString());
 	})
+
+	if (process.env.FLM_TEMPORARY_MQTT_BROKER_PORT) {
+		console.log();
+		var mqtt_server_tmp = require('net').createServer(mqtts.handle);
+		mqtt_server_tmp.listen(process.env.FLM_TEMPORARY_MQTT_BROKER_PORT, function () {
+	  		console.log('Using a TEMPORARY INSECURE MQTT server on port ' + process.env.FLM_TEMPORARY_MQTT_BROKER_PORT);
+		})
+	}
+
 }
 
 /* APP */

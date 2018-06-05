@@ -13,24 +13,46 @@ mqtts.on('clientDisconnect', function (client, err) {
 });
 
 mqtts.authenticate = function(client, username, password, cb) {
-  DeviceModel.findById(username, function(err, matchedDevice) {
-    if (err) {
-      console.log('MQTT AUTH ERROR: Device '+username+' not found: ' + err);
+  var needauth = true;
+  if(process.env.FLM_TEMPORARY_MQTT_BROKER_PORT) {
+    // Temporary disabled auth for old routers
+    if(client.id) {
+      if(client.id.startsWith("mosqsub")) {
+        console.log('MQTT AUTH on INSECURE SERVER: Device '+client.id);
+        cb(null, true);
+        needauth = false;
+      }
+    }
+  } 
+
+  if(needauth) {
+    if(!username) {
+      console.log('MQTT AUTH ERROR - Username not specified: Device '+client.id);
       var error = new Error('Auth error');
       error.returnCode = 2;
       cb(error, null);
     } else {
-      if (matchedDevice == null) {
-        console.log('MQTT AUTH ERROR: Device '+username+' internal error: ' + err);
-        var error = new Error('Auth error');
-        error.returnCode = 2;
-        cb(error, null);
-      } else {
-        console.log("MQTT AUTH OK: id "+username);
-        cb(null, password == matchedDevice.mqtt_secret)
-      }
+
+      DeviceModel.findById(username, function(err, matchedDevice) {
+        if (err) {
+          console.log('MQTT AUTH ERROR: Device '+username+' not found: ' + err);
+          var error = new Error('Auth error');
+          error.returnCode = 2;
+          cb(error, null);
+        } else {
+          if (matchedDevice == null) {
+            console.log('MQTT AUTH ERROR: Device '+username+' internal error: ' + err);
+            var error = new Error('Auth error');
+            error.returnCode = 2;
+            cb(error, null);
+          } else {
+            console.log("MQTT AUTH OK: id "+username);
+            cb(null, password == matchedDevice.mqtt_secret)
+          }
+        }
+      });
     }
-  });
+  }
 }
 
 mqtts.anlix_message_router_update = function(id) {
