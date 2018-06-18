@@ -156,7 +156,7 @@ deviceInfoController.registerMqtt = function(req, res) {
       return res.status(200).json({is_registered: 1});
     });
   } else {
-    console.log("Attempt to register MQTT secret for device " + req.body.id + " failed: App Secret not match!");
+    console.log("Attempt to register MQTT secret for device " + req.body.id + " failed: Client Secret not match!");
     return res.status(401).json({is_registered: 0});
   }
 };

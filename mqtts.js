@@ -26,28 +26,32 @@ mqtts.authenticate = function(client, username, password, cb) {
   } 
 
   if(needauth) {
+    var error = new Error('Auth error');
     if(!username) {
       console.log('MQTT AUTH ERROR - Username not specified: Device '+client.id);
-      var error = new Error('Auth error');
-      error.returnCode = 2;
+      error.returnCode = -2;
       cb(error, null);
     } else {
 
       DeviceModel.findById(username, function(err, matchedDevice) {
         if (err) {
-          console.log('MQTT AUTH ERROR: Device '+username+' not found: ' + err);
-          var error = new Error('Auth error');
-          error.returnCode = 2;
+          console.log('MQTT AUTH ERROR: Device '+username+' internal error: ' + err);
+          error.returnCode = -3;
           cb(error, null);
         } else {
           if (matchedDevice == null) {
-            console.log('MQTT AUTH ERROR: Device '+username+' internal error: ' + err);
-            var error = new Error('Auth error');
-            error.returnCode = 2;
+            console.log('MQTT AUTH ERROR: Device '+username+' not registred!');
+            error.returnCode = -4;
             cb(error, null);
           } else {
-            console.log("MQTT AUTH OK: id "+username);
-            cb(null, password == matchedDevice.mqtt_secret)
+            if(password == matchedDevice.mqtt_secret) {
+              console.log("MQTT AUTH OK: id "+username);
+              cb(null, true);
+            } else {
+              console.log('MQTT AUTH ERROR: Device '+username+' wrong password!');
+              error.returnCode = -5;
+              cb(error, null);
+            }
           }
         }
       });

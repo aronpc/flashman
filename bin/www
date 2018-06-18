@@ -93,8 +93,6 @@ function onListening() {
   debug('Listening on ' + bind);
 }
 
-
-
 /* MQTTS */
 function getDomainACMECerts(acme, domain_name) {
   var opts;
@@ -128,6 +126,31 @@ function getDomainACMECerts(acme, domain_name) {
     console.log('No Certificate found for domain!');
   else
     console.log('Using Certificate for domain '+domain_name+' from ACME file');
+
+  return opts;
+}
+
+function getFileCerts(KeyDir) {
+  var opts;
+  try {
+    opts = tls.createSecureContext({
+        key: fs.readFileSync(KeyDir+"/key.pem"),
+        cert: fs.readFileSync(KeyDir+"/cert.pem")
+    });
+  } catch (err) {
+    if (err.code === 'ENOENT') {
+      console.log('MQTT KEY or CERT file not found!');
+    } else if (err.code === 'EACCES') {
+      console.log('Cannot open MQTT KEY or CERT file!');
+    } else {
+      throw err;
+    }
+  }
+
+  if(opts === undefined) 
+    console.log('No Certification files found!');
+  else
+    console.log('Using KEY and CERT files from '+KeyDir+'!');
 
   return opts;
 }
@@ -177,30 +200,13 @@ if (!process.env.FLM_MQTT_BROKER) {
     mqtt_secure = true;
   } else {
     console.log('ACME file not specified!');
-    if(process.env.FLM_KEY_MQTT_FILE) {
-      if(process.env.FLM_CERT_MQTT_FILE) {
-        try {
-          mqtts_options = tls.createSecureContext({
-              key: fs.readFileSync(process.env.FLM_KEY_MQTT_FILE),
-              cert: fs.readFileSync(process.env.FLM_CERT_MQTT_FILE)
-          });
-          mqtt_secure = true;
-          mqtt_external_files_CRT = true;
-          console.log('Using KEY ('+process.env.FLM_KEY_MQTT_FILE+') and CERT ('+process.env.FLM_CERT_MQTT_FILE+') files!');
-        } catch (err) {
-          if (err.code === 'ENOENT') {
-            console.log('MQTT KEY or CERT file not found!');
-          } else if (err.code === 'EACCES') {
-            console.log('Cannot open MQTT KEY or CERT file!');
-          } else {
-            throw err;
-          }
-        }
-      } else {
-        console.log("MQTT Certificate file not specified")
-      }
+    if(process.env.FLM_CERT_MQTT_DIR) {
+      mqtts_options = getFileCerts(process.env.FLM_CERT_MQTT_DIR);
+      
+      mqtt_external_files_CRT = true;
+      mqtt_secure = true;
     } else {
-      console.log("MQTT Key file not specified")
+      console.log("MQTT Certificate directory not specified!")
     }
   }
 
@@ -228,14 +234,34 @@ if (!process.env.FLM_MQTT_BROKER) {
     // Install a watcher for file changes
     // Restart the service when certificate changes
     if (mqtt_external_files_CRT) {
-      console.log('Watching for file changes on '+process.env.FLM_CERT_MQTT_FILE);
-      fs.watch(process.env.FLM_CERT_MQTT_FILE, (event, filename) => {
+      if(!mqtts_options) {
+        if (!fs.existsSync(process.env.FLM_CERT_MQTT_DIR)){
+          console.log('Creating certificate directory '+process.env.FLM_CERT_MQTT_DIR+' ...');
+          fs.mkdirSync(process.env.FLM_CERT_MQTT_DIR);
+          fs.closeSync(fs.openSync(process.env.FLM_CERT_MQTT_DIR+'/cert.pem', 'w'));
+          fs.closeSync(fs.openSync(process.env.FLM_CERT_MQTT_DIR+'/key.pem', 'w'));
+        }
+      }
+
+      console.log('Watching for file changes on '+process.env.FLM_CERT_MQTT_DIR+'/cert.pem');
+      fs.watch(process.env.FLM_CERT_MQTT_DIR+'/cert.pem', (event, filename) => {
         if (filename && event ==='change') {
           console.log('Certificate file '+filename+' Changed. Reloading MQTTS Certificates...');
-          mqtts_options = tls.createSecureContext({
-            key: fs.readFileSync(process.env.FLM_KEY_MQTT_FILE),
-            cert: fs.readFileSync(process.env.FLM_CERT_MQTT_FILE)
-          });
+          var opts = getFileCerts(process.env.FLM_CERT_MQTT_DIR);
+          if(opts) {
+            mqtts_options = opts;
+            if(!mqtt_server){
+              console.log('Using MQTT Server with TLS (MQTTS)');
+              mqtt_server = tls.createServer( { 
+                SNICallback: (servername, cb) => { cb(null, mqtts_options);
+                }}, mqtts.handle);
+              mqtt_server.listen(mqtts_port, function () {
+                console.log('MQTT started and listening on port ' + mqtts_port.toString());
+              });
+            }
+          }
+          else
+            console.log('Error reading file certificates! Using old ones...');
         };
       });
     } else if (mqtt_external_files_ACME) {
