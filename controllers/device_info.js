@@ -90,7 +90,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.do_update_parameters = false;
 
         // Remove notification to device using MQTT
-        if(process.env.FLM_MQTT_BROKER) {
+        if (process.env.FLM_MQTT_BROKER) {
           // Send notification to device using external MQTT server
           let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
           client.on('connect', function() {
@@ -143,20 +143,20 @@ deviceInfoController.registerMqtt = function(req, res) {
   if (req.body.secret == req.app.locals.secret) {
     DeviceModel.findById(req.body.id, function(err, matchedDevice) {
       if (err) {
-        console.log("Attempt to register MQTT secret for device " + req.body.id + " failed: Cant get device profile.");
+        console.log('Attempt to register MQTT secret for device ' + req.body.id + ' failed: Cant get device profile.');
         return res.status(400).json({is_registered: 0});
       }
       if (!matchedDevice) {
-        console.log("Attempt to register MQTT secret for device " + req.body.id + " failed: No device found.");
+        console.log('Attempt to register MQTT secret for device ' + req.body.id + ' failed: No device found.');
         return res.status(404).json({is_registered: 0});
       }
       matchedDevice.mqtt_secret = req.body.mqttsecret;
       matchedDevice.save();
-      console.log("Device " + req.body.id + " register MQTT secret successfully.");
+      console.log('Device ' + req.body.id + ' register MQTT secret successfully.');
       return res.status(200).json({is_registered: 1});
     });
   } else {
-    console.log("Attempt to register MQTT secret for device " + req.body.id + " failed: Client Secret not match!");
+    console.log('Attempt to register MQTT secret for device ' + req.body.id + ' failed: Client Secret not match!');
     return res.status(401).json({is_registered: 0});
   }
 };
@@ -259,7 +259,7 @@ deviceInfoController.appSet = function(req, res) {
 
       matchedDevice.save();
 
-      if(process.env.FLM_MQTT_BROKER) {
+      if (process.env.FLM_MQTT_BROKER) {
         // Send notification to device using external MQTT server
         let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
         client.on('connect', function() {
