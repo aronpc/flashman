@@ -107,6 +107,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         return res.status(200).json({
           'do_update': matchedDevice.do_update,
           'release_id': returnObjOrEmptyStr(matchedDevice.release),
+          'connection_type': returnObjOrEmptyStr(matchedDevice.connection_type),
           'pppoe_user': returnObjOrEmptyStr(matchedDevice.pppoe_user),
           'pppoe_password': returnObjOrEmptyStr(matchedDevice.pppoe_password),
           'wifi_ssid': returnObjOrEmptyStr(matchedDevice.wifi_ssid),

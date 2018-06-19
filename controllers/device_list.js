@@ -150,7 +150,7 @@ deviceListController.changeUpdate = function(req, res) {
         return res.render('error', indexContent);
       }
 
-      if(process.env.FLM_MQTT_BROKER) {
+      if (process.env.FLM_MQTT_BROKER) {
         // Send notification to device using external MQTT server
         let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
         client.on('connect', function() {
@@ -179,7 +179,7 @@ deviceListController.changeAllUpdates = function(req, res) {
       return res.render('error', indexContent);
     }
 
-    if(process.env.FLM_MQTT_BROKER) {
+    if (process.env.FLM_MQTT_BROKER) {
       // Send notification to device using external MQTT server
       let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
       client.on('connect', function() {
@@ -207,7 +207,7 @@ deviceListController.changeAllUpdates = function(req, res) {
         mqtt.anlix_message_router_update(matchedDevices[idx]._id);
       }
     }
-      
+
     return res.status(200).json({'success': true});
   });
 };
@@ -358,6 +358,7 @@ deviceListController.setDeviceReg = function(req, res) {
       let validator = new Validator();
 
       let errors = [];
+      let connectionType = returnObjOrEmptyStr(content.connection_type).trim();
       let pppoeUser = returnObjOrEmptyStr(content.pppoe_user).trim();
       let pppoePassword = returnObjOrEmptyStr(content.pppoe_password).trim();
       let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
@@ -377,6 +378,13 @@ deviceListController.setDeviceReg = function(req, res) {
       };
 
       // Validate fields
+      if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
+          connectionType != '') {
+        return res.status(500).json({
+          success: false,
+          message: 'Tipo de conexão deve ser "pppoe" ou "dhcp"',
+        });
+      }
       if (pppoe) {
         genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
         genericValidate(pppoePassword, validator.validatePassword,
@@ -387,6 +395,10 @@ deviceListController.setDeviceReg = function(req, res) {
       genericValidate(channel, validator.validateChannel, 'channel');
 
       if (errors.length < 1) {
+        if (connectionType != '') {
+          matchedDevice.connection_type = connectionType;
+          updateParameters = true;
+        }
         if (content.hasOwnProperty('pppoe_user')) {
           matchedDevice.pppoe_user = pppoeUser;
           updateParameters = true;
@@ -417,7 +429,7 @@ deviceListController.setDeviceReg = function(req, res) {
 
         matchedDevice.save();
 
-        if(process.env.FLM_MQTT_BROKER) {
+        if (process.env.FLM_MQTT_BROKER) {
           // Send notification to device using external MQTT server
           let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
           client.on('connect', function() {
@@ -458,6 +470,7 @@ deviceListController.createDeviceReg = function(req, res) {
 
     let errors = [];
     let release = returnObjOrEmptyStr(content.release).trim();
+    let connectionType = returnObjOrEmptyStr(content.connection_type).trim();
     let pppoeUser = returnObjOrEmptyStr(content.pppoe_user).trim();
     let pppoePassword = returnObjOrEmptyStr(content.pppoe_password).trim();
     let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
@@ -478,6 +491,13 @@ deviceListController.createDeviceReg = function(req, res) {
 
     // Validate fields
     genericValidate(macAddr, validator.validateMac, 'mac');
+    if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
+        connectionType != '') {
+      return res.status(500).json({
+        success: false,
+        message: 'Tipo de conexão deve ser "pppoe" ou "dhcp"',
+      });
+    }
     if (pppoe) {
       genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
       genericValidate(pppoePassword, validator.validatePassword,
@@ -513,6 +533,9 @@ deviceListController.createDeviceReg = function(req, res) {
             'do_update': false,
             'do_update_parameters': false,
           });
+          if (connectionType != '') {
+            newDeviceModel.connection_type = connectionType;
+          }
           newDeviceModel.save(function(err) {
             if (err) {
               return res.status(500).json({

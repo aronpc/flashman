@@ -82,6 +82,7 @@ let validateEditDevice = function(event) {
   if (Object.keys(errors).every(hasNoErrors)) {
     // If no errors present, send to backend
     let data = {'content': {
+      'connection_type': (pppoe) ? 'pppoe' : 'dhcp',
       'pppoe_user': (pppoe) ? pppoeUser : '',
       'pppoe_password': (pppoe) ? pppoePassword : '',
       'wifi_ssid': ssid,
