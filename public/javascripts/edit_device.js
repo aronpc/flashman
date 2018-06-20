@@ -15,7 +15,7 @@ let renderEditErrors = function(errors) {
       errors[key].messages.forEach(function(msg) {
         message += msg + '<br />';
       });
-      let element = '<p class="red-text"><small>' + message + '</small></p>';
+      let element = '<h7 class="red-text">' + message + '</h7>';
       $(errors[key].field).parent().after(element);
     }
   }
@@ -117,7 +117,7 @@ let validateEditDevice = function(event) {
             let key = Object.keys(pair)[0];
             keyToError[key].messages.push(pair[key]);
           });
-          renderDeviceErrors(errors);
+          renderEditErrors(errors);
         }
       },
     });
