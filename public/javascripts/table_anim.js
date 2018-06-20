@@ -30,6 +30,8 @@ let loadDeviceInfoOnForm = function(row) {
   }
 
   $('#edit_connect_type-' + index.toString()).change(function() {
+    $('#edit_connect_type_warning-' + index.toString()).show();
+    $('#edit_connect_type-' + index.toString()).addClass('orange lighten-4');
     if ($('#edit_connect_type-' + index.toString()).val() === 'PPPoE') {
       $('#edit_pppoe_user-' + index.toString()).parent().show();
       $('#edit_pppoe_pass-' + index.toString()).parent().show();
