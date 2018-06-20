@@ -94,6 +94,11 @@ function onListening() {
 }
 
 /* MQTTS */
+var fs = require("fs");
+var mqtts_port = 1883;
+var mqtts_options;
+var mqtt_server;
+
 function getDomainACMECerts(acme, domain_name) {
   var opts;
   try {
@@ -155,11 +160,39 @@ function getFileCerts(KeyDir) {
   return opts;
 }
 
-if (!process.env.FLM_MQTT_BROKER) {
-  // No external MQTT server - use internal one
+function restart_watcher(interval, filename) {
+  fs.unwatchFile(filename)
+  watchChangeCert(interval, filename, false)
+}
 
-  var fs = require("fs");
-  var mqtts_port = 1883;
+function watchChangeCert(interval, filename, need_restart) {
+  fs.watchFile(filename+'/cert.pem', {interval: interval}, (current, previous) => {
+    if (current.mtime > previous.mtime) {
+      console.log('Certificate file '+filename+'/cert.pem Changed. Reloading MQTTS Certificates...');
+      var opts = getFileCerts(filename);
+      if(opts) {
+        mqtts_options = opts;
+        if(!mqtt_server) {
+          console.log('Using MQTT Server with TLS (MQTTS)');
+          mqtt_server = tls.createServer( { 
+            SNICallback: (servername, cb) => { cb(null, mqtts_options);
+            }}, mqtts.handle);
+          mqtt_server.listen(mqtts_port, function () {
+            console.log('MQTT started and listening on port ' + mqtts_port.toString());
+          });
+        }
+        if(need_restart)
+          restart_watcher(3600000, filename)
+      }
+      else
+        console.log('Error reading file certificates! Using old ones...');
+    };
+  });
+}
+
+if (!process.env.FLM_MQTT_BROKER) {
+
+  // No external MQTT server - use internal one
   if (process.env.FLM_MQTT_PORT) {
     mqtts_port = process.env.FLM_MQTT_PORT;
   } else {
@@ -182,7 +215,6 @@ if (!process.env.FLM_MQTT_BROKER) {
   }
 
   var mqtts_domain = '';
-  var mqtts_options;
   var mqtt_secure = false;
   var mqtt_external_files_CRT = false;
   var mqtt_external_files_ACME = false;
@@ -210,7 +242,6 @@ if (!process.env.FLM_MQTT_BROKER) {
     }
   }
 
-  var mqtt_server;
   if(mqtt_secure) {
     if(mqtts_options) {
         console.log('Using MQTT Server with TLS (MQTTS)');
@@ -244,26 +275,13 @@ if (!process.env.FLM_MQTT_BROKER) {
       }
 
       console.log('Watching for file changes on '+process.env.FLM_CERT_MQTT_DIR+'/cert.pem');
-      fs.watch(process.env.FLM_CERT_MQTT_DIR+'/cert.pem', (event, filename) => {
-        if (filename && event ==='change') {
-          console.log('Certificate file '+filename+' Changed. Reloading MQTTS Certificates...');
-          var opts = getFileCerts(process.env.FLM_CERT_MQTT_DIR);
-          if(opts) {
-            mqtts_options = opts;
-            if(!mqtt_server){
-              console.log('Using MQTT Server with TLS (MQTTS)');
-              mqtt_server = tls.createServer( { 
-                SNICallback: (servername, cb) => { cb(null, mqtts_options);
-                }}, mqtts.handle);
-              mqtt_server.listen(mqtts_port, function () {
-                console.log('MQTT started and listening on port ' + mqtts_port.toString());
-              });
-            }
-          }
-          else
-            console.log('Error reading file certificates! Using old ones...');
-        };
-      });
+      // If we do not have a key, wait for the key to start the server
+      // If we have a key, look every hour for changes
+      if(mqtt_server)
+        watchChangeCert(3600000, process.env.FLM_CERT_MQTT_DIR, false);
+      else
+        watchChangeCert(100, process.env.FLM_CERT_MQTT_DIR, true);
+      
     } else if (mqtt_external_files_ACME) {
       console.log('Watching for file changes on ACME file '+process.env.FLM_ACME_FILE);
       fs.watch(process.env.FLM_ACME_FILE, (event, filename) => {
