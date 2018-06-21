@@ -30,6 +30,8 @@ let loadDeviceInfoOnForm = function(row) {
   }
 
   $('#edit_connect_type-' + index.toString()).change(function() {
+    $('#edit_connect_type_warning-' + index.toString()).show();
+    $('#edit_connect_type-' + index.toString()).addClass('orange lighten-4');
     if ($('#edit_connect_type-' + index.toString()).val() === 'PPPoE') {
       $('#edit_pppoe_user-' + index.toString()).parent().show();
       $('#edit_pppoe_pass-' + index.toString()).parent().show();
@@ -45,8 +47,8 @@ let refreshExtRefType = function(event) {
   let selectedItem = $(event.target).closest('#ext_ref_type').find('.active');
   let inputField = $(event.target).closest('.input-group').find('input');
   selectedSpan.text($(this).text());
-  selectedItem.removeClass('active orange darken-2');
-  $(event.target).addClass('active orange darken-2');
+  selectedItem.removeClass('active teal lighten-2');
+  $(event.target).addClass('active teal lighten-2');
 
   if ($(this).text() == 'CPF') {
     inputField.mask('000.000.000-009').keyup();

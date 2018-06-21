@@ -270,7 +270,12 @@ block content
                               select.form-control(id="edit_connect_type-" + (index + 1))
                                 option(value="DHCP") DHCP
                                 option(value="PPPoE") PPPoE
-                          .row.justify-content-center.mt-3
+                              br
+                              h7.orange-text(id="edit_connect_type_warning-" + (index + 1),
+                                             style="display: none;")
+                                | Cuidado! Isso pode deixar o roteador inacessível
+                                | dependendo das configurações de rede do seu provedor
+                          .row.justify-content-center.mt-2
                             .col-6
                               label(for="edit_wifi_channel-" + (index + 1)) Canal do WiFi
                               select.form-control(id="edit_wifi_channel-" + (index + 1))
@@ -278,7 +283,7 @@ block content
                                 option(value="1") 1
                                 option(value="6") 6
                                 option(value="11") 11
-                          .row.justify-content-center
+                          .row.justify-content-center.mt-3
                             .col-6
                               .md-form
                                 input.col-xs-10.form-control(type="text",

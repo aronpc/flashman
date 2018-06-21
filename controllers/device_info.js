@@ -1,9 +1,9 @@
 
 const DeviceModel = require('../models/device');
-const mqtt = require('mqtt');
+const mqtt = require('../mqtts');
+const externMqtt = require('mqtt');
+const Validator = require('../public/javascripts/device_validator');
 let deviceInfoController = {};
-
-const mqttBrokerURL = process.env.FLM_MQTT_BROKER;
 
 const returnObjOrEmptyStr = function(query) {
   if (typeof query !== 'undefined' && query) {
@@ -14,36 +14,84 @@ const returnObjOrEmptyStr = function(query) {
 };
 
 const createRegistry = function(req, res) {
-  let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   if (typeof req.body.id == 'undefined') {
     return res.status(400);
   }
-  newDeviceModel = new DeviceModel({
-    '_id': req.body.id.trim().toUpperCase(),
-    'model': returnObjOrEmptyStr(req.body.model).trim() +
-             returnObjOrEmptyStr(req.body.model_ver).trim(),
-    'version': returnObjOrEmptyStr(req.body.version).trim(),
-    'release': returnObjOrEmptyStr(req.body.release_id).trim(),
-    'pppoe_user': returnObjOrEmptyStr(req.body.pppoe_user).trim(),
-    'pppoe_password': returnObjOrEmptyStr(req.body.pppoe_password).trim(),
-    'wifi_ssid': returnObjOrEmptyStr(req.body.wifi_ssid).trim(),
-    'wifi_password': returnObjOrEmptyStr(req.body.wifi_password).trim(),
-    'wifi_channel': returnObjOrEmptyStr(req.body.wifi_channel).trim(),
-    'wan_ip': returnObjOrEmptyStr(req.body.wan_ip).trim(),
-    'ip': ip,
-    'last_contact': Date.now(),
-    'do_update': false,
-    'do_update_parameters': false,
-  });
-  newDeviceModel.save(function(err) {
-    if (err) {
-      console.log('Error creating device: ' + err);
-      return res.status(500);
-    } else {
-      return res.status(200).json({'do_update': false,
-                                   'release_id:': req.body.release_id.trim()});
+
+  const validator = new Validator();
+  const macAddr = req.body.id.trim().toUpperCase();
+
+  let errors = [];
+  let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  let wanIp = returnObjOrEmptyStr(req.body.wan_ip).trim();
+  let release = returnObjOrEmptyStr(req.body.release_id).trim();
+  let model = returnObjOrEmptyStr(req.body.model).trim() +
+              returnObjOrEmptyStr(req.body.model_ver).trim();
+  let version = returnObjOrEmptyStr(req.body.version).trim();
+  let connectionType = returnObjOrEmptyStr(req.body.connection_type).trim();
+  let pppoeUser = returnObjOrEmptyStr(req.body.pppoe_user).trim();
+  let pppoePassword = returnObjOrEmptyStr(req.body.pppoe_password).trim();
+  let ssid = returnObjOrEmptyStr(req.body.wifi_ssid).trim();
+  let password = returnObjOrEmptyStr(req.body.wifi_password).trim();
+  let channel = returnObjOrEmptyStr(req.body.wifi_channel).trim();
+  let pppoe = (pppoeUser !== '' && pppoePassword !== '');
+
+  let genericValidate = function(field, func, key) {
+    let validField = func(field);
+    if (!validField.valid) {
+      validField.err.forEach(function(error) {
+        let obj = {};
+        obj[key] = error;
+        errors.push(obj);
+      });
     }
-  });
+  };
+
+  // Validate fields
+  genericValidate(macAddr, validator.validateMac, 'mac');
+  if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
+      connectionType != '') {
+    return res.status(500);
+  }
+  if (pppoe) {
+    genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
+    genericValidate(pppoePassword, validator.validatePassword,
+                    'pppoe_password');
+  }
+  genericValidate(ssid, validator.validateSSID, 'ssid');
+  genericValidate(password, validator.validateWifiPassword, 'password');
+  genericValidate(channel, validator.validateChannel, 'channel');
+
+  if (errors.length < 1) {
+    newDeviceModel = new DeviceModel({
+      '_id': macAddr,
+      'model': model,
+      'version': version,
+      'release': release,
+      'connection_type': connectionType,
+      'pppoe_user': pppoeUser,
+      'pppoe_password': pppoePassword,
+      'wifi_ssid': ssid,
+      'wifi_password': password,
+      'wifi_channel': channel,
+      'wan_ip': wanIp,
+      'ip': ip,
+      'last_contact': Date.now(),
+      'do_update': false,
+      'do_update_parameters': false,
+    });
+    newDeviceModel.save(function(err) {
+      if (err) {
+        console.log('Error creating entry: ' + err);
+        return res.status(500);
+      } else {
+        return res.status(200).json({'do_update': false,
+                                     'release_id:': release});
+      }
+    });
+  } else {
+    return res.status(500);
+  }
 };
 
 const isJSONObject = function(val) {
@@ -91,18 +139,24 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.do_update_parameters = false;
 
         // Remove notification to device using MQTT
-        let client = mqtt.connect(mqttBrokerURL);
-        client.on('connect', function() {
-          client.publish(
-            'flashman/update/' + matchedDevice._id,
-            '', {qos: 1, retain: true}); // topic, msg, options
-          client.end();
-        });
+        if (process.env.FLM_MQTT_BROKER) {
+          // Send notification to device using external MQTT server
+          let client = externMqtt.connect(process.env.FLM_MQTT_BROKER);
+          client.on('connect', function() {
+            client.publish(
+              'flashman/update/' + matchedDevice._id,
+              '', {qos: 1, retain: true}); // topic, msg, options
+            client.end();
+          });
+        } else {
+          mqtt.anlix_message_router_reset(matchedDevice._id);
+        }
 
         matchedDevice.save();
         return res.status(200).json({
           'do_update': matchedDevice.do_update,
           'release_id': returnObjOrEmptyStr(matchedDevice.release),
+          'connection_type': returnObjOrEmptyStr(matchedDevice.connection_type),
           'pppoe_user': returnObjOrEmptyStr(matchedDevice.pppoe_user),
           'pppoe_password': returnObjOrEmptyStr(matchedDevice.pppoe_password),
           'wifi_ssid': returnObjOrEmptyStr(matchedDevice.wifi_ssid),
@@ -133,6 +187,32 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
       }
     }
   });
+};
+
+deviceInfoController.registerMqtt = function(req, res) {
+  if (req.body.secret == req.app.locals.secret) {
+    DeviceModel.findById(req.body.id, function(err, matchedDevice) {
+      if (err) {
+        console.log('Attempt to register MQTT secret for device ' +
+          req.body.id + ' failed: Cant get device profile.');
+        return res.status(400).json({is_registered: 0});
+      }
+      if (!matchedDevice) {
+        console.log('Attempt to register MQTT secret for device ' +
+          req.body.id + ' failed: No device found.');
+        return res.status(404).json({is_registered: 0});
+      }
+      matchedDevice.mqtt_secret = req.body.mqttsecret;
+      matchedDevice.save();
+      console.log('Device ' +
+        req.body.id + ' register MQTT secret successfully.');
+      return res.status(200).json({is_registered: 1});
+    });
+  } else {
+    console.log('Attempt to register MQTT secret for device ' +
+      req.body.id + ' failed: Client Secret not match!');
+    return res.status(401).json({is_registered: 0});
+  }
 };
 
 deviceInfoController.registerApp = function(req, res) {
@@ -233,14 +313,18 @@ deviceInfoController.appSet = function(req, res) {
 
       matchedDevice.save();
 
-      // Send notification to device using MQTT
-      let client = mqtt.connect(mqttBrokerURL);
-      client.on('connect', function() {
-        client.publish(
-          'flashman/update/' + matchedDevice._id,
-          '1', {qos: 1, retain: true}); // topic, msg, options
-        client.end();
-      });
+      if (process.env.FLM_MQTT_BROKER) {
+        // Send notification to device using external MQTT server
+        let client = externMqtt.connect(process.env.FLM_MQTT_BROKER);
+        client.on('connect', function() {
+          client.publish(
+            'flashman/update/' + matchedDevice._id,
+            '1', {qos: 1, retain: true}); // topic, msg, options
+          client.end();
+        });
+      } else {
+        mqtt.anlix_message_router_update(matchedDevice._id);
+      }
 
       return res.status(200).json({is_set: 1});
     } else {

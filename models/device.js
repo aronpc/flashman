@@ -9,6 +9,7 @@ let deviceSchema = new Schema({
   model: String,
   version: String,
   release: String,
+  connection_type: {type: String, enum: ['pppoe', 'dhcp']},
   pppoe_user: String,
   pppoe_password: String,
   wifi_ssid: String,
@@ -19,6 +20,7 @@ let deviceSchema = new Schema({
   last_contact: Date,
   do_update: Boolean,
   do_update_parameters: Boolean,
+  mqtt_secret: String,
   apps: [{id: String, secret: String}],
 });
 

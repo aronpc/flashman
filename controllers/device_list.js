@@ -2,12 +2,12 @@ const Validator = require('../public/javascripts/device_validator');
 const DeviceModel = require('../models/device');
 const User = require('../models/user');
 const Config = require('../models/config');
-const mqtt = require('mqtt');
+const mqtt = require('../mqtts');
+const extern_mqtt = require('mqtt');
 let deviceListController = {};
 
 const fs = require('fs');
 const imageReleasesDir = process.env.FLM_IMG_RELEASE_DIR;
-const mqttBrokerURL = process.env.FLM_MQTT_BROKER;
 
 const getReleases = function() {
   let releases = [];
@@ -150,14 +150,18 @@ deviceListController.changeUpdate = function(req, res) {
         return res.render('error', indexContent);
       }
 
-      // Send notification to device using MQTT
-      let client = mqtt.connect(mqttBrokerURL);
-      client.on('connect', function() {
-        client.publish(
-          'flashman/update/' + matchedDevice._id,
-          '1', {qos: 1, retain: true}); // topic, msg, options
-        client.end();
-      });
+      if (process.env.FLM_MQTT_BROKER) {
+        // Send notification to device using external MQTT server
+        let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
+        client.on('connect', function() {
+          client.publish(
+            'flashman/update/' + matchedDevice._id,
+            '1', {qos: 1, retain: true}); // topic, msg, options
+          client.end();
+        });
+      } else {
+        mqtt.anlix_message_router_update(matchedDevice._id);
+      }
 
       return res.status(200).json({'success': true});
     });
@@ -175,25 +179,34 @@ deviceListController.changeAllUpdates = function(req, res) {
       return res.render('error', indexContent);
     }
 
-    // Send notification to device using MQTT
-    let client = mqtt.connect(mqttBrokerURL);
-    client.on('connect', function() {
+    if (process.env.FLM_MQTT_BROKER) {
+      // Send notification to device using external MQTT server
+      let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
+      client.on('connect', function() {
+        for (let idx = 0; idx < matchedDevices.length; idx++) {
+          matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
+          matchedDevices[idx].do_update = form.do_update;
+          matchedDevices[idx].save();
+
+          client.publish(
+            'flashman/update/' + matchedDevices[idx]._id,
+            '1', {qos: 1, retain: true},
+            function(err) {
+              if (idx == (matchedDevices.length - 1)) {
+                client.end();
+              }
+            }
+          ); // topic, msg, options, callback
+        }
+      });
+    } else {
       for (let idx = 0; idx < matchedDevices.length; idx++) {
         matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
         matchedDevices[idx].do_update = form.do_update;
         matchedDevices[idx].save();
-
-        client.publish(
-          'flashman/update/' + matchedDevices[idx]._id,
-          '1', {qos: 1, retain: true},
-          function(err) {
-            if (idx == (matchedDevices.length - 1)) {
-              client.end();
-            }
-          }
-        ); // topic, msg, options, callback
+        mqtt.anlix_message_router_update(matchedDevices[idx]._id);
       }
-    });
+    }
 
     return res.status(200).json({'success': true});
   });
@@ -294,7 +307,7 @@ deviceListController.searchDeviceReg = function(req, res) {
 };
 
 deviceListController.delDeviceReg = function(req, res) {
-  DeviceModel.remove({_id: req.params.id}, function(err) {
+  DeviceModel.remove({_id: req.params.id.toUpperCase()}, function(err) {
     if (err) {
       return res.status(500).json({'success': false,
                                    'message': 'device cannot be removed'});
@@ -308,7 +321,8 @@ deviceListController.delDeviceReg = function(req, res) {
 //
 
 deviceListController.getDeviceReg = function(req, res) {
-  DeviceModel.findById(req.params.id, function(err, matchedDevice) {
+  DeviceModel.findById(req.params.id.toUpperCase(),
+  function(err, matchedDevice) {
     if (err) {
       return res.status(500).json({'success': false,
                                    'message': 'internal server error'});
@@ -323,7 +337,8 @@ deviceListController.getDeviceReg = function(req, res) {
 };
 
 deviceListController.setDeviceReg = function(req, res) {
-  DeviceModel.findById(req.params.id, function(err, matchedDevice) {
+  DeviceModel.findById(req.params.id.toUpperCase(),
+  function(err, matchedDevice) {
     if (err) {
       return res.status(500).json({
         success: false,
@@ -345,6 +360,7 @@ deviceListController.setDeviceReg = function(req, res) {
       let validator = new Validator();
 
       let errors = [];
+      let connectionType = returnObjOrEmptyStr(content.connection_type).trim();
       let pppoeUser = returnObjOrEmptyStr(content.pppoe_user).trim();
       let pppoePassword = returnObjOrEmptyStr(content.pppoe_password).trim();
       let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
@@ -364,7 +380,15 @@ deviceListController.setDeviceReg = function(req, res) {
       };
 
       // Validate fields
+      if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
+          connectionType != '') {
+        return res.status(500).json({
+          success: false,
+          message: 'Tipo de conexão deve ser "pppoe" ou "dhcp"',
+        });
+      }
       if (pppoe) {
+        connectionType = 'pppoe';
         genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
         genericValidate(pppoePassword, validator.validatePassword,
                         'pppoe_password');
@@ -374,6 +398,10 @@ deviceListController.setDeviceReg = function(req, res) {
       genericValidate(channel, validator.validateChannel, 'channel');
 
       if (errors.length < 1) {
+        if (connectionType != '') {
+          matchedDevice.connection_type = connectionType;
+          updateParameters = true;
+        }
         if (content.hasOwnProperty('pppoe_user')) {
           matchedDevice.pppoe_user = pppoeUser;
           updateParameters = true;
@@ -404,14 +432,19 @@ deviceListController.setDeviceReg = function(req, res) {
 
         matchedDevice.save();
 
-        // Send notification to device using MQTT
-        let client = mqtt.connect(mqttBrokerURL);
-        client.on('connect', function() {
-          client.publish(
-            'flashman/update/' + matchedDevice._id,
-            '1', {qos: 1, retain: true}); // topic, msg, options
-          client.end();
-        });
+        if (process.env.FLM_MQTT_BROKER) {
+          // Send notification to device using external MQTT server
+          let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
+          client.on('connect', function() {
+            client.publish(
+              'flashman/update/' + matchedDevice._id,
+              '1', {qos: 1, retain: true}); // topic, msg, options
+            client.end();
+          });
+        } else {
+          mqtt.anlix_message_router_update(matchedDevice._id);
+        }
+
         matchedDevice.success = true;
         return res.status(200).json(matchedDevice);
       } else {
@@ -440,6 +473,7 @@ deviceListController.createDeviceReg = function(req, res) {
 
     let errors = [];
     let release = returnObjOrEmptyStr(content.release).trim();
+    let connectionType = returnObjOrEmptyStr(content.connection_type).trim();
     let pppoeUser = returnObjOrEmptyStr(content.pppoe_user).trim();
     let pppoePassword = returnObjOrEmptyStr(content.pppoe_password).trim();
     let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
@@ -460,10 +494,20 @@ deviceListController.createDeviceReg = function(req, res) {
 
     // Validate fields
     genericValidate(macAddr, validator.validateMac, 'mac');
+    if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
+        connectionType != '') {
+      return res.status(500).json({
+        success: false,
+        message: 'Tipo de conexão deve ser "pppoe" ou "dhcp"',
+      });
+    }
     if (pppoe) {
+      connectionType = 'pppoe';
       genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
       genericValidate(pppoePassword, validator.validatePassword,
                       'pppoe_password');
+    } else {
+      connectionType = 'dhcp';
     }
     genericValidate(ssid, validator.validateSSID, 'ssid');
     genericValidate(password, validator.validateWifiPassword, 'password');
@@ -495,6 +539,9 @@ deviceListController.createDeviceReg = function(req, res) {
             'do_update': false,
             'do_update_parameters': false,
           });
+          if (connectionType != '') {
+            newDeviceModel.connection_type = connectionType;
+          }
           newDeviceModel.save(function(err) {
             if (err) {
               return res.status(500).json({
