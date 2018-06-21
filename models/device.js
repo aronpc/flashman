@@ -9,6 +9,7 @@ let deviceSchema = new Schema({
   model: String,
   version: String,
   release: String,
+  connection_type: {type: String, enum: ['pppoe', 'dhcp']},
   pppoe_user: String,
   pppoe_password: String,
   wifi_ssid: String,

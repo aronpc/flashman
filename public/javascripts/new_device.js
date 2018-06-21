@@ -15,7 +15,7 @@ let renderDeviceErrors = function(errors) {
       errors[key].messages.forEach(function(msg) {
         message += msg + '<br />';
       });
-      let element = '<p class="red-text"><small>' + message + '</small></p>';
+      let element = '<h7 class="red-text">' + message + '</h7>';
       $(errors[key].field).parent().after(element);
     }
   }
@@ -80,6 +80,7 @@ let validateNewDevice = function() {
     // If no errors present, send to backend
     let data = {'content': {
       'mac_address': mac,
+      'connection_type': (pppoe) ? 'pppoe' : 'dhcp',
       'pppoe_user': (pppoe) ? pppoeUser : '',
       'pppoe_password': (pppoe) ? pppoePassword : '',
       'wifi_ssid': ssid,
