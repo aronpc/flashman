@@ -307,7 +307,7 @@ deviceListController.searchDeviceReg = function(req, res) {
 };
 
 deviceListController.delDeviceReg = function(req, res) {
-  DeviceModel.remove({_id: req.params.id}, function(err) {
+  DeviceModel.remove({_id: req.params.id.toUpperCase()}, function(err) {
     if (err) {
       return res.status(500).json({'success': false,
                                    'message': 'device cannot be removed'});
@@ -321,7 +321,8 @@ deviceListController.delDeviceReg = function(req, res) {
 //
 
 deviceListController.getDeviceReg = function(req, res) {
-  DeviceModel.findById(req.params.id, function(err, matchedDevice) {
+  DeviceModel.findById(req.params.id.toUpperCase(),
+  function(err, matchedDevice) {
     if (err) {
       return res.status(500).json({'success': false,
                                    'message': 'internal server error'});
@@ -336,7 +337,8 @@ deviceListController.getDeviceReg = function(req, res) {
 };
 
 deviceListController.setDeviceReg = function(req, res) {
-  DeviceModel.findById(req.params.id, function(err, matchedDevice) {
+  DeviceModel.findById(req.params.id.toUpperCase(),
+  function(err, matchedDevice) {
     if (err) {
       return res.status(500).json({
         success: false,
@@ -386,6 +388,7 @@ deviceListController.setDeviceReg = function(req, res) {
         });
       }
       if (pppoe) {
+        connectionType = 'pppoe';
         genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
         genericValidate(pppoePassword, validator.validatePassword,
                         'pppoe_password');
@@ -499,9 +502,12 @@ deviceListController.createDeviceReg = function(req, res) {
       });
     }
     if (pppoe) {
+      connectionType = 'pppoe';
       genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
       genericValidate(pppoePassword, validator.validatePassword,
                       'pppoe_password');
+    } else {
+      connectionType = 'dhcp';
     }
     genericValidate(ssid, validator.validateSSID, 'ssid');
     genericValidate(password, validator.validateWifiPassword, 'password');
