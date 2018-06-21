@@ -60,25 +60,25 @@ mqtts.authenticate = function(client, username, password, cb) {
 }
 
 mqtts.anlix_message_router_update = function(id) {
-	mqtts.publish({
+  mqtts.publish({
       cmd: 'publish',
       qos: 1,
       retain: true,
       topic: 'flashman/update/' + id,
       payload: '1'
     });
-	console.log('MQTT Message router update to '+id);
+  console.log('MQTT Message router update to '+id);
 };
 
 mqtts.anlix_message_router_reset = function(id) {
-	mqtts.publish({
+  mqtts.publish({
       cmd: 'publish',
       qos: 1,
       retain: true,
       topic: 'flashman/update/' + id,
-      payload: ''
+      payload: null
     });
-	console.log('MQTT Message router reset to '+id);
+  console.log('MQTT Message router reset to '+id);
 };
 
 module.exports = mqtts;
