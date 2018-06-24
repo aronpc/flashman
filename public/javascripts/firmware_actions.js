@@ -10,6 +10,17 @@ $(document).on('change', ':file', function() {
 $(document).ready(function() {
   let selectedItens = [];
 
+  $('#firmware-table').DataTable({
+    'paging': false,
+    'info': false,
+    'language': {
+      'zeroRecords': 'Nenhum registro encontrado',
+      'infoEmpty': 'Nenhum firmware disponível',
+      'search': 'Buscar',
+    },
+    'order': [[1, 'asc'], [2, 'asc'], [3, 'asc'], [4, 'asc']],
+  });
+
   $(':file').on('fileselect', function(event, numFiles, label) {
     let input = $(this).parents('.input-group').find(':text');
 
