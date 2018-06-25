@@ -68,7 +68,6 @@ const createRegistry = function(req, res) {
       'model': model,
       'version': version,
       'release': release,
-      'connection_type': connectionType,
       'pppoe_user': pppoeUser,
       'pppoe_password': pppoePassword,
       'wifi_ssid': ssid,
@@ -80,6 +79,9 @@ const createRegistry = function(req, res) {
       'do_update': false,
       'do_update_parameters': false,
     });
+    if (connectionType != '') {
+      newDeviceModel.connection_type = connectionType;
+    }
     newDeviceModel.save(function(err) {
       if (err) {
         console.log('Error creating entry: ' + err);

@@ -111,6 +111,12 @@ app.use('/scripts/sweetalert2',
 app.use('/scripts/tags-input',
   express.static(path.join(__dirname, 'node_modules/tags-input'))
 );
+app.use('/scripts/datatables.net',
+  express.static(path.join(__dirname, 'node_modules/datatables.net'))
+);
+app.use('/scripts/datatables.net-bs4',
+  express.static(path.join(__dirname, 'node_modules/datatables.net-bs4'))
+);
 
 app.use(passport.initialize());
 app.use(passport.session());

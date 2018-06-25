@@ -1,6 +1,6 @@
 {
   "name": "flashman",
-  "version": "0.10.0",
+  "version": "1.1.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -13,13 +13,14 @@
     "aedes": "^0.34.0",
     "auto-updater": "^1.0.2",
     "bcrypt-nodejs": "0.0.3",
-    "body-parser": "~1.17.1",
+    "body-parser": "^1.18.3",
     "bootstrap": "^4.0.0",
     "connect-ensure-login": "^0.1.1",
     "cookie-parser": "~1.4.3",
+    "datatables.net-bs4": "^1.10.19",
     "debug": "~2.6.3",
     "eslint": "^4.18.2",
-    "express": "~4.15.2",
+    "express": "^4.16.3",
     "express-fileupload": "^0.4.0",
     "express-session": "^1.14.1",
     "jquery": "^3.3.1",
@@ -27,7 +28,7 @@
     "mdbootstrap": "^4.5.3",
     "mongoose": "^5.0.2",
     "mongoose-paginate": "^5.0.3",
-    "morgan": "~1.8.1",
+    "morgan": "^1.9.0",
     "mqtt": "^2.15.0",
     "node-schedule": "^1.3.0",
     "passport": "^0.3.2",
