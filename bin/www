@@ -8,6 +8,8 @@ var app = require('../app');
 var mqtts = require('../mqtts');
 var debug = require('debug')('flashman:server');
 var http = require('http');
+const https = require('https');
+const fs = require('fs');
 const tls = require('tls');
 
 /* APP */
@@ -22,8 +24,16 @@ app.set('port', port);
 /**
  * Create HTTP server.
  */
-
-var server = http.createServer(app);
+var server;
+if (process.env.USE_HTTPS_SERVER) {
+  const options = {
+    key: fs.readFileSync(process.env.FLM_CERT_MQTT_DIR+"/key.pem"),
+    cert: fs.readFileSync(process.env.FLM_CERT_MQTT_DIR+"/cert.pem")
+  };
+  var server = https.createServer(options, app);
+} else {
+  var server = http.createServer(app);
+}
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -94,7 +104,6 @@ function onListening() {
 }
 
 /* MQTTS */
-var fs = require("fs");
 var mqtts_port = 1883;
 var mqtts_options;
 var mqtt_server;
