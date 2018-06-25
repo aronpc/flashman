@@ -1,5 +1,8 @@
 extends layout
 
+block stylesheets
+  link(rel='stylesheet', href='/scripts/datatables.net-bs4/css/dataTables.bootstrap4.min.css')
+
 block content
   .card.mt-4
     h4.card-header.teal.lighten-2.white-text
@@ -24,7 +27,7 @@ block content
               .fas.fa-upload.fa-lg(id="btn-submit-icon")
               span &nbsp Upload
 
-  .card.mt-4
+  .card.mt-4.mb-4
     h4.card-header.teal.lighten-2.white-text
       .fas.fa-hdd.fa-lg
       span &nbsp Firmwares
@@ -36,27 +39,26 @@ block content
           .btn-group(role="group")
             button.btn.btn-danger(type="button" id="btn-firmware-trash")
               .fas.fa-trash.fa-lg
-        .card.mt-3
-          .card-body
-            .table-responsive
-              table.table.devices-table
-                thead
-                  tr
-                    th.col-xs-1
-                      input.checkbox(type="checkbox" id="checkall")
-                    th.text-center Fabricante
-                    th.text-center Modelo
-                    th.text-center Versão
-                    th.text-center Release
-                tbody
-                  each firmware, index in firmwares
-                    tr
-                      td.col-xs-1
-                        input.checkbox(type="checkbox" id=firmware.id)
-                      td.text-center #{firmware.vendor}
-                      td.text-center #{firmware.model}
-                      td.text-center #{firmware.version}
-                      td.text-center #{firmware.release}
+        
+        .table-responsive.mt-4
+          table#firmware-table.table.devices-table
+            thead
+              tr
+                th.col-xs-1
+                  input.checkbox(type="checkbox" id="checkall")
+                th.text-center Fabricante
+                th.text-center Modelo
+                th.text-center Versão
+                th.text-center Release
+            tbody
+              each firmware, index in firmwares
+                tr
+                  td.col-xs-1
+                    input.checkbox(type="checkbox" id=firmware.id)
+                  td.text-center #{firmware.vendor}
+                  td.text-center #{firmware.model}
+                  td.text-center #{firmware.version}
+                  td.text-center #{firmware.release}
         .row.justify-content-center.mt-2
           nav
             ul.pagination.pagination-lg
@@ -88,4 +90,6 @@ block content
               - }
 
 block scripts
+  script(src='/scripts/datatables.net/js/jquery.dataTables.min.js')
+  script(src='/scripts/datatables.net-bs4/js/dataTables.bootstrap4.min.js')
   script(src='/javascripts/firmware_actions.js')
