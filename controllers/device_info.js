@@ -365,8 +365,6 @@ deviceInfoController.receiveLog = function(req, res) {
       matchedDevice.save();
       console.log('Log Receiving for device ' +
         id + ' successfully. FIRST BOOT');
-
-      fs.writeFile("first_boot.gz", matchedDevice.firstboot_log,  "binary");
     }
     else if (boot_type == "BOOT") {
       matchedDevice.lastboot_log = new Buffer(req.body)
@@ -374,7 +372,6 @@ deviceInfoController.receiveLog = function(req, res) {
       matchedDevice.save();
       console.log('Log Receiving for device ' +
         id + ' successfully. LAST BOOT');
-      fs.writeFile("last_boot.gz", matchedDevice.lastboot_log,  "binary");
     }
     else if (boot_type == "LIVE") {
 

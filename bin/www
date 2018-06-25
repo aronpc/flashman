@@ -25,10 +25,10 @@ app.set('port', port);
  * Create HTTP server.
  */
 var server;
-if (process.env.USE_HTTPS_SERVER) {
+if (process.env.USE_HTTPS_SERVER_DIR) {
   const options = {
-    key: fs.readFileSync(process.env.FLM_CERT_MQTT_DIR+"/key.pem"),
-    cert: fs.readFileSync(process.env.FLM_CERT_MQTT_DIR+"/cert.pem")
+    key: fs.readFileSync(process.env.USE_HTTPS_SERVER_DIR+"/key.pem"),
+    cert: fs.readFileSync(process.env.USE_HTTPS_SERVER_DIR+"/cert.pem")
   };
   var server = https.createServer(options, app);
 } else {
