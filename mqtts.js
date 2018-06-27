@@ -13,24 +13,9 @@ mqtts.on('clientDisconnect', function (client, err) {
 });
 
 mqtts.on('ack', function (packet, client, err) {
-  if(packet.payload == "1"){
-    console.log('MQTT ACK Message UPDATE from '+client.id);
-  }
-  else if(packet.payload == "boot"){
-    console.log('MQTT ACK Message REBOOT from '+client.id);
-  }
-  else if(packet.payload == "rstapp"){
-    console.log('MQTT ACK Message RSTAPP from '+client.id);
-  }
-  else if(packet.payload == "rstmqtt"){
-    console.log('MQTT ACK Message RSTMQTT from '+client.id);
-  }
-  else if(packet.payload == "log"){
-    console.log('MQTT ACK Message LOG from '+client.id);
-  }
-  else {
-    console.log('MQTT ACK Message UNRECOGNIZED ('+packet.payload+') from '+client.id);
-  }
+// packet is always undefined... maybe a bug?
+  if(client.id)
+    console.log('MQTT Message Delivered successfully for '+client.id);
 });
 
 mqtts.authenticate = function(client, username, password, cb) {
