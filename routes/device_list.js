@@ -48,5 +48,9 @@ router.route('/firstlog/:id').get(authController.ensureAPIAccess,
 router.route('/lastlog/:id').get(authController.ensureAPIAccess,
                                 deviceListController.getLastBootLog);
 
+// REST API - Send a message using MQTT
+router.route('/mqtt/:id/:msg').post(authController.ensureAPIAccess,
+                                 deviceListController.sendMqttMsg)
+
 
 module.exports = router;

@@ -320,6 +320,47 @@ deviceListController.delDeviceReg = function(req, res) {
 // REST API only functions
 //
 
+deviceListController.sendMqttMsg = function(req, res) {
+  msgtype = req.params.msg.toLowerCase();
+  if(msgtype == "boot") {
+    mqtt.anlix_message_router_reboot(req.params.id.toUpperCase());
+    return res.status(200).json({'message': 'Success'});
+  }
+  else if(msgtype == "rstapp") {
+    mqtt.anlix_message_router_resetapp(req.params.id.toUpperCase());
+    return res.status(200).json({'message': 'Success'});;
+  }
+  else if(msgtype == "rstmqtt") {
+    DeviceModel.findById(req.params.id.toUpperCase(),
+    function(err, matchedDevice) {
+      if (err) {
+        return res.status(500).json({'message': 'internal server error'});
+      }
+      if (matchedDevice == null) {
+        return res.status(404).json({'message': 'device not found'});
+      }
+
+      // if we have a secret, remove it to allow a new one
+      if(matchedDevice.mqtt_secret){
+        matchedDevice.mqtt_secret = null;
+        matchedDevice.save();
+      }
+
+      mqtt.anlix_message_router_resetmqtt(req.params.id.toUpperCase());
+      return res.status(200).json({'message': 'Success'});
+    });
+  }
+  else if(msgtype == "log") {
+    mqtt.anlix_message_router_log(req.params.id.toUpperCase());
+    return res.status(200).json({'message': 'Success'});
+  }
+  else {
+    // Message not implemented
+    console.log("REST API MQTT Message not recognized ("+ msgtype +")");
+    return res.status(404).json({'message': 'Message Unrecognized'});
+  }
+}
+
 deviceListController.getFirstBootLog = function(req, res) {
   DeviceModel.findById(req.params.id.toUpperCase(),
   function(err, matchedDevice) {
