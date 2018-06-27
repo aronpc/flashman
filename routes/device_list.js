@@ -41,4 +41,12 @@ router.route('/create').post(authController.ensureLogin(),
                        .put(authController.ensureAPIAccess,
                             deviceListController.createDeviceReg);
 
+// REST API - GET first boot logs
+router.route('/firstlog/:id').get(authController.ensureAPIAccess,
+                                deviceListController.getFirstBootLog);
+// REST API - GET last boot logs
+router.route('/lastlog/:id').get(authController.ensureAPIAccess,
+                                deviceListController.getLastBootLog);
+
+
 module.exports = router;

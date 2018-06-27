@@ -320,6 +320,48 @@ deviceListController.delDeviceReg = function(req, res) {
 // REST API only functions
 //
 
+deviceListController.getFirstBootLog = function(req, res) {
+  DeviceModel.findById(req.params.id.toUpperCase(),
+  function(err, matchedDevice) {
+    if (err) {
+      return res.status(500).json({'message': 'internal server error'});
+    }
+    if (matchedDevice == null) {
+      return res.status(404).json({'message': 'device not found'});
+    }
+
+    if(matchedDevice.firstboot_log) {
+      res.setHeader('Content-Encoding', 'gzip');
+      res.setHeader('Content-Type', 'text/plain');
+      res.end(matchedDevice.firstboot_log,'binary');
+      return res.status(200);
+    } else {
+      return res.status(200).json({'message': 'No log for this device'});
+    }
+  });
+};
+
+deviceListController.getLastBootLog = function(req, res) {
+  DeviceModel.findById(req.params.id.toUpperCase(),
+  function(err, matchedDevice) {
+    if (err) {
+      return res.status(500).json({'message': 'internal server error'});
+    }
+    if (matchedDevice == null) {
+      return res.status(404).json({'message': 'device not found'});
+    }
+
+    if(matchedDevice.lastboot_log) {
+      res.setHeader('Content-Encoding', 'gzip');
+      res.setHeader('Content-Type', 'text/plain');
+      res.end(matchedDevice.lastboot_log,'binary');
+      return res.status(200);
+    } else {
+      return res.status(200).json({'message': 'No log for this device'});
+    }
+  });
+};
+
 deviceListController.getDeviceReg = function(req, res) {
   DeviceModel.findById(req.params.id.toUpperCase(),
   function(err, matchedDevice) {
@@ -331,7 +373,20 @@ deviceListController.getDeviceReg = function(req, res) {
       return res.status(404).json({'success': false,
                                    'message': 'device not found'});
     }
-    matchedDevice.success = true;
+
+    // hide secret from api
+    if(matchedDevice.mqtt_secret){
+      matchedDevice.mqtt_secret = null;
+    }
+
+    // hide logs - too large for json
+    if(matchedDevice.firstboot_log){
+      matchedDevice['firstboot_log'] = null;
+    }
+    if(matchedDevice.lastboot_log){
+      matchedDevice['lastboot_log'] = null;
+    }
+
     return res.status(200).json(matchedDevice);
   });
 };
