@@ -154,7 +154,7 @@ block content
                         .fas.fa-circle.fa-lg(
                           class=status.devices[device._id],
                           data-toggle="tooltip",
-                          title=device.last_contact
+                          title=device.last_contact.toString()
                         )
                       td.text-center.col-xs-2
                         | #{device.pppoe_user}
