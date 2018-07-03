@@ -1,8 +1,9 @@
 
-var express = require('express');
-var router = express.Router();
-var deviceListController = require('../controllers/device_list');
-var authController = require('../controllers/auth');
+const express = require('express');
+const deviceListController = require('../controllers/device_list');
+const authController = require('../controllers/auth');
+
+let router = express.Router();
 
 // GET home page
 router.route('/').get(authController.ensureLogin(),
@@ -49,8 +50,9 @@ router.route('/lastlog/:id').get(authController.ensureAPIAccess,
                                 deviceListController.getLastBootLog);
 
 // REST API - Send a message using MQTT
-router.route('/mqtt/:id/:msg').post(authController.ensureAPIAccess,
-                                 deviceListController.sendMqttMsg)
-
+router.route('/command/:id/:msg').post(authController.ensureLogin(),
+                                       deviceListController.sendMqttMsg)
+                                 .put(authController.ensureAPIAccess,
+                                      deviceListController.sendMqttMsg);
 
 module.exports = router;
