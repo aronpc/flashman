@@ -322,15 +322,13 @@ deviceListController.delDeviceReg = function(req, res) {
 
 deviceListController.sendMqttMsg = function(req, res) {
   msgtype = req.params.msg.toLowerCase();
-  if(msgtype == "boot") {
+  if (msgtype == 'boot') {
     mqtt.anlix_message_router_reboot(req.params.id.toUpperCase());
     return res.status(200).json({'message': 'Success'});
-  }
-  else if(msgtype == "rstapp") {
+  } else if (msgtype == 'rstapp') {
     mqtt.anlix_message_router_resetapp(req.params.id.toUpperCase());
-    return res.status(200).json({'message': 'Success'});;
-  }
-  else if(msgtype == "rstmqtt") {
+    return res.status(200).json({'message': 'Success'}); ;
+  } else if (msgtype == 'rstmqtt') {
     DeviceModel.findById(req.params.id.toUpperCase(),
     function(err, matchedDevice) {
       if (err) {
@@ -341,7 +339,7 @@ deviceListController.sendMqttMsg = function(req, res) {
       }
 
       // if we have a secret, remove it to allow a new one
-      if(matchedDevice.mqtt_secret){
+      if (matchedDevice.mqtt_secret) {
         matchedDevice.mqtt_secret = null;
         matchedDevice.save();
       }
@@ -349,17 +347,15 @@ deviceListController.sendMqttMsg = function(req, res) {
       mqtt.anlix_message_router_resetmqtt(req.params.id.toUpperCase());
       return res.status(200).json({'message': 'Success'});
     });
-  }
-  else if(msgtype == "log") {
+  } else if (msgtype == 'log') {
     mqtt.anlix_message_router_log(req.params.id.toUpperCase());
     return res.status(200).json({'message': 'Success'});
-  }
-  else {
+  } else {
     // Message not implemented
-    console.log("REST API MQTT Message not recognized ("+ msgtype +")");
+    console.log('REST API MQTT Message not recognized ('+ msgtype +')');
     return res.status(404).json({'message': 'Message Unrecognized'});
   }
-}
+};
 
 deviceListController.getFirstBootLog = function(req, res) {
   DeviceModel.findById(req.params.id.toUpperCase(),
@@ -371,10 +367,10 @@ deviceListController.getFirstBootLog = function(req, res) {
       return res.status(404).json({'message': 'device not found'});
     }
 
-    if(matchedDevice.firstboot_log) {
+    if (matchedDevice.firstboot_log) {
       res.setHeader('Content-Encoding', 'gzip');
       res.setHeader('Content-Type', 'text/plain');
-      res.end(matchedDevice.firstboot_log,'binary');
+      res.end(matchedDevice.firstboot_log, 'binary');
       return res.status(200);
     } else {
       return res.status(200).json({'message': 'No log for this device'});
@@ -392,10 +388,10 @@ deviceListController.getLastBootLog = function(req, res) {
       return res.status(404).json({'message': 'device not found'});
     }
 
-    if(matchedDevice.lastboot_log) {
+    if (matchedDevice.lastboot_log) {
       res.setHeader('Content-Encoding', 'gzip');
       res.setHeader('Content-Type', 'text/plain');
-      res.end(matchedDevice.lastboot_log,'binary');
+      res.end(matchedDevice.lastboot_log, 'binary');
       return res.status(200);
     } else {
       return res.status(200).json({'message': 'No log for this device'});
@@ -416,15 +412,15 @@ deviceListController.getDeviceReg = function(req, res) {
     }
 
     // hide secret from api
-    if(matchedDevice.mqtt_secret){
+    if (matchedDevice.mqtt_secret) {
       matchedDevice.mqtt_secret = null;
     }
 
     // hide logs - too large for json
-    if(matchedDevice.firstboot_log){
+    if (matchedDevice.firstboot_log) {
       matchedDevice['firstboot_log'] = null;
     }
-    if(matchedDevice.lastboot_log){
+    if (matchedDevice.lastboot_log) {
       matchedDevice['lastboot_log'] = null;
     }
 
