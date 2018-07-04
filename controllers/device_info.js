@@ -138,6 +138,11 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
 
+        var hard_reset = returnObjOrEmptyStr(req.body.hardreset).trim();
+        if(hard_reset == "1") {
+          matchedDevice.last_hardreset = Date.now();
+        }
+
         // We can disable since the device will receive the update
         matchedDevice.do_update_parameters = false;
 
