@@ -103,9 +103,17 @@ const isJSONObject = function(val) {
 
 // Create new device entry or update an existing one
 deviceInfoController.updateDevicesInfo = function(req, res) {
-  DeviceModel.findById(req.body.id.toUpperCase(), function(err, matchedDevice) {
+  if(process.env.FLM_BYPASS_SECRET == undefined) {
+    if (req.body.secret != req.app.locals.secret) {
+      console.log('Error in SYN: Secret not martch!');
+      return res.status(404);
+    }
+  }
+
+  var dev_id = req.body.id.toUpperCase();
+  DeviceModel.findById(dev_id, function(err, matchedDevice) {
     if (err) {
-      console.log('Error finding device: ' + err);
+      console.log('Error finding device '+dev_id+': ' + err);
       return res.status(500);
     } else {
       if (matchedDevice == null) {
@@ -126,12 +134,18 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim() +
                                 returnObjOrEmptyStr(req.body.model_ver).trim();
         }
-        if (matchedDevice.version == '') {
-          matchedDevice.version = returnObjOrEmptyStr(req.body.version).trim();
+
+        var sent_version = returnObjOrEmptyStr(req.body.version).trim();
+        if(matchedDevice.version != sent_version){
+          console.log('Device '+dev_id+' changed version to: '+sent_version);
+          matchedDevice.version = sent_version;
         }
-        if (matchedDevice.release == '') {
-          matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
-        }
+
+        var sent_release = returnObjOrEmptyStr(req.body.release_id).trim();
+        if(matchedDevice.release != sent_release){
+          console.log('Device '+dev_id+' changed release to: '+sent_release);
+          matchedDevice.release = sent_release;
+        }  
 
         // Parameters *NOT* available to be modified by REST API
         matchedDevice.wan_ip = returnObjOrEmptyStr(req.body.wan_ip).trim();
@@ -141,6 +155,17 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         var hard_reset = returnObjOrEmptyStr(req.body.hardreset).trim();
         if(hard_reset == "1") {
           matchedDevice.last_hardreset = Date.now();
+        }
+
+        var upgrade_info = returnObjOrEmptyStr(req.body.upgfirm).trim();
+        if(upgrade_info == "1") {
+          if(matchedDevice.do_update) {
+            console.log('Device '+dev_id+' upgraded successfuly');
+            matchedDevice.do_update = false;
+          }
+          else {
+            console.log('WARNING: Device '+dev_id+' sent a upgrade ack but was not marked as upgradable!');
+          }
         }
 
         // We can disable since the device will receive the update
@@ -190,7 +215,15 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
         let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
-        matchedDevice.do_update = false;
+        var upg_status = returnObjOrEmptyStr(req.body.status).trim(); 
+        if(upg_status == "0"){
+          console.log('Device '+req.body.id+' is going on upgrade...');
+        } else if(upg_status == "1"){
+          console.log('WARNING: Device '+req.body.id+' failed in firmware check!');
+        } else if(upg_status == "2"){
+          console.log('WARNING: Device '+req.body.id+' failed to download firmware!');
+        } 
+
         matchedDevice.save();
         return res.status(200);
       }
@@ -352,6 +385,15 @@ deviceInfoController.appSet = function(req, res) {
 deviceInfoController.receiveLog = function(req, res) {
   var id = req.headers['x-anlix-id'];
   var boot_type = req.headers['x-anlix-logs'];
+  var envsec = req.headers['x-anlix-sec'];
+
+  if(process.env.FLM_BYPASS_SECRET == undefined) {
+    if (envsec != req.app.locals.secret) {
+      console.log('Error Receiving Log: Secret not martch!');
+      return res.status(404);
+    }
+  }
+
   DeviceModel.findById(id, function(err, matchedDevice) {
     if (err) {
       console.log('Log Receiving for device ' +
