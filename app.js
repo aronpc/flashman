@@ -73,6 +73,7 @@ if (process.env.FLM_COMPANY_SECRET) {
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+app.use(bodyParser.raw({ type: 'application/octet-stream' }));
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

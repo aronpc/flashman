@@ -12,6 +12,12 @@ mqtts.on('clientDisconnect', function (client, err) {
   console.log('Router disconnected on MQTT: '+client.id)
 });
 
+mqtts.on('ack', function (packet, client, err) {
+// packet is always undefined... maybe a bug?
+  if(client.id)
+    console.log('MQTT Message Delivered successfully for '+client.id);
+});
+
 mqtts.authenticate = function(client, username, password, cb) {
   var needauth = true;
   if(process.env.FLM_TEMPORARY_MQTT_BROKER_PORT) {
@@ -29,19 +35,19 @@ mqtts.authenticate = function(client, username, password, cb) {
     var error = new Error('Auth error');
     if(!username) {
       console.log('MQTT AUTH ERROR - Username not specified: Device '+client.id);
-      error.returnCode = -2;
+      error.returnCode = 2;
       cb(error, null);
     } else {
 
       DeviceModel.findById(username, function(err, matchedDevice) {
         if (err) {
           console.log('MQTT AUTH ERROR: Device '+username+' internal error: ' + err);
-          error.returnCode = -3;
+          error.returnCode = 2;
           cb(error, null);
         } else {
           if (matchedDevice == null) {
             console.log('MQTT AUTH ERROR: Device '+username+' not registred!');
-            error.returnCode = -4;
+            error.returnCode = 2;
             cb(error, null);
           } else {
             if(password == matchedDevice.mqtt_secret) {
@@ -49,7 +55,7 @@ mqtts.authenticate = function(client, username, password, cb) {
               cb(null, true);
             } else {
               console.log('MQTT AUTH ERROR: Device '+username+' wrong password!');
-              error.returnCode = -5;
+              error.returnCode = 4;
               cb(error, null);
             }
           }
@@ -60,25 +66,68 @@ mqtts.authenticate = function(client, username, password, cb) {
 }
 
 mqtts.anlix_message_router_update = function(id) {
-	mqtts.publish({
+  mqtts.publish({
       cmd: 'publish',
-      qos: 1,
+      qos: 2,
       retain: true,
       topic: 'flashman/update/' + id,
       payload: '1'
     });
-	console.log('MQTT Message router update to '+id);
+  console.log('MQTT SEND Message UPDATE to '+id);
 };
 
 mqtts.anlix_message_router_reset = function(id) {
-	mqtts.publish({
+  mqtts.publish({
       cmd: 'publish',
-      qos: 1,
       retain: true,
       topic: 'flashman/update/' + id,
-      payload: ''
+      payload: null
     });
-	console.log('MQTT Message router reset to '+id);
+  console.log('MQTT Clean Messages for router '+id);
+};
+
+mqtts.anlix_message_router_reboot = function(id) {
+  mqtts.publish({
+      cmd: 'publish',
+      qos: 2,
+      retain: false,
+      topic: 'flashman/update/' + id,
+      payload: 'boot'
+    });
+  console.log('MQTT SEND Message REBOOT to '+id);
+};
+
+mqtts.anlix_message_router_resetapp = function(id) {
+  mqtts.publish({
+      cmd: 'publish',
+      qos: 2,
+      retain: false,
+      topic: 'flashman/update/' + id,
+      payload: 'rstapp'
+    });
+  console.log('MQTT SEND Message RSTAPP to '+id);
+};
+
+mqtts.anlix_message_router_resetmqtt = function(id) {
+  mqtts.publish({
+      cmd: 'publish',
+      qos: 2,
+      retain: false,
+      topic: 'flashman/update/' + id,
+      payload: 'rstmqtt'
+    });
+  console.log('MQTT SEND Message RSTMQTT to '+id);
+};
+
+mqtts.anlix_message_router_log = function(id) {
+  mqtts.publish({
+      cmd: 'publish',
+      qos: 2,
+      retain: false,
+      topic: 'flashman/update/' + id,
+      payload: 'log'
+    });
+  console.log('MQTT SEND Message LOG to '+id);
 };
 
 module.exports = mqtts;

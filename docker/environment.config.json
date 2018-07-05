@@ -6,6 +6,7 @@
       "autorestart": true,
       "env": {
         "production": true,
+        "TZ": "America/Sao_Paulo"
       },
       "error_file": "/dev/stderr",
       "out_file": "/dev/stdout",

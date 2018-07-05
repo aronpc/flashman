@@ -88,6 +88,7 @@ const createRegistry = function(req, res) {
         return res.status(500);
       } else {
         return res.status(200).json({'do_update': false,
+                                     'do_newprobe': true,
                                      'release_id:': release});
       }
     });
@@ -137,6 +138,11 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
 
+        var hard_reset = returnObjOrEmptyStr(req.body.hardreset).trim();
+        if(hard_reset == "1") {
+          matchedDevice.last_hardreset = Date.now();
+        }
+
         // We can disable since the device will receive the update
         matchedDevice.do_update_parameters = false;
 
@@ -157,6 +163,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         matchedDevice.save();
         return res.status(200).json({
           'do_update': matchedDevice.do_update,
+          'do_newprobe': false,
           'release_id': returnObjOrEmptyStr(matchedDevice.release),
           'connection_type': returnObjOrEmptyStr(matchedDevice.connection_type),
           'pppoe_user': returnObjOrEmptyStr(matchedDevice.pppoe_user),
@@ -204,11 +211,18 @@ deviceInfoController.registerMqtt = function(req, res) {
           req.body.id + ' failed: No device found.');
         return res.status(404).json({is_registered: 0});
       }
-      matchedDevice.mqtt_secret = req.body.mqttsecret;
-      matchedDevice.save();
-      console.log('Device ' +
-        req.body.id + ' register MQTT secret successfully.');
-      return res.status(200).json({is_registered: 1});
+      if(!matchedDevice.mqtt_secret) {
+        matchedDevice.mqtt_secret = req.body.mqttsecret;
+        matchedDevice.save();
+        console.log('Device ' +
+          req.body.id + ' register MQTT secret successfully.');
+        return res.status(200).json({is_registered: 1});
+      } else {
+        // Device have a secret. Modification of secret is forbidden!
+        console.log('Attempt to register MQTT secret for device ' +
+          req.body.id + ' failed: Device have a secret.');
+        return res.status(404).json({is_registered: 0});        
+      }
     });
   } else {
     console.log('Attempt to register MQTT secret for device ' +
@@ -334,5 +348,42 @@ deviceInfoController.appSet = function(req, res) {
     }
   });
 };
+
+deviceInfoController.receiveLog = function(req, res) {
+  var id = req.headers['x-anlix-id'];
+  var boot_type = req.headers['x-anlix-logs'];
+  DeviceModel.findById(id, function(err, matchedDevice) {
+    if (err) {
+      console.log('Log Receiving for device ' +
+        id + ' failed: Cant get device profile.');
+      return res.status(400).json({processed: 0});
+    }
+    if (!matchedDevice) {
+      console.log('Log Receiving for device ' +
+        id + ' failed: No device found.');
+      return res.status(404).json({processed: 0});
+    }
+
+    if (boot_type == "FIRST") {
+      matchedDevice.firstboot_log = new Buffer(req.body);
+      matchedDevice.firstboot_date = Date.now();
+      matchedDevice.save();
+      console.log('Log Receiving for device ' +
+        id + ' successfully. FIRST BOOT');
+    }
+    else if (boot_type == "BOOT") {
+      matchedDevice.lastboot_log = new Buffer(req.body)
+      matchedDevice.lastboot_date = Date.now();
+      matchedDevice.save();
+      console.log('Log Receiving for device ' +
+        id + ' successfully. LAST BOOT');
+    }
+    else if (boot_type == "LIVE") {
+
+    }
+
+    return res.status(200).json({processed: 1});
+  });
+}
 
 module.exports = deviceInfoController;
