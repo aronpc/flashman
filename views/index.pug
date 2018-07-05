@@ -30,7 +30,7 @@ block content
             .col-10.text-center
               span.card-title Adicionar novo dispositivo
         .card-body.collapse.out(id="deviceCard")
-          form(id="deviceForm")
+          form.needs-validation(id="deviceForm", novalidate)
             .md-form.input-group
               .input-group-btn
                 button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
@@ -48,42 +48,52 @@ block content
                 placeholder="Identificação do cliente (opcional)",
                 maxlength="64"
               )
-            .mt-4
-              label(for="new_connect_type") Tipo de Conexão
-              select.form-control(id="new_connect_type")
-                option(value="DHCP") DHCP
-                option(value="PPPoE") PPPoE
-            .mt-4
-              label(for="new_wifi_channel") Canal do WiFi
-              select.form-control(id="new_wifi_channel")
-                option(value="auto") auto
-                option(value="1") 1
-                option(value="6") 6
-                option(value="11") 11
-            .md-form
-              input.col-xs-10.form-control(type="text",
-                                                id="new_wifi_ssid",
-                                                maxlength="32")
-              label SSID do WiFi
-            .md-form
-              input.col-xs-10.form-control(type="text",
-                                                id="new_wifi_pass",
-                                                maxlength="64")
-              label Senha do WiFi
-            .md-form
-              input.col-xs-10.form-control(type="text", id="new_mac")
-              label Endereço MAC
-            .md-form
-              input.col-xs-10.form-control(type="text",
-                                                id="new_pppoe_user",
-                                                maxlength="64")
-              label Usuário PPPoE
-            .md-form
-              input.col-xs-10.form-control(type="text",
-                                                id="new_pppoe_pass",
-                                                maxlength="64")
-              label Senha PPPoE
-            .col.mt-4.text-center
+            label(for="new_connect_type") Tipo de Conexão
+            select.form-control(id="new_connect_type")
+              option(value="DHCP") DHCP
+              option(value="PPPoE") PPPoE
+            br
+            label(for="new_wifi_channel") Canal do WiFi
+            select.form-control(id="new_wifi_channel")
+              option(value="auto") auto
+              option(value="1") 1
+              option(value="6") 6
+              option(value="11") 11
+            br
+            .input-entry
+              label(for="new_wifi_ssid") SSID do WiFi
+              input.form-control(type="text",
+                                 id="new_wifi_ssid",
+                                 maxlength="32")
+              .invalid-feedback
+              br
+            .input-entry
+              label(for="new_wifi_pass") Senha do WiFi
+              input.form-control(type="text",
+                                 id="new_wifi_pass",
+                                 maxlength="64")
+              .invalid-feedback
+              br
+            .input-entry
+              label(for="new_mac") Endereço MAC
+              input.form-control(type="text", id="new_mac")
+              .invalid-feedback
+              br
+            .input-entry
+              label(for="new_pppoe_user") Usuário PPPoE
+              input.form-control(type="text",
+                                 id="new_pppoe_user",
+                                 maxlength="64")
+              .invalid-feedback
+              br
+            .input-entry
+              label(for="new_pppoe_pass") Senha PPPoE
+              input.form-control(type="text",
+                                 id="new_pppoe_pass",
+                                 maxlength="64")
+              .invalid-feedback
+              br
+            .col.text-center
               .form-buttons
                 button.btn.btn-lg.teal.lighten-2(type="submit")
                   .fas.fa-check.fa-lg
