@@ -1,6 +1,5 @@
 let loadDeviceInfoOnForm = function(row) {
   let index = row.data('index');
-  $('#editDeviceForm-' + index.toString()).find('p').remove();
   $('#edit_pppoe_user-' + index.toString()).removeClass('red lighten-4')
                                            .val(row.data('user')).change();
   $('#edit_pppoe_pass-' + index.toString()).removeClass('red lighten-4')
@@ -17,9 +16,9 @@ let loadDeviceInfoOnForm = function(row) {
   $('#edit_external_reference-' + index.toString())
     .val(row.data('external-ref')).change();
 
-  let pppoe_user = row.data('user');
-  let pppoe_pass = row.data('pass');
-  if (pppoe_user === '' && pppoe_pass === '') {
+  let pppoeUser = row.data('user');
+  let pppoePass = row.data('pass');
+  if (pppoeUser === '' && pppoePass === '') {
     $('#edit_connect_type-' + index.toString()).val('DHCP');
     $('#edit_pppoe_user-' + index.toString()).parent().hide();
     $('#edit_pppoe_pass-' + index.toString()).parent().hide();
@@ -40,6 +39,14 @@ let loadDeviceInfoOnForm = function(row) {
       $('#edit_pppoe_pass-' + index.toString()).parent().hide();
     }
   });
+
+  // Device info
+  $('#info_device_model-' + index.toString()).val(
+    row.data('device-model').toUpperCase()
+  );
+  $('#info_device_version-' + index.toString()).val(
+    row.data('device-version')
+  );
 };
 
 let refreshExtRefType = function(event) {
@@ -67,25 +74,6 @@ $(document).ready(function() {
   $('.tags-input').addClass('form-control');
   $('.tags-input input').css('cssText', 'margin-top: 10px !important;');
 
-  $('.fa-chevron-right').parents('td').click(function(event) {
-    let row = $(event.target).parents('tr');
-    let index = row.data('index');
-    let hideId = '#hide-' + index.toString();
-    let formId = '#form-' + index.toString();
-    if ($(this).children().hasClass('fa-chevron-right')) {
-      $(hideId).show();
-      $(this).find('.fa-chevron-right')
-        .removeClass('fa-chevron-right')
-        .addClass('fa-chevron-down');
-    } else if ($(this).children().hasClass('fa-chevron-down')) {
-      $(hideId).hide();
-      $(formId).hide();
-      $(this).find('.fa-chevron-down')
-        .removeClass('fa-chevron-down')
-        .addClass('fa-chevron-right');
-    }
-  });
-
   $('#card-header').click(function() {
     let plus = $(this).find('.fa-plus');
     let cross = $(this).find('.fa-times');
@@ -93,38 +81,25 @@ $(document).ready(function() {
     cross.removeClass('fa-times').addClass('fa-plus');
   });
 
-  $('.btn-trash').click(function(event) {
-    let row = $(event.target).parents('tr');
-    let id = row.data('deviceid');
-    $.ajax({
-      url: '/devicelist/delete/' + id,
-      type: 'post',
-      success: function(res) {
-        setTimeout(function() {
-          window.location.reload();
-        }, 100);
-      },
-    });
-  });
-
-  $('.btn-edit').click(function(event) {
+  $('.fa-chevron-right').parents('td').click(function(event) {
     let row = $(event.target).parents('tr');
     let index = row.data('index');
-    let hideId = '#hide-' + index.toString();
     let formId = '#form-' + index.toString();
-    loadDeviceInfoOnForm(row);
-    $(hideId).hide();
-    $(formId).show();
+    if ($(this).children().hasClass('fa-chevron-right')) {
+      loadDeviceInfoOnForm(row);
+      $(formId).show();
+      $(this).find('.fa-chevron-right')
+        .removeClass('fa-chevron-right')
+        .addClass('fa-chevron-down');
+    } else if ($(this).children().hasClass('fa-chevron-down')) {
+      $(formId).hide();
+      $(this).find('.fa-chevron-down')
+        .removeClass('fa-chevron-down')
+        .addClass('fa-chevron-right');
+    }
   });
-
-  $('.btn-cancel').click(function(event) {
-    let row = $(event.target).parents('tr');
-    let index = row.data('index');
-    let hideId = '#hide-' + index.toString();
-    let formId = '#form-' + index.toString();
-    $(formId).hide();
-    $(hideId).show();
-  });
+  $('#ext_ref_type a').on('click', refreshExtRefType);
+  $('.ext-ref-input').mask('000.000.000-009').keyup();
 
   $('#btn-elements-per-page').click(function(event) {
     $.ajax({
@@ -141,7 +116,4 @@ $(document).ready(function() {
       },
     });
   });
-
-  $('#ext_ref_type a').on('click', refreshExtRefType);
-  $('.ext-ref-input').mask('000.000.000-009').keyup();
 });

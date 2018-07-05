@@ -1,5 +1,4 @@
 let removeEditErrors = function(errors, index) {
-  $('#editDeviceForm-' + index.toString()).find('p').remove();
   for (let key in errors) {
     if (Object.prototype.hasOwnProperty.call(errors, key)) {
       $(errors[key].field).removeClass('red lighten-4');
@@ -10,13 +9,16 @@ let removeEditErrors = function(errors, index) {
 let renderEditErrors = function(errors) {
   for (let key in errors) {
     if (errors[key].messages.length > 0) {
-      $(errors[key].field).addClass('red lighten-4');
+      // $(errors[key].field).addClass('red lighten-4');
       let message = '';
       errors[key].messages.forEach(function(msg) {
-        message += msg + '<br />';
+        message += msg + ' ';
       });
-      let element = '<h7 class="red-text">' + message + '</h7>';
-      $(errors[key].field).parent().after(element);
+      // let element = '<h7 class="red-text">' + message + '</h7>';
+      // $(errors[key].field).parent().after(element);
+      console.log(message);
+      // $(errors[key].field).parent().find('.invalid-feedback').html(message);
+      $(errors[key].field)[0].setCustomValidity(message);
     }
   }
 };
@@ -130,4 +132,18 @@ let validateEditDevice = function(event) {
 
 $(document).ready(function() {
   $('.edit-form').submit(validateEditDevice);
+
+  $('.btn-trash').click(function(event) {
+    let row = $(event.target).parents('tr');
+    let id = row.data('deviceid');
+    $.ajax({
+      url: '/devicelist/delete/' + id,
+      type: 'post',
+      success: function(res) {
+        setTimeout(function() {
+          window.location.reload();
+        }, 100);
+      },
+    });
+  });
 });
