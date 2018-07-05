@@ -204,7 +204,7 @@ block content
                             checked=device.do_update
                           )
                           .slider.round
-                    tr.table-active.form-div(
+                    tr(
                       id="form-" + (index + 1),
                       data-deviceid=device._id,
                       data-index=(index + 1),
@@ -213,9 +213,9 @@ block content
                       td(colspan=9).grey.lighten-5
                         form.edit-form.needs-validation(novalidate)
                           .row
-                            .col-4.offset-4
+                            .col-5
                               // Identification
-                              .md-form.input-group
+                              .md-form.input-group.input-entry
                                 .input-group-btn
                                   button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
                                     type="button",
@@ -232,7 +232,19 @@ block content
                                   placeholder="ID do cliente (opcional)",
                                   maxlength="64"
                                 )
+                                .invalid-feedback
                               br
+                            .col-7.text-right.actions-opts
+                              // Actions
+                              .btn-group.btn-group-sm(role="group")
+                                button.btn.teal.lighten-2.btn-sm.btn-reboot(type="button")
+                                  .fas.fa-sync.fa-lg
+                                  span &nbsp Reiniciar roteador
+                                button.btn.teal.lighten-2.btn-sm.btn-reset-app(type="button")
+                                  .fas.fa-mobile-alt.fa-lg
+                                  span &nbsp Resetar senha App
+                              br
+                              span.badge.badge-success.bounceIn(style="display: none;") Sucesso
                           .row
                             .col-2
                               // Connection type
@@ -247,15 +259,19 @@ block content
                                 | dependendo das configurações de rede do seu provedor
                             .col-2
                               // Device info
-                              label Modelo
-                              input.form-control(type="text",
-                                                 id="info_device_model-" + (index + 1),
-                                                 maxlength="32", disabled)
+                              .input-entry
+                                label Modelo
+                                input.form-control(type="text",
+                                                   id="info_device_model-" + (index + 1),
+                                                   maxlength="32", disabled)
+                                .invalid-feedback
                               br
-                              label Versão
-                              input.form-control(type="text",
-                                                 id="info_device_version-" + (index + 1),
-                                                 maxlength="32", disabled)
+                              .input-entry
+                                label Versão do Flashbox
+                                input.form-control(type="text",
+                                                   id="info_device_version-" + (index + 1),
+                                                   maxlength="32", disabled)
+                                .invalid-feedback
                               br
                             .col-4
                               // Wifi channel
@@ -267,33 +283,44 @@ block content
                                 option(value="11") 11
                               br
                               // Wifi ssid
-                              label(for="edit_wifi_ssid-" + (index + 1)) SSID do WiFi
-                              input.form-control(type="text",
-                                                 id="edit_wifi_ssid-" + (index + 1),
-                                                 maxlength="32")
-                              .invalid-feedback
+                              .input-entry
+                                label(for="edit_wifi_ssid-" + (index + 1)) SSID do WiFi
+                                input.form-control(type="text",
+                                                   id="edit_wifi_ssid-" + (index + 1),
+                                                   maxlength="32")
+                                .invalid-feedback
                               br
                               // Wifi password
-                              label(for="edit_wifi_pass-" + (index + 1)) Senha do WiFi
-                              input.form-control(type="text",
-                                                 id="edit_wifi_pass-" + (index + 1),
-                                                 maxlength="64")
+                              .input-entry
+                                label(for="edit_wifi_pass-" + (index + 1)) Senha do WiFi
+                                input.form-control(type="text",
+                                                   id="edit_wifi_pass-" + (index + 1),
+                                                   maxlength="64")
+                                .invalid-feedback
                             .col-4
                               // PPPoE user
-                              label(for="edit_pppoe_user-" + (index + 1)) Usuário PPPoE
-                              input.form-control(type="text",
-                                                 id="edit_pppoe_user-" + (index + 1),
-                                                 maxlength="64")
+                              .input-entry
+                                label(for="edit_pppoe_user-" + (index + 1)) Usuário PPPoE
+                                input.form-control(type="text",
+                                                   id="edit_pppoe_user-" + (index + 1),
+                                                   maxlength="64")
+                                .invalid-feedback
                               br 
                               // PPPoE password
-                              label(for="edit_pppoe_pass-" + (index + 1)) Senha PPPoE
-                              input.form-control(type="text",
-                                                 id="edit_pppoe_pass-" + (index + 1),
-                                                 maxlength="64")
+                              .input-entry
+                                label(for="edit_pppoe_pass-" + (index + 1)) Senha PPPoE
+                                input.form-control(type="text",
+                                                   id="edit_pppoe_pass-" + (index + 1),
+                                                   maxlength="64")
+                                .invalid-feedback
                               br
                           .row
+                            // Buttons
+                            .col.text-left
+                              button.btn.btn-danger.btn-trash(type="button")
+                                .fas.fa-trash.fa-lg
+                                span &nbsp Remover
                             .col.text-right
-                              // Buttons
                               button.btn.teal.lighten-2(type="submit")
                                 .fas.fa-check.fa-lg
                                 span &nbsp Editar

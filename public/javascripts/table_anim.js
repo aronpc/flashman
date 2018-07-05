@@ -1,15 +1,10 @@
 let loadDeviceInfoOnForm = function(row) {
   let index = row.data('index');
-  $('#edit_pppoe_user-' + index.toString()).removeClass('red lighten-4')
-                                           .val(row.data('user')).change();
-  $('#edit_pppoe_pass-' + index.toString()).removeClass('red lighten-4')
-                                           .val(row.data('pass')).change();
-  $('#edit_wifi_ssid-' + index.toString()).removeClass('red lighten-4')
-                                          .val(row.data('ssid')).change();
-  $('#edit_wifi_pass-' + index.toString()).removeClass('red lighten-4')
-                                          .val(row.data('wifi-pass')).change();
-  $('#edit_wifi_channel-' + index.toString()).removeClass('red lighten-4')
-                                             .val(row.data('channel')).change();
+  $('#edit_pppoe_user-' + index.toString()).val(row.data('user')).change();
+  $('#edit_pppoe_pass-' + index.toString()).val(row.data('pass')).change();
+  $('#edit_wifi_ssid-' + index.toString()).val(row.data('ssid')).change();
+  $('#edit_wifi_pass-' + index.toString()).val(row.data('wifi-pass')).change();
+  $('#edit_wifi_channel-' + index.toString()).val(row.data('channel')).change();
   $('#edit_ext_ref_type_selected-' + index.toString())
     .closest('.input-group-btn').find('#ext_ref_type a:contains("' +
       row.data('external-ref-type') + '")').click();
