@@ -103,9 +103,10 @@ const isJSONObject = function(val) {
 
 // Create new device entry or update an existing one
 deviceInfoController.updateDevicesInfo = function(req, res) {
-  DeviceModel.findById(req.body.id.toUpperCase(), function(err, matchedDevice) {
+  var dev_id = req.body.id.toUpperCase();
+  DeviceModel.findById(dev_id, function(err, matchedDevice) {
     if (err) {
-      console.log('Error finding device: ' + err);
+      console.log('Error finding device '+dev_id+': ' + err);
       return res.status(500);
     } else {
       if (matchedDevice == null) {
@@ -126,12 +127,18 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim() +
                                 returnObjOrEmptyStr(req.body.model_ver).trim();
         }
-        if (matchedDevice.version == '') {
-          matchedDevice.version = returnObjOrEmptyStr(req.body.version).trim();
+
+        var sent_version = returnObjOrEmptyStr(req.body.version).trim();
+        if(matchedDevice.version != sent_version){
+          console.log('Device '+dev_id+' changed version to: '+sent_version);
+          matchedDevice.version = sent_version;
         }
-        if (matchedDevice.release == '') {
-          matchedDevice.release = returnObjOrEmptyStr(req.body.release_id).trim();
-        }
+
+        var sent_release = returnObjOrEmptyStr(req.body.release_id).trim();
+        if(matchedDevice.release != sent_release){
+          console.log('Device '+dev_id+' changed release to: '+sent_release);
+          matchedDevice.release = sent_release;
+        }  
 
         // Parameters *NOT* available to be modified by REST API
         matchedDevice.wan_ip = returnObjOrEmptyStr(req.body.wan_ip).trim();
