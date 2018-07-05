@@ -1,28 +1,22 @@
-let removeDeviceErrors = function(errors) {
-  $('#deviceForm').find('p').remove();
-  for (let key in errors) {
-    if (Object.prototype.hasOwnProperty.call(errors, key)) {
-      $(errors[key].field).removeClass('red lighten-4');
-    }
-  }
-};
 
 let renderDeviceErrors = function(errors) {
   for (let key in errors) {
     if (errors[key].messages.length > 0) {
-      $(errors[key].field).addClass('red lighten-4');
       let message = '';
       errors[key].messages.forEach(function(msg) {
-        message += msg + '<br />';
+        message += msg + ' ';
       });
-      let element = '<h7 class="red-text">' + message + '</h7>';
-      $(errors[key].field).parent().after(element);
+      $(errors[key].field).closest('.input-entry').find('.invalid-feedback').html(message);
+      $(errors[key].field)[0].setCustomValidity(message);
     }
   }
 };
 
 let validateNewDevice = function() {
   $('.form-control').blur(); // Remove focus from form
+  $('#deviceForm input').each(function(){ // Reset validation messages
+    this.setCustomValidity('');
+  });
   let validator = new Validator();
 
   // Get form values
@@ -50,9 +44,6 @@ let validateNewDevice = function() {
       errors[key]['messages'] = [];
     }
   }
-
-  // Clean previous error values from DOM
-  removeDeviceErrors(errors);
 
   let genericValidate = function(value, func, errors) {
     let validField = func(value);
