@@ -103,6 +103,13 @@ const isJSONObject = function(val) {
 
 // Create new device entry or update an existing one
 deviceInfoController.updateDevicesInfo = function(req, res) {
+  if(process.env.FLM_BYPASS_SECRET == undefined) {
+    if (req.body.secret != req.app.locals.secret) {
+      console.log('Error in SYN: Secret not martch!');
+      return res.status(404);
+    }
+  }
+
   var dev_id = req.body.id.toUpperCase();
   DeviceModel.findById(dev_id, function(err, matchedDevice) {
     if (err) {
@@ -378,6 +385,15 @@ deviceInfoController.appSet = function(req, res) {
 deviceInfoController.receiveLog = function(req, res) {
   var id = req.headers['x-anlix-id'];
   var boot_type = req.headers['x-anlix-logs'];
+  var envsec = req.headers['x-anlix-sec'];
+
+  if(process.env.FLM_BYPASS_SECRET == undefined) {
+    if (envsec != req.app.locals.secret) {
+      console.log('Error Receiving Log: Secret not martch!');
+      return res.status(404);
+    }
+  }
+
   DeviceModel.findById(id, function(err, matchedDevice) {
     if (err) {
       console.log('Log Receiving for device ' +
