@@ -150,6 +150,17 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           matchedDevice.last_hardreset = Date.now();
         }
 
+        var upgrade_info = returnObjOrEmptyStr(req.body.upgfirm).trim();
+        if(upgrade_info == "1") {
+          if(matchedDevice.do_update) {
+            console.log('Device '+dev_id+' upgraded successfuly');
+            matchedDevice.do_update = false;
+          }
+          else {
+            console.log('WARNING: Device '+dev_id+' sent a upgrade ack but was not marked as upgradable!');
+          }
+        }
+
         // We can disable since the device will receive the update
         matchedDevice.do_update_parameters = false;
 
@@ -197,7 +208,15 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
         let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
-        matchedDevice.do_update = false;
+        var upg_status = returnObjOrEmptyStr(req.body.status).trim(); 
+        if(upg_status == "0"){
+          console.log('Device '+req.body.id+' is going on upgrade...');
+        } else if(upg_status == "1"){
+          console.log('WARNING: Device '+req.body.id+' failed in firmware check!');
+        } else if(upg_status == "2"){
+          console.log('WARNING: Device '+req.body.id+' failed to download firmware!');
+        } 
+
         matchedDevice.save();
         return res.status(200);
       }
