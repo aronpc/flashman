@@ -139,12 +139,6 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         if(matchedDevice.version != sent_version){
           console.log('Device '+dev_id+' changed version to: '+sent_version);
           matchedDevice.version = sent_version;
-        }
-
-        var sent_release = returnObjOrEmptyStr(req.body.release_id).trim();
-        if(matchedDevice.release != sent_release){
-          console.log('Device '+dev_id+' changed release to: '+sent_release);
-          matchedDevice.release = sent_release;
         }  
 
         // Parameters *NOT* available to be modified by REST API
@@ -165,6 +159,16 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           }
           else {
             console.log('WARNING: Device '+dev_id+' sent a upgrade ack but was not marked as upgradable!');
+          }
+        }
+
+        var sent_release = returnObjOrEmptyStr(req.body.release_id).trim();
+        if(matchedDevice.release != sent_release){
+          if(matchedDevice.do_update) {
+            console.log('Device '+dev_id+' reported release as '+sent_release+', but is expect to change to '+matchedDevice.release);
+          } else {
+            console.log('Device '+dev_id+' changed release to: '+sent_release);
+            matchedDevice.release = sent_release;
           }
         }
 
@@ -222,7 +226,9 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
           console.log('WARNING: Device '+req.body.id+' failed in firmware check!');
         } else if(upg_status == "2"){
           console.log('WARNING: Device '+req.body.id+' failed to download firmware!');
-        } 
+        } else if (upg_status == '') {
+          console.log('WARNING: Device '+req.body.id+' ack update on an old firmware!');
+        }
 
         matchedDevice.save();
         return res.status(200);
