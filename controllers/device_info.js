@@ -220,14 +220,15 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
         var upg_status = returnObjOrEmptyStr(req.body.status).trim(); 
-        if(upg_status == "0"){
+        if(upg_status == "1"){
           console.log('Device '+req.body.id+' is going on upgrade...');
-        } else if(upg_status == "1"){
+        } else if(upg_status == "0"){
           console.log('WARNING: Device '+req.body.id+' failed in firmware check!');
         } else if(upg_status == "2"){
           console.log('WARNING: Device '+req.body.id+' failed to download firmware!');
         } else if (upg_status == '') {
-          console.log('WARNING: Device '+req.body.id+' ack update on an old firmware!');
+          console.log('WARNING: Device '+req.body.id+' ack update on an old firmware! Reseting upgrade...');
+          matchedDevice.do_update = false;
         }
 
         matchedDevice.save();
