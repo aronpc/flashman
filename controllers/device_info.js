@@ -390,7 +390,7 @@ deviceInfoController.receiveLog = function(req, res) {
   if(process.env.FLM_BYPASS_SECRET == undefined) {
     if (envsec != req.app.locals.secret) {
       console.log('Error Receiving Log: Secret not martch!');
-      return res.status(404);
+      return res.status(404).json({processed: 0});
     }
   }
 

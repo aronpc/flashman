@@ -54,9 +54,14 @@ mqtts.authenticate = function(client, username, password, cb) {
               console.log("MQTT AUTH OK: id "+username);
               cb(null, true);
             } else {
-              console.log('MQTT AUTH ERROR: Device '+username+' wrong password!');
-              error.returnCode = 4;
-              cb(error, null);
+              if(process.env.FLM_BYPASS_MQTTS_PASSWD) {
+                console.log('MQTT AUTH WARNING: Device '+username+' wrong password! Bypass allowed...');
+                cb(null, true);
+              } else {
+                console.log('MQTT AUTH ERROR: Device '+username+' wrong password!');
+                error.returnCode = 4;
+                cb(error, null);
+              }
             }
           }
         }
