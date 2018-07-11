@@ -15,7 +15,7 @@ const returnObjOrEmptyStr = function(query) {
 
 const createRegistry = function(req, res) {
   if (typeof req.body.id == 'undefined') {
-    return res.status(400);
+    return res.status(400).end();;
   }
 
   const validator = new Validator();
@@ -85,7 +85,7 @@ const createRegistry = function(req, res) {
     newDeviceModel.save(function(err) {
       if (err) {
         console.log('Error creating entry: ' + err);
-        return res.status(500);
+        return res.status(500).end();;
       } else {
         return res.status(200).json({'do_update': false,
                                      'do_newprobe': true,
@@ -93,7 +93,7 @@ const createRegistry = function(req, res) {
       }
     });
   } else {
-    return res.status(500);
+    return res.status(500).end();;
   }
 };
 
@@ -101,12 +101,58 @@ const isJSONObject = function(val) {
   return val instanceof Object ? true : false;
 };
 
+deviceInfoController.syncDate = function(req, res) {
+  // WARNING: This api is open. 
+  var dev_id;
+  if(req.body.id) {
+    if(req.body.id.trim().length == 17)
+    dev_id = req.body.id.trim().toUpperCase();
+  } else {
+    dev_id="";
+  }
+
+  var dev_ntp;
+  if(req.body.ntp) {
+    if(req.body.ntp.trim().length <= 12)
+    dev_ntp = req.body.ntp.trim();
+  } else {
+    dev_ntp="";
+  }
+
+  var dev_date;
+  if(req.body.date) {
+    if(req.body.date.trim().length <= 14)
+    dev_date = req.body.date.trim();
+  } else {
+    dev_date="";
+  }
+  
+  console.log('Request Date from '+dev_id+': NTP '+dev_ntp+' Date '+dev_date);
+
+  var parsedate = parseInt(dev_date)
+  if(!isNaN(parsedate)) {
+    var loc_date = new Date(parsedate*1000);
+    var at_date = Date.now();
+    var diff_date = at_date - loc_date;
+    // adjust router clock if difference is more than a minute ahead or more than an hour behind
+    var server_date = Math.floor(Date.now() / 1000);
+    if((diff_date < -(60*1000)) || (diff_date>(60*60*1000))) {
+      res.status(200).json({'need_update': 1, 'new_date': server_date});
+    } else {
+      res.status(200).json({'need_update': 0, 'new_date': server_date});
+    }
+  }
+  else
+    res.status(500).end();
+}
+
+
 // Create new device entry or update an existing one
 deviceInfoController.updateDevicesInfo = function(req, res) {
   if(process.env.FLM_BYPASS_SECRET == undefined) {
     if (req.body.secret != req.app.locals.secret) {
       console.log('Error in SYN: Secret not martch!');
-      return res.status(404);
+      return res.status(404).end();;
     }
   }
 
@@ -114,7 +160,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
   DeviceModel.findById(dev_id, function(err, matchedDevice) {
     if (err) {
       console.log('Error finding device '+dev_id+': ' + err);
-      return res.status(500);
+      return res.status(500).end();;
     } else {
       if (matchedDevice == null) {
         createRegistry(req, res);
@@ -140,6 +186,12 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           console.log('Device '+dev_id+' changed version to: '+sent_version);
           matchedDevice.version = sent_version;
         }  
+
+        var sent_ntp = returnObjOrEmptyStr(req.body.ntp).trim();
+        if(matchedDevice.ntp_status != sent_ntp){
+          console.log('Device '+dev_id+' changed NTP STATUS to: '+sent_ntp);
+          matchedDevice.ntp_status = sent_ntp;
+        } 
 
         // Parameters *NOT* available to be modified by REST API
         matchedDevice.wan_ip = returnObjOrEmptyStr(req.body.wan_ip).trim();
@@ -172,22 +224,27 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           }
         }
 
-        // We can disable since the device will receive the update
-        matchedDevice.do_update_parameters = false;
+        var flm_updater = returnObjOrEmptyStr(req.body.flm_updater).trim();
+        if(flm_updater == "1" || flm_updater == "") {
+          // The syn came from flashman_updater (or old routers...)
 
-        // Remove notification to device using MQTT
-        if (process.env.FLM_MQTT_BROKER) {
-          // Send notification to device using external MQTT server
-          let client = externMqtt.connect(process.env.FLM_MQTT_BROKER);
-          client.on('connect', function() {
-            client.publish(
-              'flashman/update/' + matchedDevice._id,
-              '', {qos: 1, retain: true}); // topic, msg, options
-            client.end();
-          });
-        } else {
-          mqtt.anlix_message_router_reset(matchedDevice._id);
-        }
+          // We can disable since the device will receive the update
+          matchedDevice.do_update_parameters = false;
+
+          // Remove notification to device using MQTT
+          if (process.env.FLM_MQTT_BROKER) {
+            // Send notification to device using external MQTT server
+            let client = externMqtt.connect(process.env.FLM_MQTT_BROKER);
+            client.on('connect', function() {
+              client.publish(
+                'flashman/update/' + matchedDevice._id,
+                '', {qos: 1, retain: true}); // topic, msg, options
+              client.end();
+            });
+          } else {
+            mqtt.anlix_message_router_reset(matchedDevice._id);
+          }
+        } 
 
         matchedDevice.save();
         return res.status(200).json({
