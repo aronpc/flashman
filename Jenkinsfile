@@ -22,9 +22,9 @@ node {
         echo '"secret":"'${params.AUTHCLIENTSECRET}'"' >> secret.json
         echo } >> secret.json
 
-        echo { > mqtt-port.json
-        echo '"port":"'${params.MQTTPORT}'"' >> mqtt-port.json
-        echo } >> mqtt-port.json
+        echo { > mqtts-port.json
+        echo '"port":"'${params.MQTTPORT}'"' >> mqtts-port.json
+        echo } >> mqtts-port.json
 
         IMGZIP='flashman.zip'
 
