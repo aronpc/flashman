@@ -25,7 +25,8 @@ COPY /routes /app/routes
 COPY /views /app/views
 
 # Run as root
-RUN chown -R node:node /app
+RUN mkdir -p /app/public/firmwares \
+	&& chown -R node:node /app /app/public/firmwares
 RUN npm install pm2 -g
 
 # Run as user node

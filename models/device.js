@@ -17,6 +17,7 @@ let deviceSchema = new Schema({
   wifi_channel: String,
   wan_ip: String,
   ip: String,
+  ntp_status: String,
   last_contact: Date,
   last_hardreset: Date,
   do_update: Boolean,
