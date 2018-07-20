@@ -10,7 +10,7 @@
     "contentHost": "codeload.github.com",
     "githubUser": "anlix-io",
     "githubRepo": "flashman",
-    "githubBranch": "development"
+    "githubBranch": "master"
   },
   "dependencies": {
     "aedes": "^0.34.0",
