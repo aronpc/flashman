@@ -70,15 +70,12 @@ const downloadUpdate = function(version) {
   });
 };
 
-const moveUpdate = function(version) {
+const moveUpdate = function() {
   return new Promise((resolve, reject)=>{
     let gitRepo = localPackageJson.updater.githubRepo;
     let gitBranch = localPackageJson.updater.githubBranch.replace(/\//g, '-');
     let source = 'updates/' + gitRepo + '-' + gitBranch + '/';
     ncp(source, '.', (err)=>{
-      let filename = 'updates/' + version + '.zip';
-      fs.unlinkSync(filename);
-      rimraf.sync(source);
       (err) ? reject() : resolve();
     });
   });
@@ -90,7 +87,7 @@ const extractUpdate = function(version) {
     fs.createReadStream(filename)
     .pipe(unzip.Extract({path: 'updates/'}))
     .on('close', ()=>{
-      moveUpdate(version).then(resolve, reject);
+      moveUpdate().then(resolve, reject);
     });
   });
 };
@@ -103,7 +100,11 @@ const updateDependencies = function() {
   });
 };
 
-const rebootFlashman = function() {
+const rebootFlashman = function(version) {
+  let gitRepo = localPackageJson.updater.githubRepo;
+  let gitBranch = localPackageJson.updater.githubBranch.replace(/\//g, '-');
+  fs.unlinkSync('updates/' + version + '.zip');
+  rimraf.sync('updates/' + gitRepo + '-' + gitBranch + '/');
   exec('pm2 reload environment.config.json', (err, stdout, stderr) => {});
 };
 
@@ -146,7 +147,7 @@ const updateFlashman = function(automatic, res) {
               if (res) {
                 res.status(200).json({hasUpdate: false, updated: true});
               }
-              rebootFlashman();
+              rebootFlashman(version);
             });
           }, (rejectedValue)=>{
             errorCallback(res);
