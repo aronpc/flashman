@@ -171,7 +171,7 @@ updateController.update = function() {
 };
 
 updateController.checkUpdate = function() {
-  updateFlashman(true, null);
+  updateFlashman(false, null);
 };
 
 updateController.apiUpdate = function(req, res) {
