@@ -76,6 +76,9 @@ const moveUpdate = function(version) {
     let gitBranch = localPackageJson.updater.githubBranch.replace(/\//g, '-');
     let source = 'updates/' + gitRepo + '-' + gitBranch + '/';
     ncp(source, '.', (err)=>{
+      let filename = 'updates/' + version + '.zip';
+      fs.unlinkSync(filename);
+      rimraf.sync(source);
       (err) ? reject() : resolve();
     });
   });
@@ -128,7 +131,11 @@ const updateFlashman = function(automatic, res) {
         if (automatic) {
           downloadUpdate(remoteVersion)
           .then(()=>{
-            extractUpdate(remoteVersion);
+            return extractUpdate(remoteVersion);
+          }, (rejectedValue)=>{
+            return Promise.reject(rejectedValue);
+          })
+          .then(()=>{
             return updateDependencies();
           }, (rejectedValue)=>{
             return Promise.reject(rejectedValue);
