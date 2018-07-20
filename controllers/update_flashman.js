@@ -3,6 +3,7 @@ const exec = require('child_process').exec;
 const fs = require('fs');
 const request = require('request');
 const unzip = require('unzip');
+const ncp = require('ncp').ncp;
 let Config = require('../models/config');
 let updateController = {};
 
@@ -68,10 +69,25 @@ const downloadUpdate = function(version) {
   });
 };
 
+const moveUpdate = function() {
+  return new Promise((resolve, reject)=>{
+    let gitRepo = localPackageJson.updater.githubRepo;
+    let gitBranch = localPackageJson.updater.githubBranch.replace(/\//g, '-');
+    let source = 'updates/' + gitRepo + '-' + gitBranch + '/*';
+    ncp(source, '.', (err)=>{
+      (err) ? reject() : resolve();
+    });
+  });
+};
+
 const extractUpdate = function(version) {
   return new Promise((resolve, reject)=>{
     let filename = 'updates/' + version + '.zip';
-    fs.createReadStream(filename).pipe(unzip.Extract({path: '.'}).on('close', resolve));
+    fs.createReadStream(filename).pipe(
+      unzip.Extract({path: 'updates/'}).on('close', ()=>{
+        moveUpdate().then(resolve, reject);
+      })
+    );
   });
 };
 
