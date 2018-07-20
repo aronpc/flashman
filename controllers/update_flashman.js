@@ -147,7 +147,7 @@ const updateFlashman = function(automatic, res) {
               if (res) {
                 res.status(200).json({hasUpdate: false, updated: true});
               }
-              rebootFlashman(version);
+              rebootFlashman(remoteVersion);
             });
           }, (rejectedValue)=>{
             errorCallback(res);
