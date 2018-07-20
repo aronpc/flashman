@@ -101,6 +101,9 @@ const updateDependencies = function() {
 };
 
 const rebootFlashman = function(version) {
+  fs.chmodSync('bin/www', '755');
+  fs.chmodSync('docker/wait-for-it.sh', '755');
+  fs.chmodSync('scripts/cert-deploy-hook.sh', '755');
   let gitRepo = localPackageJson.updater.githubRepo;
   let gitBranch = localPackageJson.updater.githubBranch.replace(/\//g, '-');
   fs.unlinkSync('updates/' + version + '.zip');
