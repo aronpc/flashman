@@ -2,6 +2,7 @@ const localPackageJson = require('../package.json');
 const exec = require('child_process').exec;
 const fs = require('fs');
 const request = require('request');
+const unzip = require('unzip');
 let Config = require('../models/config');
 let updateController = {};
 
@@ -69,7 +70,10 @@ const downloadUpdate = function(version) {
 };
 
 const extractUpdate = function(version) {
-  // Extracts zip in local files
+  return new Promise((resolve, reject)=>{
+    let filename = 'updates/' + version + '.zip';
+    fs.createReadStream(filename).pipe(unzip.Extract({path: '.'}).on('close', resolve));
+  });
 };
 
 const updateDependencies = function() {
