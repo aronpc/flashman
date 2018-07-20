@@ -78,7 +78,6 @@ const moveUpdate = function(version) {
     ncp(source, '.', (err)=>{
       let filename = 'updates/' + version + '.zip';
       fs.unlinkSync(filename);
-      rimraf(source);
       (err) ? reject() : resolve();
     });
   });
