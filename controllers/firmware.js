@@ -30,12 +30,18 @@ firmwareController.firmwares = function(req, res) {
   let indexContent = {};
   indexContent.username = req.user.name;
   User.findOne({name: req.user.name}, function(err, user) {
-    if (err || !user) { indexContent.superuser = false; }
-    else { indexContent.superuser = user.is_superuser; }
+    if (err || !user) {
+      indexContent.superuser = false;
+    } else {
+      indexContent.superuser = user.is_superuser;
+    }
 
     Config.findOne({is_default: true}, function(err, matchedConfig) {
-      if (err || !matchedConfig) { indexContent.update = false; }
-      else { indexContent.update = matchedConfig.hasUpdate; }
+      if (err || !matchedConfig) {
+        indexContent.update = false;
+      } else {
+        indexContent.update = matchedConfig.hasUpdate;
+      }
 
       if (req.query.page) {
         reqPage = req.query.page;
@@ -62,6 +68,12 @@ firmwareController.firmwares = function(req, res) {
 firmwareController.delFirmware = function(req, res) {
   if (req.user.is_superuser) {
     Firmware.find({'_id': {$in: req.body.ids}}, function(err, firmwares) {
+      if (err || firmwares.length == 0) {
+        return res.json({
+          type: 'danger',
+          message: 'Registro não encontrado ou selecionado',
+        });
+      }
       firmwares.forEach((firmware) => {
         fs.unlink('./public/firmwares/' + firmware.filename, function(err) {
           if (err) {
@@ -77,12 +89,12 @@ firmwareController.delFirmware = function(req, res) {
                 message: 'Registro não encontrado',
               });
             }
+            return res.json({
+              type: 'success',
+              message: 'Firmware(s) deletado(s) com sucesso!',
+            });
           });
         });
-      });
-      return res.json({
-        type: 'success',
-        message: 'Firmware(s) deletado(s) com sucesso!',
       });
     });
   } else {
