@@ -1,8 +1,137 @@
+const localPackageJson = require('../package.json');
 const exec = require('child_process').exec;
+const fs = require('fs');
+const request = require('request');
 let Config = require('../models/config');
 let updateController = {};
 
-let updateFlashman = function(automatic, res) {
+const versionCompare = function(foo, bar) {
+  // Returns like C strcmp: 0 if equal, -1 if foo < bar, 1 if foo > bar
+  let fooVer = foo.split('.').map((val) => {
+   return parseInt(val);
+  });
+  let barVer = bar.split('.').map((val) => {
+   return parseInt(val);
+  });
+  for (let i = 0; i < fooVer.length; i++) {
+    if (fooVer[i] < barVer[i]) return -1;
+    if (fooVer[i] > barVer[i]) return 1;
+  }
+  return 0;
+};
+
+const getRemoteVersion = function() {
+  return new Promise((resolve, reject)=>{
+    return resolve('1.2.0');
+    let jsonHost = localPackageJson.updater.jsonHost;
+    let gitUser = localPackageJson.updater.githubUser;
+    let gitRepo = localPackageJson.updater.githubRepo;
+    let gitBranch = localPackageJson.updater.githubBranch;
+    let url = 'https://' + jsonHost + '/' + gitUser + '/' + gitRepo + '/' +
+              gitBranch + '/package.json';
+    request.get(url, (error, resp, body)=>{
+      if (error || resp.statusCode !== 200) {
+        reject();
+      } else {
+        resolve(JSON.parse(body).version);
+      }
+    });
+  });
+};
+
+const getLocalVersion = function() {
+  return localPackageJson.version;
+};
+
+const downloadUpdate = function(version) {
+  return new Promise((resolve, reject)=>{
+    if (!fs.existsSync('updates')) {
+      fs.mkdirSync('updates');
+    }
+    if (fs.existsSync('updates/' + version + '.zip')) {
+      return resolve();
+    }
+    let contentHost = localPackageJson.updater.contentHost;
+    let gitUser = localPackageJson.updater.githubUser;
+    let gitRepo = localPackageJson.updater.githubRepo;
+    let gitBranch = localPackageJson.updater.githubBranch;
+    let url = 'https://' + contentHost + '/' + gitUser + '/' + gitRepo +
+              '/zip/' + gitBranch;
+    let req = request(url);
+    req.on('response', (resp)=>{
+      if (resp.statusCode === 200) {
+        let file = fs.createWriteStream('updates/' + version + '.zip');
+        req.pipe(file).on('finish', resolve);
+      }
+    });
+    req.on('error', reject);
+  });
+};
+
+const extractUpdate = function(version) {
+  // Extracts zip in local files
+};
+
+const updateDependencies = function() {
+  return new Promise((resolve, reject)=>{
+    exec('npm install --production', (err, stdout, stderr)=>{
+      (err) ? reject() : resolve();
+    });
+  });
+};
+
+const rebootFlashman = function() {
+  exec('pm2 reload environment.config.json', (err, stdout, stderr) => {});
+};
+
+const errorCallback = function(res) {
+  if (res) {
+    Config.findOne({is_default: true}, function(err, config) {
+      if (!err && config) {
+        res.status(200).json({hasUpdate: config.hasUpdate, updated: false});
+      } else {
+        res.status(500).json({});
+      }
+    });
+  }
+};
+
+const updateFlashman = function(automatic, res) {
+  getRemoteVersion().then((remoteVersion)=>{
+    let localVersion = getLocalVersion();
+    let needsUpdate = versionCompare(remoteVersion, localVersion) > 0;
+    if (needsUpdate) {
+      Config.findOne({is_default: true}, function(err, matchedConfig) {
+        if (err || !matchedConfig) return errorCallback(res);
+        matchedConfig.hasUpdate = true;
+        matchedConfig.save();
+        if (automatic) {
+          downloadUpdate(remoteVersion)
+          .then(()=>{
+            extractUpdate(remoteVersion);
+            return updateDependencies();
+          }, (rejectedValue)=>{
+            return Promise.reject(rejectedValue);
+          })
+          .then(()=>{
+            matchedConfig.hasUpdate = false;
+            matchedConfig.save((err)=>{
+              if (res) {
+                res.status(200).json({hasUpdate: false, updated: true});
+              }
+              rebootFlashman();
+            });
+          }, (rejectedValue)=>{
+            errorCallback(res);
+          });
+        } else if (res) {
+          res.status(200).json({hasUpdate: true, updated: false});
+        }
+      });
+    } else if (res) {
+      res.status(200).json({hasUpdate: false, updated: false});
+    }
+  }, ()=>errorCallback(res));
 };
 
 updateController.update = function() {
@@ -14,7 +143,7 @@ updateController.update = function() {
 };
 
 updateController.checkUpdate = function() {
-  updateFlashman(false, null);
+  updateFlashman(true, null);
 };
 
 updateController.apiUpdate = function(req, res) {
