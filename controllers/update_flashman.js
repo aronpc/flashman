@@ -23,7 +23,6 @@ const versionCompare = function(foo, bar) {
 
 const getRemoteVersion = function() {
   return new Promise((resolve, reject)=>{
-    return resolve('1.2.0');
     let jsonHost = localPackageJson.updater.jsonHost;
     let gitUser = localPackageJson.updater.githubUser;
     let gitRepo = localPackageJson.updater.githubRepo;
