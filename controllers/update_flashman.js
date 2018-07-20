@@ -87,11 +87,11 @@ const moveUpdate = function(version) {
 const extractUpdate = function(version) {
   return new Promise((resolve, reject)=>{
     let filename = 'updates/' + version + '.zip';
-    fs.createReadStream(filename).pipe(
-      unzip.Extract({path: 'updates/'}).on('close', ()=>{
-        moveUpdate(version).then(resolve, reject);
-      })
-    );
+    fs.createReadStream(filename)
+    .pipe(unzip.Extract({path: 'updates/'}))
+    .on('close', ()=>{
+      moveUpdate(version).then(resolve, reject);
+    });
   });
 };
 
