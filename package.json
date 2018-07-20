@@ -10,7 +10,7 @@
     "contentHost": "codeload.github.com",
     "githubUser": "anlix-io",
     "githubRepo": "flashman",
-    "githubBranch": "feature/refactor-auto-update"
+    "githubBranch": "development"
   },
   "dependencies": {
     "aedes": "^0.34.0",
