@@ -166,29 +166,51 @@ const updateFlashman = function(automatic, res) {
 };
 
 updateController.update = function() {
-  Config.findOne({is_default: true}, function(err, matchedConfig) {
-    if (!err && matchedConfig) {
-      updateFlashman(matchedConfig.autoUpdate, null);
-    }
-  });
+  if (process.env.FLM_DISABLE_AUTO_UPDATE != 'true') {
+    Config.findOne({is_default: true}, function(err, matchedConfig) {
+      if (!err && matchedConfig) {
+        updateFlashman(matchedConfig.autoUpdate, null);
+      }
+    });
+  }
 };
 
 updateController.checkUpdate = function() {
-  updateFlashman(false, null);
+  if (process.env.FLM_DISABLE_AUTO_UPDATE == 'true') {
+    // Always return as updated if auto update is disabled
+    Config.findOne({is_default: true}, function(err, matchedConfig) {
+      if (!err && matchedConfig) {
+        matchedConfig.hasUpdate = false;
+        matchedConfig.save();
+      }
+    });
+  } else {
+    updateFlashman(false, null);
+  }
 };
 
 updateController.apiUpdate = function(req, res) {
-  Config.findOne({is_default: true}, function(err, matchedConfig) {
-    if (!err && matchedConfig && matchedConfig.hasUpdate) {
-      return res.status(200).json({hasUpdate: true, updated: false});
-    } else {
-      updateFlashman(false, res);
-    }
-  });
+  if (process.env.FLM_DISABLE_AUTO_UPDATE == 'true') {
+    // Always return as updated if auto update is disabled
+    res.status(200).json({hasUpdate: false, updated: true});
+  } else {
+    Config.findOne({is_default: true}, function(err, matchedConfig) {
+      if (!err && matchedConfig && matchedConfig.hasUpdate) {
+        return res.status(200).json({hasUpdate: true, updated: false});
+      } else {
+        updateFlashman(false, res);
+      }
+    });
+  }
 };
 
 updateController.apiForceUpdate = function(req, res) {
-  updateFlashman(true, res);
+  if (process.env.FLM_DISABLE_AUTO_UPDATE == 'true') {
+    // Always return as updated if auto update is disabled
+    res.status(200).json({hasUpdate: false, updated: true});
+  } else {
+    updateFlashman(true, res);
+  }
 };
 
 updateController.getAutoConfig = function(req, res) {
