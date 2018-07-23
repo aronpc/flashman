@@ -166,7 +166,7 @@ const updateFlashman = function(automatic, res) {
 };
 
 updateController.update = function() {
-  if (process.env.FLM_DISABLE_AUTO_UPDATE != 'true') {
+  if (process.env.FLM_DISABLE_AUTO_UPDATE !== 'true') {
     Config.findOne({is_default: true}, function(err, matchedConfig) {
       if (!err && matchedConfig) {
         updateFlashman(matchedConfig.autoUpdate, null);
@@ -176,7 +176,7 @@ updateController.update = function() {
 };
 
 updateController.checkUpdate = function() {
-  if (process.env.FLM_DISABLE_AUTO_UPDATE == 'true') {
+  if (process.env.FLM_DISABLE_AUTO_UPDATE === 'true') {
     // Always return as updated if auto update is disabled
     Config.findOne({is_default: true}, function(err, matchedConfig) {
       if (!err && matchedConfig) {
@@ -190,7 +190,7 @@ updateController.checkUpdate = function() {
 };
 
 updateController.apiUpdate = function(req, res) {
-  if (process.env.FLM_DISABLE_AUTO_UPDATE == 'true') {
+  if (process.env.FLM_DISABLE_AUTO_UPDATE === 'true') {
     // Always return as updated if auto update is disabled
     res.status(200).json({hasUpdate: false, updated: true});
   } else {
@@ -205,7 +205,7 @@ updateController.apiUpdate = function(req, res) {
 };
 
 updateController.apiForceUpdate = function(req, res) {
-  if (process.env.FLM_DISABLE_AUTO_UPDATE == 'true') {
+  if (process.env.FLM_DISABLE_AUTO_UPDATE === 'true') {
     // Always return as updated if auto update is disabled
     res.status(200).json({hasUpdate: false, updated: true});
   } else {
