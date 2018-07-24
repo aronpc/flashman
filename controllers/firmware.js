@@ -1,17 +1,18 @@
-var User = require('../models/user');
-var Config = require('../models/config');
-var Firmware = require('../models/firmware');
+let User = require('../models/user');
+let Config = require('../models/config');
+let Firmware = require('../models/firmware');
 
 const fs = require('fs');
+const request = require('request');
 const imageReleasesDir = process.env.FLM_IMG_RELEASE_DIR;
 
-var firmwareController = {};
+let firmwareController = {};
 
-var isValidFilename = function(filename) {
+let isValidFilename = function(filename) {
   return /^([A-Z\-0-9]+)_([A-Z\-0-9]+)_([A-Z0-9]+)_([0-9]{4}\-[a-z]{3})\.(bin)$/.test(filename);
 };
 
-var parseFilename = function(filename) {
+let parseFilename = function(filename) {
   // File name pattern is VENDOR_MODEL_MODELVERSION_RELEASE.bin
   let fnameSubStrings = filename.split('_');
   let releaseSubStringRaw = fnameSubStrings[fnameSubStrings.length - 1];
@@ -75,7 +76,7 @@ firmwareController.delFirmware = function(req, res) {
         });
       }
       firmwares.forEach((firmware) => {
-        fs.unlink('./public/firmwares/' + firmware.filename, function(err) {
+        fs.unlink(imageReleasesDir + firmware.filename, function(err) {
           if (err) {
             return res.json({
               type: 'danger',
@@ -114,7 +115,7 @@ firmwareController.uploadFirmware = function(req, res) {
       'Nomes de arquivo válidos: *FABRICANTE*_*MODELO*_*VERSÃO*_*RELEASE*.bin'});
   }
 
-  firmwarefile.mv('./public/firmwares/' + firmwarefile.name,
+  firmwarefile.mv(imageReleasesDir + firmwarefile.name,
     function(err) {
       if (err) {
         return res.json({type: 'danger', message: 'Erro ao mover arquivo'});
@@ -164,6 +165,65 @@ firmwareController.uploadFirmware = function(req, res) {
                            message: 'Upload de firmware feito com sucesso!'});
         });
       });
+    }
+  );
+};
+
+firmwareController.syncRemoteFirmwareFiles = function(req, res) {
+  request({
+      url: 'https://controle.anlix.io/api/user',
+      method: 'GET',
+      auth: {
+        user: req.body.name,
+        pass: req.body.password,
+      },
+    },
+    function(error, response, body) {
+      if (error) {
+        return res.json({type: 'danger', message: 'Erro na requisição'});
+      }
+      if (response.statusCode === 200) {
+        let company = JSON.parse(body)['o'];
+        request({
+            url: 'https://artifactory.anlix.io/' +
+                 'artifactory/api/storage/upgrades/' + company,
+            method: 'GET',
+            auth: {
+              user: req.body.name,
+              pass: req.body.password,
+            },
+          },
+          function(error, response, body) {
+            if (error) {
+              return res.json({type: 'danger', message: 'Erro na requisição'});
+            }
+            if (response.statusCode === 200) {
+              let firmwareNames = [];
+              let firmwareList = JSON.parse(body)['children'];
+              firmwareList.forEach((firmwareEntry) => {
+                let fileName = firmwareEntry.uri;
+                let fileNameParts = fileName.split('_');
+                let firmwareInfoObj = {
+                  vendor: fileNameParts[0].split('/')[1],
+                  model: fileNameParts[1],
+                  version: fileNameParts[2],
+                  release: fileNameParts[3].split('.')[0],
+                };
+                firmwareNames.push(firmwareInfoObj);
+              });
+
+              return res.json({type: 'success', message: firmwareNames});
+            } else {
+              return res.json({
+                type: 'danger',
+                message: 'Erro na autenticação',
+              });
+            }
+          }
+        );
+      } else {
+        return res.json({type: 'danger', message: 'Erro na autenticação'});
+      }
     }
   );
 };

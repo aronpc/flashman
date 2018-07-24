@@ -105,4 +105,61 @@ $(document).ready(function() {
 
     return false;
   });
+
+  $('form[name=firmwaresync]').submit(function() {
+    $('#btn-firmware-sync').prop('disabled', true);
+    $('#btn-firmware-sync-icon')
+      .removeClass('fa-sync-alt')
+      .addClass('fa-spinner fa-pulse');
+    $('#avail-firmware-list').empty();
+    $('#avail-firmware-tableres').hide();
+    $('#avail-firmware-placeholder').show();
+    $.post($(this).attr('action'), $(this).serialize(), function(res) {
+      $('#btn-firmware-sync').prop('disabled', false);
+      $('#btn-firmware-sync-icon')
+        .addClass('fa-sync-alt')
+        .removeClass('fa-spinner fa-pulse');
+      if (res.type == 'success') {
+        $('#avail-firmware-placeholder').hide();
+        $('#avail-firmware-tableres').show();
+        res.message.forEach(function(firmwareInfoObj) {
+          $('#avail-firmware-list').append(
+            $('<tr></tr>').append(
+              $('<td></td>').addClass('text-center').html(firmwareInfoObj.vendor),
+              $('<td></td>').addClass('text-center').html(firmwareInfoObj.model),
+              $('<td></td>').addClass('text-center').html(firmwareInfoObj.version),
+              $('<td></td>').addClass('text-center').html(firmwareInfoObj.release),
+              $('<td></td>').addClass('text-center').append(
+                $('<button></button>').append(
+                  $('<div></div>').addClass('fas fa-check'),
+                  $('<span></span>').html('&nbsp Adicionar')
+                ).addClass('btn btn-sm my-0 teal lighten-2')
+              )
+            )
+          );
+        });
+
+        $('#avail-firmware-table').DataTable({
+          'destroy': true,
+          'paging': true,
+          'info': false,
+          'pagingType': 'numbers',
+          'language': {
+            'zeroRecords': 'Nenhum registro encontrado',
+            'infoEmpty': 'Nenhum firmware disponível',
+            'search': 'Buscar',
+            'lengthMenu': 'Exibir _MENU_ firmwares',
+          },
+          'order': [[0, 'asc'], [1, 'asc'], [2, 'asc'], [3, 'desc']],
+        });
+      } else {
+        displayAlertMsg({
+          type: res.type,
+          message: res.message,
+        });
+      }
+    }, 'json');
+
+    return false;
+  });
 });
