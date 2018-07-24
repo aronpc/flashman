@@ -6,26 +6,54 @@ block stylesheets
 block content
   .card.mt-4
     h4.card-header.teal.lighten-2.white-text
-      span.card-title Upload de novo firmware
+      .row
+        .col-6
+          .fas.fa-exchange-alt.fa-lg.mt-1
+          span &nbsp Upload de novo firmware
+        .col-6
+          ul.nav.nav-pills.nav-justified
+            li.nav-item
+              a.nav-link.active(data-toggle="tab", role="tab", href="#panel1")
+                .fas.fa-file
+                span &nbsp Arquivo
+            li.nav-item
+              a.nav-link(data-toggle="tab", role="tab", href="#panel2")
+                .fas.fa-globe
+                span &nbsp Conta da Anlix
     .card-body
-      form(method="post", action="/firmware/upload", name="firmwareform")
-        .col
-          .input-group
-            label.input-group-btn
-              label.btn.teal.lighten-2.btn-file
-                | Arquivo...
-                input.form-control(type="file", name="firmwarefile",
-                                   style="display:none;")
-            input.form-control(type="text", readonly)
+      .tab-content
+        .tab-pane.fade.in.show.active(id="panel1", role="tabpanel")
+          form(method="post", action="/firmware/upload", name="firmwareform")
+            .col
+              .input-group
+                label.input-group-btn
+                  label.btn.teal.lighten-2.btn-file
+                    | Arquivo...
+                    input.form-control(type="file", name="firmwarefile",
+                                       style="display:none;")
+                input.form-control(type="text", readonly)
 
-        .col.mt-4.text-center
-          .form-buttons
-            button.btn.btn-lg.teal.lighten-2(
-              type="submit",
-              id="btn-submit-upload"
-            )
-              .fas.fa-upload.fa-lg(id="btn-submit-icon")
-              span &nbsp Upload
+            .col.mt-4.text-center
+              .form-buttons
+                button.btn.btn-lg.teal.lighten-2(
+                  type="submit",
+                  id="btn-submit-upload"
+                )
+                  .fas.fa-upload.fa-lg(id="btn-submit-icon")
+                  span &nbsp Upload
+        .tab-pane.fade(id="panel2", role="tabpanel")
+          .col-4.offset-4
+            form(method='post', action='#')
+              .md-form
+                i.fas.fa-user.prefix.grey-text
+                input#name.form-control(type="text", name="name")
+                label(for="name") Usuário
+              .md-form
+                i.fas.fa-lock.prefix.grey-text
+                input#password.form-control(type="password", name="password")
+                label(for="password") Senha
+              .form-buttons.text-center
+                button.btn.btn-primary.btn-lg.teal.lighten-2(type="submit") Sincronizar
 
   .card.mt-4.mb-4
     h4.card-header.teal.lighten-2.white-text

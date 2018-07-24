@@ -116,3 +116,25 @@ input:checked + .slider:before {
   border-bottom: 1px solid #ced4da;
   box-shadow: none;
 }
+
+/* nav pills custom colors */
+
+.nav-pills .nav-link:not(.active) {
+  background-color: #4db6ac;
+  color: white;
+}
+
+.nav-pills .nav-link:hover {
+  background-color: #4db6ac;
+  color: #2c6b65; 
+}
+
+.nav-pills .nav-link:focus {
+  background-color: #3f968e;
+  color: white;
+}
+
+.nav-pills .nav-link.active {
+  background-color: #3f968e;
+  color: white;
+}
