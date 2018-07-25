@@ -47,6 +47,32 @@ $(document).ready(function() {
     });
   });
 
+  // Use this format when adding button with AJAX
+  $(document).on('click', '.btn-firmware-add', function(event) {
+    let encoded = $('#avail-firmware-table').data('encoded');
+    let company = $(this).data('company');
+    let firmwarefile = $(this).data('firmwarefile');
+    let currBtn = $(this);
+
+    currBtn.prop('disabled', true);
+    currBtn.find('.btn-fw-add-icon')
+      .removeClass('fa-check')
+      .addClass('fa-spinner fa-pulse');
+    $.ajax({
+      type: 'POST',
+      url: '/firmware/add',
+      traditional: true,
+      data: {encoded: encoded, company: company, firmwarefile: firmwarefile},
+      success: function(res) {
+        currBtn.prop('disabled', false);
+        currBtn.find('.btn-fw-add-icon')
+          .removeClass('fa-spinner fa-pulse')
+          .addClass('fa-check');
+        displayAlertMsg(res);
+      },
+    });
+  });
+
   $('.checkbox').change(function(event) {
     let itemId = $(this).prop('id');
 
@@ -122,7 +148,7 @@ $(document).ready(function() {
       if (res.type == 'success') {
         $('#avail-firmware-placeholder').hide();
         $('#avail-firmware-tableres').show();
-        res.message.forEach(function(firmwareInfoObj) {
+        res.firmwarelist.forEach(function(firmwareInfoObj) {
           $('#avail-firmware-list').append(
             $('<tr></tr>').append(
               $('<td></td>').addClass('text-center').html(firmwareInfoObj.vendor),
@@ -131,13 +157,17 @@ $(document).ready(function() {
               $('<td></td>').addClass('text-center').html(firmwareInfoObj.release),
               $('<td></td>').addClass('text-center').append(
                 $('<button></button>').append(
-                  $('<div></div>').addClass('fas fa-check'),
+                  $('<div></div>').addClass('fas fa-check btn-fw-add-icon'),
                   $('<span></span>').html('&nbsp Adicionar')
-                ).addClass('btn btn-sm my-0 teal lighten-2')
+                ).addClass('btn btn-sm my-0 teal lighten-2 btn-firmware-add')
+                .attr('data-firmwarefile', firmwareInfoObj.uri)
+                .attr('data-company', firmwareInfoObj.company)
+                .attr('type', 'button')
               )
             )
           );
         });
+        $('#avail-firmware-table').attr('data-encoded', res.encoded);
 
         $('#avail-firmware-table').DataTable({
           'destroy': true,

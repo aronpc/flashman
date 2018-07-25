@@ -17,4 +17,7 @@ router.route('/upload').post(authController.ensureLogin(),
 router.route('/sync').post(authController.ensureLogin(),
                            firmwareController.syncRemoteFirmwareFiles);
 
+router.route('/add').post(authController.ensureLogin(),
+                          firmwareController.addRemoteFirmwareFile);
+
 module.exports = router;

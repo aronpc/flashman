@@ -3,6 +3,7 @@ let Config = require('../models/config');
 let Firmware = require('../models/firmware');
 
 const fs = require('fs');
+const unzip = require('unzip');
 const request = require('request');
 const imageReleasesDir = process.env.FLM_IMG_RELEASE_DIR;
 
@@ -204,15 +205,22 @@ firmwareController.syncRemoteFirmwareFiles = function(req, res) {
                 let fileName = firmwareEntry.uri;
                 let fileNameParts = fileName.split('_');
                 let firmwareInfoObj = {
+                  company: company,
                   vendor: fileNameParts[0].split('/')[1],
                   model: fileNameParts[1],
                   version: fileNameParts[2],
                   release: fileNameParts[3].split('.')[0],
+                  uri: fileName,
                 };
                 firmwareNames.push(firmwareInfoObj);
               });
+              let encodedAuth = new Buffer(
+                req.body.name + ':' + req.body.password).toString('base64');
 
-              return res.json({type: 'success', message: firmwareNames});
+              return res.json({type: 'success',
+                firmwarelist: firmwareNames,
+                encoded: encodedAuth,
+              });
             } else {
               return res.json({
                 type: 'danger',
@@ -226,6 +234,81 @@ firmwareController.syncRemoteFirmwareFiles = function(req, res) {
       }
     }
   );
+};
+
+firmwareController.addRemoteFirmwareFile = function(req, res) {
+  let responseStream = request
+    .get('https://artifactory.anlix.io/artifactory/upgrades/' +
+      req.body.company + req.body.firmwarefile, {
+        headers: {
+          'Authorization': 'Basic ' + req.body.encoded,
+        },
+      })
+    .on('error', function(err) {
+      return res.json({type: 'danger', message: 'Erro na requisição'});
+    })
+    .on('response', function(response) {
+      let unzipDest = new unzip.Extract({path: 'public/firmwares'});
+      if (response.statusCode === 200) {
+        responseStream.pipe(unzipDest);
+        unzipDest.on('close', function() {
+          let firmwarefname = req.body.firmwarefile
+            .replace('/', '')
+            .replace('.zip', '.bin');
+          let fnameFields = parseFilename(firmwarefname);
+
+          Firmware.findOne({
+            vendor: fnameFields.vendor,
+            model: fnameFields.model,
+            version: fnameFields.version,
+            release: fnameFields.release,
+            filename: firmwarefname,
+          }, function(err, firmware) {
+            if (err) {
+              return res.json({
+                type: 'danger',
+                message: 'Erro buscar na base de dados',
+              });
+            }
+            if (!firmware) {
+              firmware = new Firmware({
+                vendor: fnameFields.vendor,
+                model: fnameFields.model,
+                version: fnameFields.version,
+                release: fnameFields.release,
+                filename: firmwarefname,
+              });
+            } else {
+              firmware.vendor = fnameFields.vendor;
+              firmware.model = fnameFields.model;
+              firmware.version = fnameFields.version;
+              firmware.release = fnameFields.release;
+              firmware.filename = firmwarefname;
+            }
+
+            firmware.save(function(err) {
+              if (err) {
+                let msg = '';
+                for (let field = 0; field < err.errors.length; field++) {
+                  msg += err.errors[field].message + ' ';
+                }
+                return res.json({type: 'danger', message: msg});
+              }
+
+              return res.json({
+                type: 'success',
+                message: 'Firmware adicionado com sucesso!',
+              });
+            });
+          });
+        });
+      } else {
+        return res.json({
+          type: 'danger',
+          message: 'Erro na autenticação',
+        });
+      }
+    });
 };
 
 module.exports = firmwareController;
