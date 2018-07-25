@@ -27,6 +27,22 @@ let parseFilename = function(filename) {
   return firmwareFields;
 };
 
+let removeFirmware = function(firmware) {
+  return new Promise((resolve, reject)=> {
+    fs.unlink(imageReleasesDir + firmware.filename, function(err) {
+      if (err) {
+        return reject('Arquivo não encontrado');
+      }
+      firmware.remove(function(err) {
+        if (err) {
+          return reject('Registro não encontrado');
+        }
+        return resolve();
+      });
+    });
+  });
+};
+
 firmwareController.firmwares = function(req, res) {
   let reqPage = 1;
   let indexContent = {};
@@ -76,27 +92,21 @@ firmwareController.delFirmware = function(req, res) {
           message: 'Registro não encontrado ou selecionado',
         });
       }
+      let promises = [];
       firmwares.forEach((firmware) => {
-        fs.unlink(imageReleasesDir + firmware.filename, function(err) {
-          if (err) {
-            return res.json({
-              type: 'danger',
-              message: 'Arquivo não encontrado',
-            });
-          }
-          firmware.remove(function(err) {
-            if (err) {
-              return res.json({
-                type: 'danger',
-                message: 'Registro não encontrado',
-              });
-            }
-            return res.json({
-              type: 'success',
-              message: 'Firmware(s) deletado(s) com sucesso!',
-            });
+        promises.push(removeFirmware(firmware));
+      });
+      Promise.all(promises).then(
+        function() {
+          return res.json({
+            type: 'success',
+            message: 'Firmware(s) deletado(s) com sucesso!',
           });
-        });
+        }, function(errMessage) {
+          return res.json({
+            type: 'danger',
+            message: errMessage,
+          });
       });
     });
   } else {

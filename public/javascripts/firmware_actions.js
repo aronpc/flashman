@@ -37,9 +37,10 @@ $(document).ready(function() {
       data: {ids: selectedItens},
       success: function(res) {
         if (res.type == 'success') {
+          displayAlertMsg(res);
           setTimeout(function() {
             window.location.reload();
-          }, 100);
+          }, 1000);
         } else {
           displayAlertMsg(res);
         }
