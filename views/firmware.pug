@@ -6,26 +6,73 @@ block stylesheets
 block content
   .card.mt-4
     h4.card-header.teal.lighten-2.white-text
-      span.card-title Upload de novo firmware
+      .row
+        .col-6
+          .fas.fa-exchange-alt.fa-lg.mt-1
+          span &nbsp Upload de novo firmware
+        .col-6
+          ul.nav.nav-pills.nav-justified
+            li.nav-item
+              a.nav-link.active(data-toggle="tab", role="tab", href="#panel1")
+                .fas.fa-file
+                span &nbsp Arquivo
+            li.nav-item
+              a.nav-link(data-toggle="tab", role="tab", href="#panel2")
+                .fas.fa-globe
+                span &nbsp Conta da Anlix
     .card-body
-      form(method="post", action="/firmware/upload", name="firmwareform")
-        .col
-          .input-group
-            label.input-group-btn
-              label.btn.teal.lighten-2.btn-file
-                | Arquivo...
-                input.form-control(type="file", name="firmwarefile",
-                                   style="display:none;")
-            input.form-control(type="text", readonly)
+      .tab-content
+        .tab-pane.fade.in.show.active(id="panel1", role="tabpanel")
+          form(method="post", action="/firmware/upload", name="firmwareform")
+            .col
+              .input-group
+                label.input-group-btn
+                  label.btn.teal.lighten-2.btn-file
+                    | Arquivo...
+                    input.form-control(type="file", name="firmwarefile",
+                                       style="display:none;")
+                input.form-control(type="text", readonly)
 
-        .col.mt-4.text-center
-          .form-buttons
-            button.btn.btn-lg.teal.lighten-2(
-              type="submit",
-              id="btn-submit-upload"
-            )
-              .fas.fa-upload.fa-lg(id="btn-submit-icon")
-              span &nbsp Upload
+            .col.mt-4.text-center
+              .form-buttons
+                button.btn.btn-lg.teal.lighten-2(
+                  type="submit",
+                  id="btn-submit-upload"
+                )
+                  .fas.fa-upload.fa-lg(id="btn-submit-icon")
+                  span &nbsp Upload
+        .tab-pane.fade(id="panel2", role="tabpanel")
+          .col-8.offset-2.mb-5
+            form.form-inline(method="post", action="/firmware/sync", name="firmwaresync")
+              .md-form.mr-3.mt-2.mb-0
+                i.fas.fa-user.prefix.grey-text
+                input#name.form-control(type="text", name="name")
+                label(for="name") Usuário
+              .md-form.mr-3.mt-2.mb-0
+                i.fas.fa-lock.prefix.grey-text
+                input#password.form-control(type="password", name="password")
+                label(for="password") Senha
+              .form-buttons
+                button.btn.btn-md.mt-0.my-0.teal.lighten-2(
+                  type="submit",
+                  id="btn-firmware-sync"
+                )
+                  .fas.fa-sync-alt.fa-lg(id="btn-firmware-sync-icon")
+                  span &nbsp Sincronizar
+          #avail-firmware-tableres.table-responsive(style="display: none;")
+            table#avail-firmware-table.table
+              thead
+                tr
+                  th.text-center Fabricante
+                  th.text-center Modelo
+                  th.text-center Versão do hardware
+                  th.text-center Release
+                  th
+              tbody#avail-firmware-list
+          h2#avail-firmware-placeholder.text-center.grey-text.mb-3
+            i.fas.fa-hdd.fa-4x
+            br
+            span Faça seu login
 
   .card.mt-4.mb-4
     h4.card-header.teal.lighten-2.white-text

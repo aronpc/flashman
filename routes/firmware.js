@@ -1,16 +1,23 @@
 
-var express = require('express');
-var router = express.Router();
-var firmwareController = require('../controllers/firmware');
-var authController = require('../controllers/auth');
+const express = require('express');
+const firmwareController = require('../controllers/firmware');
+const authController = require('../controllers/auth');
+
+let router = express.Router();
 
 router.route('/').get(authController.ensureLogin(),
                       firmwareController.firmwares);
 
 router.route('/del').post(authController.ensureLogin(),
-                          firmwareController.delFirmware)
+                          firmwareController.delFirmware);
 
 router.route('/upload').post(authController.ensureLogin(),
-                             firmwareController.uploadFirmware)
+                             firmwareController.uploadFirmware);
+
+router.route('/sync').post(authController.ensureLogin(),
+                           firmwareController.syncRemoteFirmwareFiles);
+
+router.route('/add').post(authController.ensureLogin(),
+                          firmwareController.addRemoteFirmwareFile);
 
 module.exports = router;

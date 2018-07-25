@@ -37,12 +37,39 @@ $(document).ready(function() {
       data: {ids: selectedItens},
       success: function(res) {
         if (res.type == 'success') {
+          displayAlertMsg(res);
           setTimeout(function() {
             window.location.reload();
-          }, 100);
+          }, 1000);
         } else {
           displayAlertMsg(res);
         }
+      },
+    });
+  });
+
+  // Use this format when adding button with AJAX
+  $(document).on('click', '.btn-firmware-add', function(event) {
+    let encoded = $('#avail-firmware-table').data('encoded');
+    let company = $(this).data('company');
+    let firmwarefile = $(this).data('firmwarefile');
+    let currBtn = $(this);
+
+    currBtn.prop('disabled', true);
+    currBtn.find('.btn-fw-add-icon')
+      .removeClass('fa-check')
+      .addClass('fa-spinner fa-pulse');
+    $.ajax({
+      type: 'POST',
+      url: '/firmware/add',
+      traditional: true,
+      data: {encoded: encoded, company: company, firmwarefile: firmwarefile},
+      success: function(res) {
+        currBtn.prop('disabled', false);
+        currBtn.find('.btn-fw-add-icon')
+          .removeClass('fa-spinner fa-pulse')
+          .addClass('fa-check');
+        displayAlertMsg(res);
       },
     });
   });
@@ -102,6 +129,67 @@ $(document).ready(function() {
         message: 'Nenhum arquivo foi selecionado',
       });
     }
+
+    return false;
+  });
+
+  $('form[name=firmwaresync]').submit(function() {
+    $('#btn-firmware-sync').prop('disabled', true);
+    $('#btn-firmware-sync-icon')
+      .removeClass('fa-sync-alt')
+      .addClass('fa-spinner fa-pulse');
+    $('#avail-firmware-list').empty();
+    $('#avail-firmware-tableres').hide();
+    $('#avail-firmware-placeholder').show();
+    $.post($(this).attr('action'), $(this).serialize(), function(res) {
+      $('#btn-firmware-sync').prop('disabled', false);
+      $('#btn-firmware-sync-icon')
+        .addClass('fa-sync-alt')
+        .removeClass('fa-spinner fa-pulse');
+      if (res.type == 'success') {
+        $('#avail-firmware-placeholder').hide();
+        $('#avail-firmware-tableres').show();
+        res.firmwarelist.forEach(function(firmwareInfoObj) {
+          $('#avail-firmware-list').append(
+            $('<tr></tr>').append(
+              $('<td></td>').addClass('text-center').html(firmwareInfoObj.vendor),
+              $('<td></td>').addClass('text-center').html(firmwareInfoObj.model),
+              $('<td></td>').addClass('text-center').html(firmwareInfoObj.version),
+              $('<td></td>').addClass('text-center').html(firmwareInfoObj.release),
+              $('<td></td>').addClass('text-center').append(
+                $('<button></button>').append(
+                  $('<div></div>').addClass('fas fa-check btn-fw-add-icon'),
+                  $('<span></span>').html('&nbsp Adicionar')
+                ).addClass('btn btn-sm my-0 teal lighten-2 btn-firmware-add')
+                .attr('data-firmwarefile', firmwareInfoObj.uri)
+                .attr('data-company', firmwareInfoObj.company)
+                .attr('type', 'button')
+              )
+            )
+          );
+        });
+        $('#avail-firmware-table').attr('data-encoded', res.encoded);
+
+        $('#avail-firmware-table').DataTable({
+          'destroy': true,
+          'paging': true,
+          'info': false,
+          'pagingType': 'numbers',
+          'language': {
+            'zeroRecords': 'Nenhum registro encontrado',
+            'infoEmpty': 'Nenhum firmware disponível',
+            'search': 'Buscar',
+            'lengthMenu': 'Exibir _MENU_ firmwares',
+          },
+          'order': [[0, 'asc'], [1, 'asc'], [2, 'asc'], [3, 'desc']],
+        });
+      } else {
+        displayAlertMsg({
+          type: res.type,
+          message: res.message,
+        });
+      }
+    }, 'json');
 
     return false;
   });
