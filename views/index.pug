@@ -125,7 +125,13 @@ block content
                   tr
                     th
                     th.text-center #
-                    th.text-center Status
+                    th.text-center
+                      span Status &nbsp
+                      a.fas.fa-question-circle(
+                        href="#",
+                        data-toggle="tooltip",
+                        title="-Verde: Online\n-Vermelho: Sem resposta imediata\n-Cinza: Sem resposta por mais de 1 hora",
+                      )
                     th.text-center Usuário PPPoE
                     th.text-center Identificação
                     th.text-center IP WAN
