@@ -29,13 +29,19 @@ const getReleases = function() {
 
 const getStatus = function(devices) {
   let statusAll = {};
-  let yesterday = new Date();
-  // 24 hours back from now
-  yesterday.setDate(yesterday.getDate() - 1);
+  let lastHour = new Date();
+  lastHour.setHours(lastHour.getHours() - 1);
+
   devices.forEach((device) => {
-    let deviceColor = 'red-text';
-    if (device.last_contact.getTime() > yesterday.getTime()) {
+    let deviceColor = 'grey-text';
+    // MQTTS status
+    if (mqtt.clients[device._id.toUpperCase()]) {
       deviceColor = 'green-text';
+    } else {
+      // No MQTT connected. Check last keepalive
+      if (device.last_contact.getTime() > lastHour.getTime()) {
+        deviceColor = 'red-text';
+      }
     }
     statusAll[device._id] = deviceColor;
   });
@@ -44,10 +50,10 @@ const getStatus = function(devices) {
 
 const getOnlineCount = function(query, status) {
   let andQuery = {};
-  let yesterday = new Date();
-  // 24 hours back from now
-  yesterday.setDate(yesterday.getDate() - 1);
-  andQuery.$and = [{last_contact: {$gt: yesterday.getTime()}}, query];
+  let lastHour = new Date();
+  lastHour.setHours(lastHour.getHours() - 1);
+
+  andQuery.$and = [{last_contact: {$gt: lastHour.getTime()}}, query];
   DeviceModel.count(andQuery, function(err, count) {
     if (err) {
       status.onlinenum = 0;
