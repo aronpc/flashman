@@ -232,15 +232,15 @@ deviceListController.searchDeviceReg = function(req, res) {
 
     if (queryContents[idx].toLowerCase() == 'online') {
       let field = {};
-      let yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      field['last_contact'] = {$gte: yesterday};
+      let lastHour = new Date();
+      lastHour.setHours(lastHour.getHours() - 1);
+      field['last_contact'] = {$gte: lastHour};
       queryArray.push(field);
     } else if (queryContents[idx].toLowerCase() == 'offline') {
       let field = {};
-      let yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      field['last_contact'] = {$lt: yesterday};
+      let lastHour = new Date();
+      lastHour.setHours(lastHour.getHours() - 1);
+      field['last_contact'] = {$lt: lastHour};
       queryArray.push(field);
     } else {
       for (let property in DeviceModel.schema.paths) {
