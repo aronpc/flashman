@@ -145,3 +145,8 @@ input:checked + .slider:before {
   background-color: #4db6ac;
   color: white;
 }
+
+/* modal dialog customization */
+.modal-dialog.modal-notify.modal-teal .modal-header {
+  background-color: #4db6ac;
+}

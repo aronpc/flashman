@@ -1,6 +1,48 @@
 extends layout
 
 block content
+  #special-search-terms.modal.fade(tabindex="-1", role="dialog")
+    .modal-dialog.modal-notify.modal-teal(role="document")
+      .modal-content
+        .modal-header
+          p.heading.lead
+            span.fas.fa-search.fa-lg
+            strong &nbsp; Termos de Busca Especiais
+
+          button.close(type="button", data-dismiss="modal")
+            span.white-text &times;
+        .modal-body
+            .row
+              .col-7
+                h4
+                  span.badge.grey.lighten-2.bounceIn.mr-2
+                    .black-text online
+                  span.badge.grey.lighten-2.bounceIn
+                    .black-text offline
+              .col-5
+                p
+                  strong Use um desses termos para filtrar somente os dispositivos online ou offline
+            .row.mt-2
+              .col-7
+                h4
+                  span.badge.grey.lighten-2.bounceIn.mr-2
+                    .black-text upgrade on
+                  span.badge.grey.lighten-2.bounceIn
+                    .black-text update on
+              .col-5
+                p
+                  strong Use um desses termos para filtrar somente os dispositivos marcados para atualização
+            .row.mt-2
+              .col-7
+                h4
+                  span.badge.grey.lighten-2.bounceIn.mr-2
+                    .black-text upgrade off
+                  span.badge.grey.lighten-2.bounceIn
+                    .black-text update off
+              .col-5
+                p
+                  strong Use um desses termos para filtrar somente os dispositivos não marcados para atualização
+
   .row.justify-content-center
     .col-12.col-lg-8.mt-4
       form(action="/devicelist/search")
@@ -9,13 +51,19 @@ block content
                                         placeholder="Buscar...")
           .input-group-append(
             data-toggle="tooltip",
-            title="Use as vírgulas para combinar os filtros desejados. (Exemplo: TP-Link, 0001-aix)"
+            title="-Use as vírgulas para combinar os filtros desejados. (Exemplo: TP-Link, 0001-aix)"
           )
             span.input-group-text.md-addon
               .fas.fa-question.fa-lg
           .input-group-btn
             button.my-0.btn.teal.lighten-2(type="submit")
               .fas.fa-search.fa-lg
+        a.badge.teal.lighten-2.bounceIn(
+          data-toggle="modal",
+          data-target="#special-search-terms"
+        )
+          | Termos Especiais &nbsp
+          .fas.fa-plus-circle
 
   .row.justify-content-center
     .col-12.col-lg-8.mt-5
@@ -122,7 +170,22 @@ block content
             .table-responsive
               table.table.devices-table
                 thead
-                  tr
+                  tr.csv-export(data-deviceid="Identificação",
+                     data-connection-type="Tipo de Conexão WAN",
+                     data-user="Usuário PPPoE",
+                     data-pass="Senha PPPoE",
+                     data-ssid="WiFi SSID",
+                     data-wifi-pass="WiFi Senha",
+                     data-channel="WiFi Canal",
+                     data-ext-wan="IP Público",
+                     data-int-wan="IP WAN",
+                     data-external-ref-type="Tipo de ID do cliente",
+                     data-external-ref="ID do cliente",
+                     data-device-model="Modelo do roteador",
+                     data-device-version="Versão do Flashbox",
+                     data-device-release="Release",
+                     data-do-update="Atualizar Firmware"
+                  )
                     th
                     th.text-center #
                     th.text-center
@@ -160,18 +223,23 @@ block content
                         )
                         .slider.round
                   each device, index in devices
-                    tr(id=device._id,
-                       data-deviceid=device._id,
+                    tr.csv-export(id=device._id,
                        data-index=(index + 1),
+                       data-deviceid=device._id,
+                       data-connection-type=(device.connection_type ? device.connection_type : ""),
                        data-user=device.pppoe_user,
                        data-pass=device.pppoe_password,
                        data-ssid=device.wifi_ssid,
                        data-wifi-pass=device.wifi_password,
                        data-channel=device.wifi_channel,
-                       data-external-ref-type=device.external_reference.kind,
-                       data-external-ref=device.external_reference.data,
-                       data-device-model=device.model
-                       data-device-version=device.version
+                       data-ext-wan=(device.ip ? device.ip : ""),
+                       data-int-wan=(device.wan_ip ? device.wan_ip : ""),
+                       data-external-ref-type=(device.external_reference.kind ? device.external_reference.kind : ""),
+                       data-external-ref=(device.external_reference.data ? device.external_reference.data : ""),
+                       data-device-model=(device.model ? device.model : ""),
+                       data-device-version=(device.version ? device.version : ""),
+                       data-device-release=(device.release ? device.release : ""),
+                       data-do-update=(device.do_update ? "Sim" : "Não"),
                     )
                       td.text-center.col-xs-1(
                         style="cursor: pointer;"
@@ -341,30 +409,36 @@ block content
                                 .fas.fa-check.fa-lg
                                 span &nbsp Editar
 
-        .row.justify-content-center.mt-4
-          nav
-            ul.pagination.pagination-lg
-              - let cPage = parseInt(page);
-              - let delta = 2;
-              - for (var i=1; i<=pages; i++) {
-              -   if (i == 1 || i == pages || ((i >= cPage-delta) && (i <= cPage+delta))) {
-              -     if (i == page)
-                      li.page-item.active
-                        a.page-link.teal.lighten-2(href="#") #{i}
-              -     else {
-              -       if (i == pages && (cPage+delta <= pages-delta)) {
+        .row.mt-3.mb-3
+          .col-md-9
+            nav
+              ul.pagination.pagination-lg
+                - let cPage = parseInt(page);
+                - let delta = 2;
+                - for (var i=1; i<=pages; i++) {
+                -   if (i == 1 || i == pages || ((i >= cPage-delta) && (i <= cPage+delta))) {
+                -     if (i == page)
+                        li.page-item.active
+                          a.page-link.teal.lighten-2(href="#") #{i}
+                -     else {
+                -       if (i == pages && (cPage+delta <= pages-delta)) {
+                          li.page-item
+                            h3.page-link.disabled ...
+                -       }
                         li.page-item
-                          h3.page-link.disabled ...
-              -       }
-                      li.page-item
-                        a.page-link(href="?content=" + lastquery + "&page=" + i) #{i}
-              -       if (i == 1 && (cPage-delta > delta)) {
-                        li.page-item
-                          h3.page-link.disabled ...
-              -       }
-              -     }
-              -   }
-              - }
+                          a.page-link(href="?content=" + lastquery + "&page=" + i) #{i}
+                -       if (i == 1 && (cPage-delta > delta)) {
+                          li.page-item
+                            h3.page-link.disabled ...
+                -       }
+                -     }
+                -   }
+                - }
+          .col-md-3
+            .text-right
+              button#export-csv.btn.teal.lighten-2.mr-0.my-0
+                .fas.fa-file-excel.fa-lg
+                span &nbsp Exportar CSV
 
 block scripts
   script(src='/scripts/tags-input/tags-input.js')
