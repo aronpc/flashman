@@ -9,7 +9,11 @@ block content
                                         placeholder="Buscar...")
           .input-group-append(
             data-toggle="tooltip",
-            title="Use as vírgulas para combinar os filtros desejados. (Exemplo: TP-Link, 0001-aix)"
+            title="-Use as vírgulas para combinar os filtros desejados. (Exemplo: TP-Link, 0001-aix)\n" +
+            "-Use o termo 'online' para filtrar somente os dispositivos online\n" +
+            "-Use o termo 'offline' para filtrar somente os dispositivos offline\n" +
+            "-Use o termo 'upgrade on' ou 'update on' para filtrar somente os dispositivos marcados para atualização\n" +
+            "-Use o termo 'upgrade off' ou 'update off' para filtrar somente os dispositivos não marcados para atualização"
           )
             span.input-group-text.md-addon
               .fas.fa-question.fa-lg

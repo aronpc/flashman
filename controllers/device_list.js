@@ -242,6 +242,16 @@ deviceListController.searchDeviceReg = function(req, res) {
       lastHour.setHours(lastHour.getHours() - 1);
       field['last_contact'] = {$lt: lastHour};
       queryArray.push(field);
+    } else if ((queryContents[idx].toLowerCase() == 'upgrade on') ||
+               (queryContents[idx].toLowerCase() == 'update on')) {
+      let field = {};
+      field['do_update'] = {$eq: true};
+      queryArray.push(field);
+    } else if ((queryContents[idx].toLowerCase() == 'upgrade off') ||
+               (queryContents[idx].toLowerCase() == 'update off')) {
+      let field = {};
+      field['do_update'] = {$eq: false};
+      queryArray.push(field);
     } else {
       for (let property in DeviceModel.schema.paths) {
         if (DeviceModel.schema.paths.hasOwnProperty(property) &&
