@@ -1,6 +1,48 @@
 extends layout
 
 block content
+  #special-search-terms.modal.fade(tabindex="-1", role="dialog")
+    .modal-dialog.modal-notify.modal-teal(role="document")
+      .modal-content
+        .modal-header
+          p.heading.lead
+            span.fas.fa-search.fa-lg
+            strong &nbsp; Termos de Busca Especiais
+
+          button.close(type="button", data-dismiss="modal")
+            span.white-text &times;
+        .modal-body
+            .row
+              .col-7
+                h4
+                  span.badge.grey.lighten-2.bounceIn.mr-2
+                    .black-text online
+                  span.badge.grey.lighten-2.bounceIn
+                    .black-text offline
+              .col-5
+                p
+                  strong Use um desses termos para filtrar somente os dispositivos online ou offline
+            .row.mt-2
+              .col-7
+                h4
+                  span.badge.grey.lighten-2.bounceIn.mr-2
+                    .black-text upgrade on
+                  span.badge.grey.lighten-2.bounceIn
+                    .black-text update on
+              .col-5
+                p
+                  strong Use um desses termos para filtrar somente os dispositivos marcados para atualização
+            .row.mt-2
+              .col-7
+                h4
+                  span.badge.grey.lighten-2.bounceIn.mr-2
+                    .black-text upgrade off
+                  span.badge.grey.lighten-2.bounceIn
+                    .black-text update off
+              .col-5
+                p
+                  strong Use um desses termos para filtrar somente os dispositivos não marcados para atualização
+
   .row.justify-content-center
     .col-12.col-lg-8.mt-4
       form(action="/devicelist/search")
@@ -9,17 +51,19 @@ block content
                                         placeholder="Buscar...")
           .input-group-append(
             data-toggle="tooltip",
-            title="-Use as vírgulas para combinar os filtros desejados. (Exemplo: TP-Link, 0001-aix)\n" +
-            "-Use o termo 'online' para filtrar somente os dispositivos online\n" +
-            "-Use o termo 'offline' para filtrar somente os dispositivos offline\n" +
-            "-Use o termo 'upgrade on' ou 'update on' para filtrar somente os dispositivos marcados para atualização\n" +
-            "-Use o termo 'upgrade off' ou 'update off' para filtrar somente os dispositivos não marcados para atualização"
+            title="-Use as vírgulas para combinar os filtros desejados. (Exemplo: TP-Link, 0001-aix)"
           )
             span.input-group-text.md-addon
               .fas.fa-question.fa-lg
           .input-group-btn
             button.my-0.btn.teal.lighten-2(type="submit")
               .fas.fa-search.fa-lg
+        a.badge.teal.lighten-2.bounceIn(
+          data-toggle="modal",
+          data-target="#special-search-terms"
+        )
+          | Termos Especiais &nbsp
+          .fas.fa-plus-circle
 
   .row.justify-content-center
     .col-12.col-lg-8.mt-5
