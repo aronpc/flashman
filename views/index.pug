@@ -170,7 +170,22 @@ block content
             .table-responsive
               table.table.devices-table
                 thead
-                  tr
+                  tr.csv-export(data-deviceid="Identificação",
+                     data-connection-type="Tipo de Conexão WAN",
+                     data-user="Usuário PPPoE",
+                     data-pass="Senha PPPoE",
+                     data-ssid="WiFi SSID",
+                     data-wifi-pass="WiFi Senha",
+                     data-channel="WiFi Canal",
+                     data-ext-wan="IP Público",
+                     data-int-wan="IP WAN",
+                     data-external-ref-type="Tipo de ID do cliente",
+                     data-external-ref="ID do cliente",
+                     data-device-model="Modelo do roteador",
+                     data-device-version="Versão do Flashbox",
+                     data-device-release="Release",
+                     data-do-update="Atualizar Firmware"
+                  )
                     th
                     th.text-center #
                     th.text-center
@@ -208,18 +223,23 @@ block content
                         )
                         .slider.round
                   each device, index in devices
-                    tr(id=device._id,
-                       data-deviceid=device._id,
+                    tr.csv-export(id=device._id,
                        data-index=(index + 1),
+                       data-deviceid=device._id,
+                       data-connection-type=(device.connection_type ? device.connection_type : ""),
                        data-user=device.pppoe_user,
                        data-pass=device.pppoe_password,
                        data-ssid=device.wifi_ssid,
                        data-wifi-pass=device.wifi_password,
                        data-channel=device.wifi_channel,
-                       data-external-ref-type=device.external_reference.kind,
-                       data-external-ref=device.external_reference.data,
-                       data-device-model=device.model
-                       data-device-version=device.version
+                       data-ext-wan=(device.ip ? device.ip : ""),
+                       data-int-wan=(device.wan_ip ? device.wan_ip : ""),
+                       data-external-ref-type=(device.external_reference.kind ? device.external_reference.kind : ""),
+                       data-external-ref=(device.external_reference.data ? device.external_reference.data : ""),
+                       data-device-model=(device.model ? device.model : ""),
+                       data-device-version=(device.version ? device.version : ""),
+                       data-device-release=(device.release ? device.release : ""),
+                       data-do-update=(device.do_update ? "Sim" : "Não"),
                     )
                       td.text-center.col-xs-1(
                         style="cursor: pointer;"
@@ -389,30 +409,36 @@ block content
                                 .fas.fa-check.fa-lg
                                 span &nbsp Editar
 
-        .row.justify-content-center.mt-4
-          nav
-            ul.pagination.pagination-lg
-              - let cPage = parseInt(page);
-              - let delta = 2;
-              - for (var i=1; i<=pages; i++) {
-              -   if (i == 1 || i == pages || ((i >= cPage-delta) && (i <= cPage+delta))) {
-              -     if (i == page)
-                      li.page-item.active
-                        a.page-link.teal.lighten-2(href="#") #{i}
-              -     else {
-              -       if (i == pages && (cPage+delta <= pages-delta)) {
+        .row.mt-3.mb-3
+          .col-md-9
+            nav
+              ul.pagination.pagination-lg
+                - let cPage = parseInt(page);
+                - let delta = 2;
+                - for (var i=1; i<=pages; i++) {
+                -   if (i == 1 || i == pages || ((i >= cPage-delta) && (i <= cPage+delta))) {
+                -     if (i == page)
+                        li.page-item.active
+                          a.page-link.teal.lighten-2(href="#") #{i}
+                -     else {
+                -       if (i == pages && (cPage+delta <= pages-delta)) {
+                          li.page-item
+                            h3.page-link.disabled ...
+                -       }
                         li.page-item
-                          h3.page-link.disabled ...
-              -       }
-                      li.page-item
-                        a.page-link(href="?content=" + lastquery + "&page=" + i) #{i}
-              -       if (i == 1 && (cPage-delta > delta)) {
-                        li.page-item
-                          h3.page-link.disabled ...
-              -       }
-              -     }
-              -   }
-              - }
+                          a.page-link(href="?content=" + lastquery + "&page=" + i) #{i}
+                -       if (i == 1 && (cPage-delta > delta)) {
+                          li.page-item
+                            h3.page-link.disabled ...
+                -       }
+                -     }
+                -   }
+                - }
+          .col-md-3
+            .text-right
+              button#export-csv.btn.teal.lighten-2.mr-0.my-0
+                .fas.fa-file-excel.fa-lg
+                span &nbsp Exportar CSV
 
 block scripts
   script(src='/scripts/tags-input/tags-input.js')

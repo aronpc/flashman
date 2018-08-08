@@ -44,6 +44,46 @@ let loadDeviceInfoOnForm = function(row) {
   );
 };
 
+let downloadCSV = function(csv, filename) {
+  let csvFile;
+  let downloadLink;
+  // CSV file
+  csvFile = new Blob([csv], {type: 'text/csv'});
+  // Download link
+  downloadLink = document.createElement('a');
+  // File name
+  downloadLink.download = filename;
+  // Create a link to the file
+  downloadLink.href = window.URL.createObjectURL(csvFile);
+  // Hide download link
+  downloadLink.style.display = 'none';
+  // Add the link to DOM
+  document.body.appendChild(downloadLink);
+  // Click download link
+  downloadLink.click();
+};
+
+let exportTableToCSV = function(filename) {
+  let csv = [];
+  let rows = document.querySelectorAll('table tr.csv-export');
+
+  for (let i = 0; i < rows.length; i++) {
+    let row = [];
+    for (let data in rows[i].dataset) {
+      if (data != 'index') {
+        if (rows[i].dataset[data]) {
+          row.push(rows[i].dataset[data]);
+        } else {
+          row.push('-');
+        }
+      }
+    }
+    csv.push(row.join(','));
+  }
+  // Download CSV file
+  downloadCSV(csv.join('\n'), filename);
+};
+
 let refreshExtRefType = function(event) {
   let selectedSpan = $(event.target).closest('.input-group-btn').find('span.selected');
   let selectedItem = $(event.target).closest('#ext_ref_type').find('.active');
@@ -110,5 +150,9 @@ $(document).ready(function() {
         }
       },
     });
+  });
+
+  $('#export-csv').click(function(event) {
+    exportTableToCSV('lista-de-roteadores-flashbox.csv');
   });
 });
