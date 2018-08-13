@@ -101,6 +101,11 @@ const isJSONObject = function(val) {
   return val instanceof Object ? true : false;
 };
 
+const serializeBlocked = function(devices) {
+  if (!devices) return [];
+  return devices.map((device)=>device.mac + '|' + device.id);
+};
+
 deviceInfoController.syncDate = function(req, res) {
   // WARNING: This api is open. 
   var dev_id;
@@ -257,6 +262,10 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           'wifi_ssid': returnObjOrEmptyStr(matchedDevice.wifi_ssid),
           'wifi_password': returnObjOrEmptyStr(matchedDevice.wifi_password),
           'wifi_channel': returnObjOrEmptyStr(matchedDevice.wifi_channel),
+          'app_password': returnObjOrEmptyStr(matchedDevice.app_password),
+          'blocked_devices': serializeBlocked(matchedDevice.blocked_devices),
+          'blocked_devices_length': (matchedDevice.blocked_devices) ?
+                                     matchedDevice.blocked_devices.length : 0,
         });
       }
     }
@@ -399,6 +408,7 @@ deviceInfoController.appSet = function(req, res) {
     if (isJSONObject(req.body.content)) {
       let content = req.body.content;
       let updateParameters = false;
+      let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
 
       if (content.hasOwnProperty('pppoe_user')) {
         matchedDevice.pppoe_user = content.pppoe_user;
@@ -419,6 +429,35 @@ deviceInfoController.appSet = function(req, res) {
       if (content.hasOwnProperty('wifi_channel')) {
         matchedDevice.wifi_channel = content.wifi_channel;
         updateParameters = true;
+      }
+      if (content.hasOwnProperty('app_password')) {
+        matchedDevice.app_password = content.app_password;
+        updateParameters = true;
+      }
+      if (content.hasOwnProperty('blacklist_device') &&
+          content.blacklist_device.hasOwnProperty('mac') &&
+          content.blacklist_device.mac.match(macRegex)) {
+        let containsMac = matchedDevice.blocked_devices.reduce((acc, val)=>{
+          return acc || (val.mac === content.blacklist_device);
+        }, false);
+        if (!containsMac) {
+          matchedDevice.blocked_devices.push({
+            id: content.blacklist_device.id,
+            mac: content.blacklist_device.mac,
+          });
+          updateParameters = true;
+        }
+      }
+      if (content.hasOwnProperty('whitelist_device') &&
+          content.whitelist_device.hasOwnProperty('mac') &&
+          content.whitelist_device.mac.match(macRegex)) {
+        let filteredDevices = matchedDevice.blocked_devices.filter((device)=>{
+          return device.mac !== content.whitelist_device.mac;
+        });
+        if (matchedDevice.blocked_devices.length !== filteredDevices.length) {
+          matchedDevice.blocked_devices = filteredDevices;
+          updateParameters = true;
+        }
       }
       if (updateParameters) {
         matchedDevice.do_update_parameters = true;
