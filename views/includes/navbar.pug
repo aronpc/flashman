@@ -14,10 +14,16 @@ nav.navbar.navbar-expand-lg.navbar-dark.flashbox-color
           a#navbarDropdown.nav-link.dropdown-toggle(data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false")
             | Olá, #{username}
           .dropdown-menu(aria-labelledby="navbarDropdown")
+            a.dropdown-item(href="/user/profile")
+              .fas.fa-user.fa-lg
+              span &nbsp Meu perfil
             a.dropdown-item(href="/firmware")
               .fas.fa-hdd.fa-lg
               span &nbsp Firmwares
             if (superuser)
+              a.dropdown-item(href="/users")
+                .fas.fa-users.fa-lg
+                span &nbsp Gerenciar usuários
               a.dropdown-item.update
                 .fas.fa-arrow-circle-down.fa-lg
                 span &nbsp Atualizar Flashman

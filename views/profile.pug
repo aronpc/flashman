@@ -1,0 +1,46 @@
+extends layout
+
+block content
+  .row
+    .col-md-6.offset-md-3.col-12
+      .card.mt-4
+        h4.card-header.teal.lighten-2.white-text
+          .fas.fa-info.fa-lg
+          span &nbsp Meu perfil
+        .card-body
+          form.needs-validation(method='post', action='/user/edit/' + user._id, novalidate)
+            input.form-control(type="hidden", name="returnurl", value="profile")
+            input.form-control(
+              type="hidden",
+              name="redirecturl",
+              value="/user/profile"
+            )
+            .row
+              .col-md
+                .md-form
+                  label(for="name") Usuário
+                  input#name.form-control(
+                    type="text",
+                    name="name",
+                    value=user.name
+                  )
+                .md-form
+                  label(for="password") Alterar senha
+                  input#password.form-control(
+                    type="password",
+                    name="password"
+                  )
+                .md-form
+                  label(for="passwordack") Senha novamente
+                  input#passwordack.form-control(
+                    type="password",
+                    name="passwordack",
+                    oninput="check(this)"
+                  )
+                  .invalid-feedback As senhas estão diferentes
+            .col-12.mt-3.text-center
+              .form-buttons
+                button.btn.btn-lg.teal.lighten-2(type="submit") Atualizar
+
+block scripts
+  script(src='/javascripts/profile_actions.js')

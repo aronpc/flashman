@@ -1,8 +1,9 @@
 
-var express = require('express');
-var router = express.Router();
-var userController = require('../controllers/user');
-var authController = require('../controllers/auth');
+const express = require('express');
+const userController = require('../controllers/user');
+const authController = require('../controllers/auth');
+
+let router = express.Router();
 
 // GET change password page
 router.route('/changepassword').get(authController.ensureLogin(),
@@ -12,10 +13,13 @@ router.route('/changepassword').get(authController.ensureLogin(),
 router.route('/elementsperpage').post(authController.ensureLogin(),
                                       userController.changeElementsPerPage);
 
+router.route('/profile').get(authController.ensureLogin(),
+                             userController.getProfile);
+
 // POST or PUT user edit. Browser and API handler
 router.route('/edit/:id').post(authController.ensureLogin(),
                                userController.editUser)
-						 .put(authController.ensureAPIAccess,
+                         .put(authController.ensureAPIAccess,
                               userController.editUser);
 
 module.exports = router;

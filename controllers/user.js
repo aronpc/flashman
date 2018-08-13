@@ -1,13 +1,14 @@
 
-var User = require('../models/user');
-var userController = {};
-
+const User = require('../models/user');
+const Config = require('../models/config');
+let userController = {};
 
 userController.changePassword = function(req, res) {
   return res.render('changepassword',
-                    {userid: req.user._id,
-                      message: 'Sua senha expirou. Insira uma nova senha',
-                      type: 'danger'});
+                    {user: req.user,
+                     username: req.user.name,
+                     message: 'Sua senha expirou. Insira uma nova senha',
+                     type: 'danger'});
 };
 
 userController.changeElementsPerPage = function(req, res) {
@@ -91,8 +92,9 @@ userController.editUser = function(req, res) {
   User.findById(req.params.id, function(err, user) {
     if (err) {
       if (req.accepts('text/html') && !req.is('application/json')) {
-        return res.render('changepassword',
-                          {userid: req.user._id,
+        return res.render(req.body.returnurl,
+                          {user: req.user,
+                           username: req.user.name,
                            message: err,
                            type: 'danger'});
       } else {
@@ -106,13 +108,18 @@ userController.editUser = function(req, res) {
     }
     if ('password' in req.body && 'passwordack' in req.body) {
       if (req.body.password == req.body.passwordack) {
-        user.password = req.body.password;
+        // Test if password is not empty nor contains only whitespaces
+        if (/\S/.test(req.body.password)) {
+          user.password = req.body.password;
+        }
       } else {
         if (req.accepts('text/html') && !req.is('application/json')) {
-          return res.render('changepassword',
-                            {userid: req.user._id,
-                             message: 'As senhas estão diferentes. Digite novamente',
-                             type: 'danger'});
+          return res.render(req.body.returnurl, {
+            user: req.user,
+            username: req.user.name,
+            message: 'As senhas estão diferentes. Digite novamente',
+            type: 'danger',
+          });
         } else {
           // REST API response
           return res.status(500).json({message: 'Passwords don\'t match'});
@@ -128,17 +135,19 @@ userController.editUser = function(req, res) {
       user.save(function(err) {
         if (err) {
           if (req.accepts('text/html') && !req.is('application/json')) {
-            return res.render('changepassword',
-                              {userid: req.user._id,
-                               message: err,
-                               type: 'danger'});
+            return res.render(req.body.returnurl, {
+              user: req.user,
+              username: req.user.name,
+              message: err,
+              type: 'danger',
+            });
           } else {
             // REST API response
             return res.status(500).json(err);
           }
         } else {
           if (req.accepts('text/html') && !req.is('application/json')) {
-            return res.redirect('/devicelist');
+            return res.redirect(req.body.redirecturl);
           } else {
             // REST API response
             return res.status(200).json({message: 'Edited successfully!'});
@@ -147,13 +156,17 @@ userController.editUser = function(req, res) {
       });
     } else {
       if (req.accepts('text/html') && !req.is('application/json')) {
-        return res.render('changepassword',
-                          {userid: req.user._id,
-                           message: 'Permissão negada',
-                           type: 'danger'});
+        return res.render(req.body.returnurl, {
+          user: req.user,
+          username: req.user.name,
+          message: 'Permissão negada',
+          type: 'danger',
+        });
       } else {
         // REST API response
-        return res.status(403).json({message: 'You don\'t have permission to do it'});
+        return res.status(403).json({
+          message: 'You don\'t have permission to do it',
+        });
       }
     }
   });
@@ -171,6 +184,29 @@ return res.json(err);
   } else {
     return res.status(403).json({message: 'You don\'t have permission!'});
   }
+};
+
+userController.getProfile = function(req, res) {
+  let indexContent = {};
+  User.findOne({name: req.user.name}, function(err, user) {
+    if (err || !user) {
+      indexContent.superuser = false;
+    } else {
+      indexContent.superuser = user.is_superuser;
+    }
+
+    Config.findOne({is_default: true}, function(err, matchedConfig) {
+      if (err || !matchedConfig) {
+        indexContent.update = false;
+      } else {
+        indexContent.update = matchedConfig.hasUpdate;
+      }
+      indexContent.username = req.user.name;
+      indexContent.user = req.user;
+
+      return res.render('profile', indexContent);
+    });
+  });
 };
 
 module.exports = userController;
