@@ -16,10 +16,33 @@ router.route('/elementsperpage').post(authController.ensureLogin(),
 router.route('/profile').get(authController.ensureLogin(),
                              userController.getProfile);
 
-// POST or PUT user edit. Browser and API handler
+router.route('/profile/:id').get(authController.ensureLogin(),
+                                 userController.getProfile);
+
+router.route('/showall').get(authController.ensureLogin(),
+                             userController.showAll);
+
+//
+// REST API
+//
 router.route('/edit/:id').post(authController.ensureLogin(),
                                userController.editUser)
                          .put(authController.ensureAPIAccess,
                               userController.editUser);
+
+router.route('/get/all').get(authController.ensureLogin(),
+                              userController.getUsers)
+                        .get(authController.ensureAPIAccess,
+                             userController.getUsers);
+
+router.route('/new').post(authController.ensureLogin(),
+                          userController.postUser)
+                    .put(authController.ensureAPIAccess,
+                         userController.postUser);
+
+router.route('/del').post(authController.ensureLogin(),
+                          userController.deleteUser)
+                    .put(authController.ensureAPIAccess,
+                         userController.deleteUser);
 
 module.exports = router;
