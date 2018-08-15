@@ -1,13 +1,14 @@
 
-var User = require('../models/user');
-var userController = {};
-
+const User = require('../models/user');
+const Config = require('../models/config');
+let userController = {};
 
 userController.changePassword = function(req, res) {
   return res.render('changepassword',
-                    {userid: req.user._id,
-                      message: 'Sua senha expirou. Insira uma nova senha',
-                      type: 'danger'});
+                    {user: req.user,
+                     username: req.user.name,
+                     message: 'Sua senha expirou. Insira uma nova senha',
+                     type: 'danger'});
 };
 
 userController.changeElementsPerPage = function(req, res) {
@@ -41,17 +42,26 @@ userController.postUser = function(req, res) {
     let user = new User({
       name: req.body.name,
       password: req.body.password,
-      is_superuser: req.body.is_superuser,
+      is_superuser: false,
     });
     user.save(function(err) {
       if (err) {
-        return res.json(err);
+        console.log('Error creating user: ' + err);
+        return res.json({
+          type: 'danger',
+          message: 'Erro ao criar usuário. Verifique se o usuário já existe.',
+        });
       }
-      return res.json({message: 'User successfully created!'});
+      return res.json({
+        type: 'success',
+        message: 'Usuário criado com sucesso!',
+      });
     });
   } else {
-    return res.status(403).json(
-      {message: 'You don\'t have permission to create users'});
+    return res.status(403).json({
+      type: 'danger',
+      message: 'Permissão negada',
+    });
   }
 };
 
@@ -59,13 +69,13 @@ userController.getUsers = function(req, res) {
   if (req.user.is_superuser) {
     User.find(function(err, users) {
       if (err) {
-        return res.json(err);
+        return res.json({type: 'danger', message: err});
       }
-      return res.json(users);
+      return res.json({type: 'success', users: users});
     });
   } else {
     return res.status(403).json(
-      {message: 'You don\'t have permission to see users'});
+      {type: 'danger', message: 'Permissão negada'});
   }
 };
 
@@ -73,15 +83,14 @@ userController.getUser = function(req, res) {
   // Use the User model to find a specific user
   User.findById(req.params.user_id, function(err, user) {
     if (err) {
-return res.json(err);
-}
+      return res.json(err);
+    }
     if (req.user.is_superuser) {
       return res.json(user);
     } else if (req.user._id.toString() === user._id.toString()) {
       // If user isn't admin and wants to see himself, remove is_superuser
       // field from json response
-      normal_user = {name: user.name, lastLogin: user.lastLogin};
-      return res.json(normal_user);
+      return res.json({name: user.name, lastLogin: user.lastLogin});
     }
   });
 };
@@ -90,15 +99,11 @@ userController.editUser = function(req, res) {
   // Use the User model to find a specific user
   User.findById(req.params.id, function(err, user) {
     if (err) {
-      if (req.accepts('text/html') && !req.is('application/json')) {
-        return res.render('changepassword',
-                          {userid: req.user._id,
-                           message: err,
-                           type: 'danger'});
-      } else {
-        // REST API response
-        return res.status(500).json(err);
-      }
+      console.log('Error finding user: ' + err);
+      return res.status(500).json({
+        type: 'danger',
+        message: 'Erro ao encontrar usuário',
+      });
     }
 
     if ('name' in req.body) {
@@ -106,17 +111,15 @@ userController.editUser = function(req, res) {
     }
     if ('password' in req.body && 'passwordack' in req.body) {
       if (req.body.password == req.body.passwordack) {
-        user.password = req.body.password;
-      } else {
-        if (req.accepts('text/html') && !req.is('application/json')) {
-          return res.render('changepassword',
-                            {userid: req.user._id,
-                             message: 'As senhas estão diferentes. Digite novamente',
-                             type: 'danger'});
-        } else {
-          // REST API response
-          return res.status(500).json({message: 'Passwords don\'t match'});
+        // Test if password is not empty nor contains only whitespaces
+        if (/\S/.test(req.body.password)) {
+          user.password = req.body.password;
         }
+      } else {
+        return res.status(500).json({
+          type: 'danger',
+          message: 'As senhas estão diferentes',
+        });
       }
     }
     if (req.user.is_superuser && 'is_superuser' in req.body) {
@@ -127,34 +130,23 @@ userController.editUser = function(req, res) {
       user.lastLogin = new Date();
       user.save(function(err) {
         if (err) {
-          if (req.accepts('text/html') && !req.is('application/json')) {
-            return res.render('changepassword',
-                              {userid: req.user._id,
-                               message: err,
-                               type: 'danger'});
-          } else {
-            // REST API response
-            return res.status(500).json(err);
-          }
+          console.log('Error saving user entry: ' + err);
+          return res.status(500).json({
+            type: 'danger',
+            message: 'Erro ao salvar alterações',
+          });
         } else {
-          if (req.accepts('text/html') && !req.is('application/json')) {
-            return res.redirect('/devicelist');
-          } else {
-            // REST API response
-            return res.status(200).json({message: 'Edited successfully!'});
-          }
+          return res.json({
+            type: 'success',
+            message: 'Editado com sucesso!',
+          });
         }
       });
     } else {
-      if (req.accepts('text/html') && !req.is('application/json')) {
-        return res.render('changepassword',
-                          {userid: req.user._id,
-                           message: 'Permissão negada',
-                           type: 'danger'});
-      } else {
-        // REST API response
-        return res.status(403).json({message: 'You don\'t have permission to do it'});
-      }
+      return res.status(403).json({
+        type: 'danger',
+        message: 'Permissão negada',
+      });
     }
   });
 };
@@ -162,15 +154,77 @@ userController.editUser = function(req, res) {
 userController.deleteUser = function(req, res) {
   // Use the User model to find a specific user and remove it
   if (req.user.is_superuser) {
-    User.findByIdAndRemove(req.params.user_id, function(err) {
+    User.find({'_id': {$in: req.body.ids}}).remove(function(err) {
       if (err) {
-return res.json(err);
-}
-      return res.json({message: 'Deleted user successfully!'});
+        console.log('User delete error: ' + err);
+        return res.json({
+          type: 'danger',
+          message: 'Erro interno ao deletar usuário(s). ' +
+          'Entre em contato com o desenvolvedor',
+        });
+      }
+      return res.json({
+        type: 'success',
+        message: 'Usuário(s) deletado(s) com sucesso!',
+      });
     });
   } else {
-    return res.status(403).json({message: 'You don\'t have permission!'});
+    return res.status(403).json({
+      type: 'danger',
+      message: 'Permissão negada',
+    });
   }
+};
+
+userController.getProfile = function(req, res) {
+  let indexContent = {};
+  let queryUserId = req.user._id;
+
+  if ('id' in req.params) {
+    queryUserId = req.params.id;
+  }
+
+  User.findById(queryUserId, function(err, user) {
+    if (err || !user) {
+      indexContent.superuser = false;
+    } else {
+      indexContent.superuser = user.is_superuser;
+    }
+
+    Config.findOne({is_default: true}, function(err, matchedConfig) {
+      if (err || !matchedConfig) {
+        indexContent.update = false;
+      } else {
+        indexContent.update = matchedConfig.hasUpdate;
+      }
+      indexContent.username = req.user.name;
+      indexContent.user = user;
+
+      return res.render('profile', indexContent);
+    });
+  });
+};
+
+userController.showAll = function(req, res) {
+  let indexContent = {};
+  User.findOne({name: req.user.name}, function(err, user) {
+    if (err || !user) {
+      indexContent.superuser = false;
+    } else {
+      indexContent.superuser = user.is_superuser;
+    }
+
+    Config.findOne({is_default: true}, function(err, matchedConfig) {
+      if (err || !matchedConfig) {
+        indexContent.update = false;
+      } else {
+        indexContent.update = matchedConfig.hasUpdate;
+      }
+      indexContent.username = req.user.name;
+
+      return res.render('showusers', indexContent);
+    });
+  });
 };
 
 module.exports = userController;
