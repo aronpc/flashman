@@ -89,7 +89,8 @@ $(document).ready(function() {
               )
             ),
             $('<td></td>').addClass('text-center').html(userObj.name),
-            $('<td></td>').addClass('text-center').html(userObj.createdAt),
+            $('<td></td>').addClass('text-center').html(
+              new Date(userObj.createdAt).toLocaleString()),
             $('<td></td>').addClass('text-center').append(
               $('<button></button>').append(
                 $('<div></div>').addClass('fas fa-edit btn-usr-edit-icon'),
