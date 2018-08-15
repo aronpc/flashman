@@ -75,7 +75,7 @@ userController.getUsers = function(req, res) {
     });
   } else {
     return res.status(403).json(
-      {type: 'danger', message: 'You don\'t have permission to see users'});
+      {type: 'danger', message: 'Permissão negada'});
   }
 };
 
@@ -99,16 +99,11 @@ userController.editUser = function(req, res) {
   // Use the User model to find a specific user
   User.findById(req.params.id, function(err, user) {
     if (err) {
-      if (req.accepts('text/html') && !req.is('application/json')) {
-        return res.render(req.body.returnurl,
-                          {user: req.user,
-                           username: req.user.name,
-                           message: err,
-                           type: 'danger'});
-      } else {
-        // REST API response
-        return res.status(500).json(err);
-      }
+      console.log('Error finding user: ' + err);
+      return res.status(500).json({
+        type: 'danger',
+        message: 'Erro ao encontrar usuário',
+      });
     }
 
     if ('name' in req.body) {
@@ -121,17 +116,10 @@ userController.editUser = function(req, res) {
           user.password = req.body.password;
         }
       } else {
-        if (req.accepts('text/html') && !req.is('application/json')) {
-          return res.render(req.body.returnurl, {
-            user: req.user,
-            username: req.user.name,
-            message: 'As senhas estão diferentes. Digite novamente',
-            type: 'danger',
-          });
-        } else {
-          // REST API response
-          return res.status(500).json({message: 'Passwords don\'t match'});
-        }
+        return res.status(500).json({
+          type: 'danger',
+          message: 'As senhas estão diferentes',
+        });
       }
     }
     if (req.user.is_superuser && 'is_superuser' in req.body) {
@@ -142,40 +130,23 @@ userController.editUser = function(req, res) {
       user.lastLogin = new Date();
       user.save(function(err) {
         if (err) {
-          if (req.accepts('text/html') && !req.is('application/json')) {
-            return res.render(req.body.returnurl, {
-              user: req.user,
-              username: req.user.name,
-              message: err,
-              type: 'danger',
-            });
-          } else {
-            // REST API response
-            return res.status(500).json(err);
-          }
+          console.log('Error saving user entry: ' + err);
+          return res.status(500).json({
+            type: 'danger',
+            message: 'Erro ao salvar alterações',
+          });
         } else {
-          if (req.accepts('text/html') && !req.is('application/json')) {
-            return res.redirect(req.body.redirecturl);
-          } else {
-            // REST API response
-            return res.status(200).json({message: 'Edited successfully!'});
-          }
+          return res.json({
+            type: 'success',
+            message: 'Editado com sucesso!',
+          });
         }
       });
     } else {
-      if (req.accepts('text/html') && !req.is('application/json')) {
-        return res.render(req.body.returnurl, {
-          user: req.user,
-          username: req.user.name,
-          message: 'Permissão negada',
-          type: 'danger',
-        });
-      } else {
-        // REST API response
-        return res.status(403).json({
-          message: 'You don\'t have permission to do it',
-        });
-      }
+      return res.status(403).json({
+        type: 'danger',
+        message: 'Permissão negada',
+      });
     }
   });
 };

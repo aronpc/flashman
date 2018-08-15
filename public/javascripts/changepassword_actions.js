@@ -7,19 +7,24 @@ let check = function(input) {
   }
 };
 
-(function() {
-  'use strict';
-  window.addEventListener('load', function() {
-    let forms = document.getElementsByClassName('needs-validation');
-    // Loop over them and prevent submission
-    Array.prototype.filter.call(forms, function(form) {
-      form.addEventListener('submit', function(event) {
-        if (form.checkValidity() === false) {
-          event.preventDefault();
-          event.stopPropagation();
-        }
-        form.classList.add('was-validated');
-      }, false);
-    });
-  }, false);
-})();
+$(document).ready(function() {
+  $('.needs-validation').submit(function(event) {
+    if ($(this)[0].checkValidity()) {
+      $.post($(this).attr('action'), $(this).serialize(), 'json')
+        .done(function(res) {
+          displayAlertMsg(res);
+          setTimeout(function() {
+            $(location).attr('href', '/devicelist');
+          }, 1500);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+          displayAlertMsg(JSON.parse(jqXHR.responseText));
+        });
+    } else {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    $(this).addClass('was-validated');
+    return false;
+  });
+});
