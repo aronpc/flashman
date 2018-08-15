@@ -15,6 +15,7 @@ let session = require('express-session');
 let updater = require('./controllers/update_flashman');
 let Config = require('./models/config');
 let User = require('./models/user');
+let Role = require('./models/role');
 let index = require('./routes/index');
 
 let app = express();
@@ -41,6 +42,26 @@ User.find({is_superuser: true}, function(err, matchedUsers) {
       is_superuser: true,
     });
     newSuperUser.save();
+  }
+});
+
+// check default role existence
+Role.find({}, function(err, roles) {
+  if (err || !roles || 0 === roles.length) {
+    let managerRole = new Role({
+      name: 'Gerente',
+      rules: [
+        {role: 'Gerente', resource: 'device', action: 'create:any', attributes: '*'},
+        {role: 'Gerente', resource: 'device', action: 'read:any', attributes: '*'},
+        {role: 'Gerente', resource: 'device', action: 'update:any', attributes: '*'},
+        {role: 'Gerente', resource: 'device', action: 'delete:any', attributes: '*'},
+        {role: 'Gerente', resource: 'firmware', action: 'create:any', attributes: '*'},
+        {role: 'Gerente', resource: 'firmware', action: 'read:any', attributes: '*'},
+        {role: 'Gerente', resource: 'firmware', action: 'update:any', attributes: '*'},
+        {role: 'Gerente', resource: 'firmware', action: 'delete:any', attributes: '*'},
+      ],
+    });
+    managerRole.save();
   }
 });
 

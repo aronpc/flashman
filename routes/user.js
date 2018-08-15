@@ -22,6 +22,9 @@ router.route('/profile/:id').get(authController.ensureLogin(),
 router.route('/showall').get(authController.ensureLogin(),
                              userController.showAll);
 
+router.route('/roles').get(authController.ensureLogin(),
+                           userController.showRoles);
+
 //
 // REST API
 //
@@ -44,5 +47,20 @@ router.route('/del').post(authController.ensureLogin(),
                           userController.deleteUser)
                     .put(authController.ensureAPIAccess,
                          userController.deleteUser);
+
+router.route('/role/get/all').get(authController.ensureLogin(),
+                                  userController.getRoles)
+                             .get(authController.ensureAPIAccess,
+                                  userController.getRoles);
+
+router.route('/role/new').post(authController.ensureLogin(),
+                               userController.postRole)
+                         .put(authController.ensureAPIAccess,
+                              userController.postRole);
+
+router.route('/role/del').post(authController.ensureLogin(),
+                               userController.deleteRole)
+                         .put(authController.ensureAPIAccess,
+                              userController.deleteRole);
 
 module.exports = router;

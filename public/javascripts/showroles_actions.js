@@ -1,21 +1,14 @@
 
-let check = function(input) {
-  if (input.value != document.getElementById('new_pass').value) {
-    input.setCustomValidity('As senhas estão diferentes');
-  } else {
-    input.setCustomValidity('');
-  }
-};
-
 $(document).ready(function() {
   let selectedItens = [];
+  let selectedNames = [];
 
-  $('#btn-user-trash').click(function(event) {
+  $('#btn-roles-trash').click(function(event) {
     $.ajax({
       type: 'POST',
-      url: '/user/del',
+      url: '/user/role/del',
       traditional: true,
-      data: {ids: selectedItens},
+      data: {ids: selectedItens, names: selectedNames},
       success: function(res) {
         if (res.type == 'success') {
           displayAlertMsg(res);
@@ -30,13 +23,14 @@ $(document).ready(function() {
   });
 
   // Use this format when adding button with AJAX
-  $(document).on('click', '.btn-usr-edit', function(event) {
-    let userid = $(this).data('userid');
-    window.location.href = '/user/profile/' + userid;
+  $(document).on('click', '.btn-role-edit', function(event) {
+    let roleid = $(this).data('roleid');
+    window.location.href = '/user/role/' + roleid;
   });
 
   $(document).on('change', '.checkbox', function(event) {
     let itemId = $(this).prop('id');
+    let itemName = $(this).data('name');
     if (itemId == 'checkall') {
       $('.checkbox').not(this).prop('checked', this.checked).change();
     } else {
@@ -44,17 +38,19 @@ $(document).ready(function() {
       if ($(this).is(':checked')) {
         if (itemIdx == -1) {
           selectedItens.push(itemId);
+          selectedNames.push(itemName);
         }
       } else {
         if (itemIdx != -1) {
           selectedItens.splice(itemIdx, 1);
+          selectedNames.splice(itemIdx, 1);
         }
       }
     }
   });
 
-  // Handle new users
-  $('#new-user-form').submit(function(event) {
+  // Handle new roles
+  $('#new-role-form').submit(function(event) {
     if ($(this)[0].checkValidity()) {
       $.post($(this).attr('action'), $(this).serialize(), function(res) {
         displayAlertMsg(res);
@@ -72,50 +68,44 @@ $(document).ready(function() {
     return false;
   });
 
-  $.get('/user/get/all', function(res) {
+  $.get('/user/role/get/all', function(res) {
     if (res.type == 'success') {
-      $('#loading-users').hide();
-      $('#users-table-wrapper').show();
+      $('#loading-roles').hide();
+      $('#roles-table-wrapper').show();
 
-      res.users.forEach(function(userObj) {
-        $('#users-table-content').append(
+      res.roles.forEach(function(roleObj) {
+        $('#roles-table-content').append(
           $('<tr></tr>').append(
-            (userObj.is_superuser ?
-              $('<td></td>') :
-              $('<td></td>').addClass('col-xs-1').append(
-                $('<input></input>').addClass('checkbox')
-                .attr('type', 'checkbox')
-                .attr('id', userObj._id)
-              )
+            $('<td></td>').addClass('col-xs-1').append(
+              $('<input></input>').addClass('checkbox')
+              .attr('type', 'checkbox')
+              .attr('id', roleObj._id)
+              .attr('data-name', roleObj.name)
             ),
-            $('<td></td>').addClass('text-center').html(userObj.name),
-            $('<td></td>').addClass('text-center').html(userObj.role),
-            $('<td></td>').addClass('text-center').html(
-              new Date(userObj.createdAt).toLocaleString()),
+            $('<td></td>').addClass('text-center').html(roleObj.name),
             $('<td></td>').addClass('text-center').append(
               $('<button></button>').append(
-                $('<div></div>').addClass('fas fa-edit btn-usr-edit-icon'),
+                $('<div></div>').addClass('fas fa-edit btn-role-edit-icon'),
                 $('<span></span>').html('&nbsp Editar')
-              ).addClass('btn btn-sm my-0 teal lighten-2 btn-usr-edit')
-              .attr('data-userid', userObj._id)
+              ).addClass('btn btn-sm my-0 teal lighten-2 btn-role-edit')
+              .attr('data-roleid', roleObj._id)
               .attr('type', 'button')
             )
           )
         );
       });
 
-      $('#users-table').DataTable({
+      $('#roles-table').DataTable({
         'destroy': true,
         'paging': true,
         'info': false,
         'pagingType': 'numbers',
         'language': {
-          'zeroRecords': 'Nenhum usuário encontrado',
-          'infoEmpty': 'Nenhum usuário encontrado',
+          'zeroRecords': 'Nenhum classe de permissões encontrada',
+          'infoEmpty': 'Nenhum classe de permissões encontrada',
           'search': 'Buscar',
-          'lengthMenu': 'Exibir _MENU_ usuários',
+          'lengthMenu': 'Exibir _MENU_',
         },
-        'order': [[1, 'asc'], [2, 'asc']],
       });
     } else {
       displayAlertMsg({

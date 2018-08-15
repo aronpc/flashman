@@ -45,6 +45,13 @@ block content
                                  oninput="check(this)",
                                  required)
               .invalid-feedback As senhas estão diferentes
+            .input-entry.mt-2
+              label(for="new_user_role") Classe de permissões
+              select.form-control(id="new_user_role",
+                                  name="role",
+                                  required)
+                each role in roles
+                  option(value=role.name) #{role.name}
             .col.text-center.mt-3
               .form-buttons
                 button.btn.btn-lg.teal.lighten-2(type="submit")
@@ -68,6 +75,7 @@ block content
               th.col-xs-1
                 input.checkbox(type="checkbox" id="checkall")
               th.text-center Usuário
+              th.text-center Classe de permissões
               th.text-center Data de Criação
               th.text-center
           tbody#users-table-content

@@ -32,6 +32,17 @@ block content
                     oninput="check(this)"
                   )
                   .invalid-feedback As senhas estão diferentes
+                if roles && roles.length != 0
+                  .md-form
+                    select.form-control(
+                      name="role",
+                      placeholder="Classe de permissões"
+                    )
+                      each role in roles
+                        if user.role == role.name
+                          option(value=role.name, selected="selected") #{role.name}
+                        else
+                          option(value=role.name) #{role.name}
             .col-12.mt-3.text-center
               .form-buttons
                 button.btn.btn-lg.teal.lighten-2(type="submit") Atualizar
