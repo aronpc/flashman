@@ -264,8 +264,6 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           'wifi_channel': returnObjOrEmptyStr(matchedDevice.wifi_channel),
           'app_password': returnObjOrEmptyStr(matchedDevice.app_password),
           'blocked_devices': serializeBlocked(matchedDevice.blocked_devices),
-          'blocked_devices_length': (matchedDevice.blocked_devices) ?
-                                     matchedDevice.blocked_devices.length : 0,
         });
       }
     }
