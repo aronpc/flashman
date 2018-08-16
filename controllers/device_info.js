@@ -503,7 +503,7 @@ deviceInfoController.appSetWhitelist = function(req, res) {
         return device.mac !== content.whitelist_device.mac;
       });
       if (device.blocked_devices.length !== filteredDevices.length) {
-        matchedDevice.blocked_devices = filteredDevices;
+        device.blocked_devices = filteredDevices;
         return true;
       }
     }
