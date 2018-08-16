@@ -463,7 +463,7 @@ deviceInfoController.appSetWifi = function(req, res) {
 deviceInfoController.appSetPassword = function(req, res) {
   let processFunction = (content, device) => {
     if (content.hasOwnProperty('app_password')) {
-      matchedDevice.app_password = content.app_password;
+      device.app_password = content.app_password;
       return true;
     }
     return false;
@@ -477,11 +477,11 @@ deviceInfoController.appSetBlacklist = function(req, res) {
     if (content.hasOwnProperty('blacklist_device') &&
         content.blacklist_device.hasOwnProperty('mac') &&
         content.blacklist_device.mac.match(macRegex)) {
-      let containsMac = matchedDevice.blocked_devices.reduce((acc, val)=>{
+      let containsMac = device.blocked_devices.reduce((acc, val)=>{
         return acc || (val.mac === content.blacklist_device);
       }, false);
       if (!containsMac) {
-        matchedDevice.blocked_devices.push({
+        device.blocked_devices.push({
           id: content.blacklist_device.id,
           mac: content.blacklist_device.mac,
         });
@@ -499,10 +499,10 @@ deviceInfoController.appSetWhitelist = function(req, res) {
     if (content.hasOwnProperty('whitelist_device') &&
         content.whitelist_device.hasOwnProperty('mac') &&
         content.whitelist_device.mac.match(macRegex)) {
-      let filteredDevices = matchedDevice.blocked_devices.filter((device)=>{
+      let filteredDevices = device.blocked_devices.filter((device)=>{
         return device.mac !== content.whitelist_device.mac;
       });
-      if (matchedDevice.blocked_devices.length !== filteredDevices.length) {
+      if (device.blocked_devices.length !== filteredDevices.length) {
         matchedDevice.blocked_devices = filteredDevices;
         return true;
       }
