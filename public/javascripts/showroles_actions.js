@@ -3,6 +3,13 @@ $(document).ready(function() {
   let selectedItens = [];
   let selectedNames = [];
 
+  $('#card-header').click(function() {
+    let plus = $(this).find('.fa-plus');
+    let cross = $(this).find('.fa-times');
+    plus.removeClass('fa-plus').addClass('fa-times');
+    cross.removeClass('fa-times').addClass('fa-plus');
+  });
+
   $('#btn-roles-trash').click(function(event) {
     $.ajax({
       type: 'POST',
@@ -20,12 +27,6 @@ $(document).ready(function() {
         }
       },
     });
-  });
-
-  // Use this format when adding button with AJAX
-  $(document).on('click', '.btn-role-edit', function(event) {
-    let roleid = $(this).data('roleid');
-    window.location.href = '/user/role/' + roleid;
   });
 
   $(document).on('change', '.checkbox', function(event) {
@@ -83,29 +84,129 @@ $(document).ready(function() {
               .attr('data-name', roleObj.name)
             ),
             $('<td></td>').addClass('text-center').html(roleObj.name),
-            $('<td></td>').addClass('text-center').append(
-              $('<button></button>').append(
-                $('<div></div>').addClass('fas fa-edit btn-role-edit-icon'),
-                $('<span></span>').html('&nbsp Editar')
-              ).addClass('btn btn-sm my-0 teal lighten-2 btn-role-edit')
-              .attr('data-roleid', roleObj._id)
-              .attr('type', 'button')
+            $('<td></td>').addClass('text-center col-xs-1 colapse')
+              .attr('style', 'cursor: pointer;').append(
+                $('<div></div>').addClass('fas fa-chevron-down fa-lg colapse')
+            )
+          ),
+          // form row
+          $('<tr></tr>').attr('style', 'display: none;').append(
+            $('<td></td>').addClass('grey lighten-5').attr('colspan', '3')
+            .append(
+              $('<form></form>').addClass('needs-validation')
+              .attr('novalidate', 'true')
+              .attr('action', '/user/role/edit/' + roleObj._id)
+              .append(
+                $('<div></div>').addClass('row')
+                .attr('style', 'margin: 0px;')
+                .append(
+                  $('<div></div>').addClass('col-4').append(
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>').text('Informações do WiFi'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-wifi-info').append(
+                        $('<option></option>').val(0).text('Não visualizar'),
+                        $('<option></option>').val(1).text('Visualizar'),
+                        $('<option></option>').val(2).text('Visualizar e editar')
+                      )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>').text('Informações do PPPoE'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-pppoe-info').append(
+                        $('<option></option>').val(0).text('Não visualizar'),
+                        $('<option></option>').val(1).text('Visualizar'),
+                        $('<option></option>').val(2).text('Visualizar e editar')
+                      )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Controle de Atualização de Firmware'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-firmware-upgrade').append(
+                        $('<option></option>').val(0).text('Bloquear'),
+                        $('<option></option>').val(1).text('Permitir')
+                      )
+                    )
+                  ),
+                  $('<div></div>').addClass('col-4').append(
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Controle do Tipo de Conexão'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-wan-type').append(
+                        $('<option></option>').val(0).text('Bloquear'),
+                        $('<option></option>').val(1).text('Permitir')
+                      )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Controle de Identificação do Dispositivo'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-device-id').append(
+                        $('<option></option>').val(0).text('Bloquear'),
+                        $('<option></option>').val(1).text('Permitir')
+                      )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Controle de Ações no Dispositivo'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-device-actions').append(
+                        $('<option></option>').val(0).text('Bloquear'),
+                        $('<option></option>').val(1).text('Permitir')
+                      )
+                    )
+                  ),
+                  $('<div></div>').addClass('col-4').append(
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Remoção de Registro de Dispositivo'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-device-removal').append(
+                        $('<option></option>').val(0).text('Bloquear'),
+                        $('<option></option>').val(1).text('Permitir')
+                      )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Adição de Registro de Dispositivo'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'new-grant-device-add').append(
+                        $('<option></option>').val(0).text('Bloquear'),
+                        $('<option></option>').val(1).text('Permitir')
+                      )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Controle de Gerência de Firmwares'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-firmware-manage').append(
+                        $('<option></option>').val(0).text('Bloquear'),
+                        $('<option></option>').val(1).text('Permitir')
+                      )
+                    )
+                  )
+                ),
+                $('<div></div>').addClass('row')
+                .addClass('mt-2')
+                .attr('style', 'margin: 0px;')
+                .append(
+                  $('<div></div>').addClass('col text-center').append(
+                    $('<div></div>').addClass('form-buttons').append(
+                      $('<button></button>').addClass('btn teal lighten-2')
+                      .attr('type', 'submit')
+                      .append(
+                        $('<div></div>').addClass('fas fa-check'),
+                        $('<span></span>').html('&nbsp Editar')
+                      )
+                    )
+                  )
+                )
+              )
             )
           )
         );
-      });
-
-      $('#roles-table').DataTable({
-        'destroy': true,
-        'paging': true,
-        'info': false,
-        'pagingType': 'numbers',
-        'language': {
-          'zeroRecords': 'Nenhum classe de permissões encontrada',
-          'infoEmpty': 'Nenhum classe de permissões encontrada',
-          'search': 'Buscar',
-          'lengthMenu': 'Exibir _MENU_',
-        },
       });
     } else {
       displayAlertMsg({
@@ -114,4 +215,20 @@ $(document).ready(function() {
       });
     }
   }, 'json');
+
+  $(document).on('click', '.colapse', function(event) {
+    let formRow = $(event.target).parents('tr').next();
+
+    if ($(this).children().hasClass('fa-chevron-down')) {
+      formRow.show();
+      $(this).find('.fa-chevron-down')
+        .removeClass('fa-chevron-down')
+        .addClass('fa-chevron-up');
+    } else if ($(this).children().hasClass('fa-chevron-up')) {
+      formRow.hide();
+      $(this).find('.fa-chevron-up')
+        .removeClass('fa-chevron-up')
+        .addClass('fa-chevron-down');
+    }
+  });
 });

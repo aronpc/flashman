@@ -4,6 +4,88 @@ const Role = require('../models/role');
 const Config = require('../models/config');
 let userController = {};
 
+let createRules = function(roleName, grants) {
+  let readDeviceAttrs = ['*'];
+  let modifyDeviceAttrs = ['*'];
+
+  const wifiExceptions = ['!wifi_ssid', '!wifi_password', '!wifi_channel'];
+  if (parseInt(grants['grant-wifi-info']) == 1) {
+    modifyDeviceAttrs.push(...wifiExceptions);
+  } else if (parseInt(grants['grant-wifi-info']) == 0) {
+    modifyDeviceAttrs.push(...wifiExceptions);
+    readDeviceAttrs.push(...wifiExceptions);
+  }
+
+  const pppoeExceptions = ['!pppoe_user', '!pppoe_password'];
+  if (parseInt(grants['grant-pppoe-info']) == 1) {
+    modifyDeviceAttrs.push(...pppoeExceptions);
+  } else if (parseInt(grants['grant-pppoe-info']) == 0) {
+    modifyDeviceAttrs.push(...pppoeExceptions);
+    readDeviceAttrs.push(...pppoeExceptions);
+  }
+
+  const updateExceptions = ['!do_update'];
+  if (grants['grant-firmware-upgrade'] == 0) {
+    modifyDeviceAttrs.push(...updateExceptions);
+    readDeviceAttrs.push(...updateExceptions);
+  }
+
+  const connectExceptions = ['!connection_type'];
+  if (grants['grant-wan-type'] == 0) {
+    modifyDeviceAttrs.push(...connectExceptions);
+    readDeviceAttrs.push(...connectExceptions);
+  }
+
+  const extIdExceptions = ['!external_reference'];
+  if (grants['grant-device-id'] == 0) {
+    modifyDeviceAttrs.push(...extIdExceptions);
+    readDeviceAttrs.push(...extIdExceptions);
+  }
+
+  const actionExceptions = ['!actions'];
+  if (grants['grant-device-actions'] == 0) {
+    modifyDeviceAttrs.push(...actionExceptions);
+    readDeviceAttrs.push(...actionExceptions);
+  }
+
+  let rules = [
+    {role: roleName, resource: 'device',
+     action: 'read:any', attributes: readDeviceAttrs},
+    {role: roleName, resource: 'device',
+     action: 'update:any', attributes: modifyDeviceAttrs},
+  ];
+
+  if (grants['grant-device-removal'] == 1) {
+    rules.push({
+      role: roleName, resource: 'device',
+      action: 'delete:any', attributes: '*',
+    });
+  }
+
+  if (grants['grant-device-add'] == 1) {
+    rules.push({
+      role: roleName, resource: 'device',
+      action: 'create:any', attributes: '*',
+    });
+  }
+
+  if (grants['grant-firmware-manage'] == 1) {
+    const firmwareRules = [
+      {role: roleName, resource: 'firmware',
+       action: 'create:any', attributes: '*'},
+      {role: roleName, resource: 'firmware',
+       action: 'read:any', attributes: '*'},
+      {role: roleName, resource: 'firmware',
+       action: 'update:any', attributes: '*'},
+      {role: roleName, resource: 'firmware',
+       action: 'delete:any', attributes: '*'},
+    ];
+    rules.push(...firmwareRules);
+  }
+
+  return rules;
+};
+
 userController.changePassword = function(req, res) {
   return res.render('changepassword',
                     {user: req.user,
@@ -71,25 +153,7 @@ userController.postRole = function(req, res) {
   if (req.user.is_superuser) {
     let role = new Role({
       name: req.body.name,
-      // TODO: This is temporary.
-      rules: [
-        {role: 'Gerente', resource: 'device',
-         action: 'create:any', attributes: '*'},
-        {role: 'Gerente', resource: 'device',
-         action: 'read:any', attributes: '*'},
-        {role: 'Gerente', resource: 'device',
-         action: 'update:any', attributes: '*'},
-        {role: 'Gerente', resource: 'device',
-         action: 'delete:any', attributes: '*'},
-        {role: 'Gerente', resource: 'firmware',
-         action: 'create:any', attributes: '*'},
-        {role: 'Gerente', resource: 'firmware',
-         action: 'read:any', attributes: '*'},
-        {role: 'Gerente', resource: 'firmware',
-         action: 'update:any', attributes: '*'},
-        {role: 'Gerente', resource: 'firmware',
-         action: 'delete:any', attributes: '*'},
-      ],
+      rules: createRules(req.body.name, req.body),
     });
     role.save(function(err) {
       if (err) {
@@ -199,6 +263,40 @@ userController.editUser = function(req, res) {
       });
     }
   });
+};
+
+userController.editRole = function(req, res) {
+  if (req.user.is_superuser) {
+    Role.findById(req.params._id, function(err, role) {
+      if (err) {
+        console.log('Error editing role: ' + err);
+        return res.json({
+          type: 'danger',
+          message: 'Erro ao encontrar classe.',
+        });
+      }
+      role.rules = createRules(role.name, req.body);
+
+      role.save(function(err) {
+        if (err) {
+          console.log('Error saving role: ' + err);
+          return res.json({
+            type: 'danger',
+            message: 'Erro ao editar classe.',
+          });
+        }
+        return res.json({
+          type: 'success',
+          message: 'Classe de permissões edita com sucesso!',
+        });
+      });
+    });
+  } else {
+    return res.status(403).json({
+      type: 'danger',
+      message: 'Permissão negada',
+    });
+  }
 };
 
 userController.deleteUser = function(req, res) {

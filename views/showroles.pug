@@ -24,12 +24,58 @@ block content
             novalidate
           )
             .input-entry
-              label(for="new-role-name") Nome da classe
+              label Nome da classe
               input.form-control(type="text",
-                                 id="new-role-name",
                                  name="name",
                                  required)
               .invalid-feedback Por favor, preencha este campo
+            .input-entry.mt-2
+              label Informações do WiFi
+              select.form-control(name="grant-wifi-info")
+                option(value=0) Não visualizar
+                option(value=1) Visualizar
+                option(value=2) Visualizar e editar
+            .input-entry.mt-2
+              label Informações do PPPoE
+              select.form-control(name="grant-pppoe-info")
+                option(value=0) Não visualizar
+                option(value=1) Visualizar
+                option(value=2) Visualizar e editar
+            .input-entry.mt-2
+              label Controle de Atualização de Firmware
+              select.form-control(name="grant-firmware-upgrade")
+                option(value=0) Bloquear
+                option(value=1) Permitir
+            .input-entry.mt-2
+              label Controle do Tipo de Conexão
+              select.form-control(name="grant-wan-type")
+                option(value=0) Bloquear
+                option(value=1) Permitir
+            .input-entry.mt-2
+              label Controle de Identificação do Dispositivo
+              select.form-control(name="grant-device-id")
+                option(value=0) Bloquear
+                option(value=1) Permitir
+            .input-entry.mt-2
+              label Controle de Ações no Dispositivo
+              select.form-control(name="grant-device-actions")
+                option(value=0) Bloquear
+                option(value=1) Permitir
+            .input-entry.mt-2
+              label Remoção de Registro de Dispositivo
+              select.form-control(name="grant-device-removal")
+                option(value=0) Bloquear
+                option(value=1) Permitir
+            .input-entry.mt-2
+              label Adição de Registro de Dispositivo
+              select.form-control(name="grant-device-add")
+                option(value=0) Bloquear
+                option(value=1) Permitir
+            .input-entry.mt-2
+              label Controle de Gerência de Firmwares
+              select.form-control(name="grant-firmware-manage")
+                option(value=0) Bloquear
+                option(value=1) Permitir
             .col.text-center.mt-3
               .form-buttons
                 button.btn.btn-lg.teal.lighten-2(type="submit")
@@ -53,10 +99,8 @@ block content
               th.col-xs-1
                 input.checkbox(type="checkbox" id="checkall")
               th.text-center Nome da Classe
-              th.text-center
+              th
           tbody#roles-table-content
 
 block scripts
-  script(src='/scripts/datatables.net/js/jquery.dataTables.min.js')
-  script(src='/scripts/datatables.net-bs4/js/dataTables.bootstrap4.min.js')
   script(src='/javascripts/showroles_actions.js')

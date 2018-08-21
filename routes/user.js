@@ -58,6 +58,11 @@ router.route('/role/new').post(authController.ensureLogin(),
                          .put(authController.ensureAPIAccess,
                               userController.postRole);
 
+router.route('/role/edit/:id').post(authController.ensureLogin(),
+                                    userController.editRole)
+                              .put(authController.ensureAPIAccess,
+                                   userController.editRole);
+
 router.route('/role/del').post(authController.ensureLogin(),
                                userController.deleteRole)
                          .put(authController.ensureAPIAccess,
