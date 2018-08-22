@@ -1,3 +1,4 @@
+/* eslint require-jsdoc: 0 */
 
 $(document).ready(function() {
   let selectedItens = [];
@@ -50,8 +51,8 @@ $(document).ready(function() {
     }
   });
 
-  // Handle new roles
-  $('#new-role-form').submit(function(event) {
+  // Handle new roles and roles edition
+  function handleFormSubmit(event) {
     if ($(this)[0].checkValidity()) {
       $.post($(this).attr('action'), $(this).serialize(), function(res) {
         displayAlertMsg(res);
@@ -67,7 +68,9 @@ $(document).ready(function() {
     }
     $(this).addClass('was-validated');
     return false;
-  });
+  };
+  $(document).on('submit', '.edit-role-form', handleFormSubmit);
+  $('#new-role-form').submit(handleFormSubmit);
 
   $.get('/user/role/get/all', function(res) {
     if (res.type == 'success') {
@@ -75,6 +78,7 @@ $(document).ready(function() {
       $('#roles-table-wrapper').show();
 
       res.roles.forEach(function(roleObj) {
+        let rowObj = null;
         $('#roles-table-content').append(
           $('<tr></tr>').append(
             $('<td></td>').addClass('col-xs-1').append(
@@ -90,11 +94,13 @@ $(document).ready(function() {
             )
           ),
           // form row
-          $('<tr></tr>').attr('style', 'display: none;').append(
+          rowObj = $('<tr></tr>').attr('style', 'display: none;').append(
             $('<td></td>').addClass('grey lighten-5').attr('colspan', '3')
             .append(
               $('<form></form>').addClass('needs-validation')
+              .addClass('edit-role-form')
               .attr('novalidate', 'true')
+              .attr('method', 'post')
               .attr('action', '/user/role/edit/' + roleObj._id)
               .append(
                 $('<div></div>').addClass('row')
@@ -172,7 +178,7 @@ $(document).ready(function() {
                       $('<label></label>')
                       .text('Adição de Registro de Dispositivo'),
                       $('<select></select>').addClass('form-control')
-                      .attr('name', 'new-grant-device-add').append(
+                      .attr('name', 'grant-device-add').append(
                         $('<option></option>').val(0).text('Bloquear'),
                         $('<option></option>').val(1).text('Permitir')
                       )
@@ -207,6 +213,34 @@ $(document).ready(function() {
             )
           )
         );
+        // Mark selected options
+        $(rowObj).find('[name=grant-wifi-info] option[value=' +
+          roleObj.grantWifiInfo + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-pppoe-info] option[value=' +
+          roleObj.grantPPPoEInfo + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-firmware-upgrade] option[value=' +
+          roleObj.grantFirmwareUpgrade + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-wan-type] option[value=' +
+          roleObj.grantWanType + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-device-id] option[value=' +
+          roleObj.grantDeviceId + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-device-actions] option[value=' +
+          roleObj.grantDeviceActions + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-device-removal] option[value=' +
+          roleObj.grantDeviceRemoval + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-device-add] option[value=' +
+          roleObj.grantDeviceAdd + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-firmware-manage] option[value=' +
+          roleObj.grantFirmwareManage + ']')
+        .attr('selected', 'selected');
       });
     } else {
       displayAlertMsg({

@@ -154,6 +154,15 @@ userController.postRole = function(req, res) {
     let role = new Role({
       name: req.body.name,
       rules: createRules(req.body.name, req.body),
+      grantWifiInfo: parseInt(req.body['grant-wifi-info']),
+      grantPPPoEInfo: parseInt(req.body['grant-pppoe-info']),
+      grantFirmwareUpgrade: parseInt(req.body['grant-firmware-upgrade']),
+      grantWanType: parseInt(req.body['grant-wan-type']),
+      grantDeviceId: parseInt(req.body['grant-device-id']),
+      grantDeviceActions: parseInt(req.body['grant-device-actions']),
+      grantDeviceRemoval: parseInt(req.body['grant-device-removal']),
+      grantDeviceAdd: parseInt(req.body['grant-device-add']),
+      grantFirmwareManage: parseInt(req.body['grant-firmware-manage']),
     });
     role.save(function(err) {
       if (err) {
@@ -267,8 +276,8 @@ userController.editUser = function(req, res) {
 
 userController.editRole = function(req, res) {
   if (req.user.is_superuser) {
-    Role.findById(req.params._id, function(err, role) {
-      if (err) {
+    Role.findById(req.params.id, function(err, role) {
+      if (err || !role) {
         console.log('Error editing role: ' + err);
         return res.json({
           type: 'danger',
@@ -276,6 +285,15 @@ userController.editRole = function(req, res) {
         });
       }
       role.rules = createRules(role.name, req.body);
+      role.grantWifiInfo = parseInt(req.body['grant-wifi-info']);
+      role.grantPPPoEInfo = parseInt(req.body['grant-pppoe-info']);
+      role.grantFirmwareUpgrade = parseInt(req.body['grant-firmware-upgrade']);
+      role.grantWanType = parseInt(req.body['grant-wan-type']);
+      role.grantDeviceId = parseInt(req.body['grant-device-id']);
+      role.grantDeviceActions = parseInt(req.body['grant-device-actions']);
+      role.grantDeviceRemoval = parseInt(req.body['grant-device-removal']);
+      role.grantDeviceAdd = parseInt(req.body['grant-device-add']);
+      role.grantFirmwareManage = parseInt(req.body['grant-firmware-manage']);
 
       role.save(function(err) {
         if (err) {
@@ -287,7 +305,7 @@ userController.editRole = function(req, res) {
         }
         return res.json({
           type: 'success',
-          message: 'Classe de permissões edita com sucesso!',
+          message: 'Classe de permissões editada com sucesso!',
         });
       });
     });

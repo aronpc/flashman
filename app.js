@@ -60,6 +60,15 @@ Role.find({}, function(err, roles) {
         {role: 'Gerente', resource: 'firmware', action: 'update:any', attributes: '*'},
         {role: 'Gerente', resource: 'firmware', action: 'delete:any', attributes: '*'},
       ],
+      grantWifiInfo: 2,
+      grantPPPoEInfo: 2,
+      grantFirmwareUpgrade: 1,
+      grantWanType: 1,
+      grantDeviceId: 1,
+      grantDeviceActions: 1,
+      grantDeviceRemoval: 1,
+      grantDeviceAdd: 1,
+      grantFirmwareManage: 1,
     });
     managerRole.save();
   }
