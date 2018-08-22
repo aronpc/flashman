@@ -11,7 +11,8 @@
         "FLM_ALLOW_DEV_UPDATE_REST_DATA": false,
         "FLM_MONGODB_HOST": "localhost",
         "FLM_ADM_USER": "admin",
-        "FLM_ADM_PASS": "flashman"
+        "FLM_ADM_PASS": "flashman",
+        "FLM_COMPANY_SECRET": "eEIBDRfEao1JriwsKGyN6l1WVzWZMmcr"
       },
       "error_file": "/dev/stderr",
       "out_file": "/dev/stdout",

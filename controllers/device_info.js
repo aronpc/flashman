@@ -410,6 +410,11 @@ let appSet = function(req, res, processFunction) {
         matchedDevice.do_update_parameters = true;
       }
 
+      let hashSuffix = '';
+      if (content.hasOwnProperty('command_hash')) {
+        hashSuffix = ' ' + content.command_hash;
+      }
+
       matchedDevice.save();
 
       if (process.env.FLM_MQTT_BROKER) {
@@ -418,11 +423,11 @@ let appSet = function(req, res, processFunction) {
         client.on('connect', function() {
           client.publish(
             'flashman/update/' + matchedDevice._id,
-            '1', {qos: 1, retain: true}); // topic, msg, options
+            '1'+hashSuffix, {qos: 1, retain: true}); // topic, msg, options
           client.end();
         });
       } else {
-        mqtt.anlix_message_router_update(matchedDevice._id);
+        mqtt.anlix_message_router_update(matchedDevice._id, hashSuffix);
       }
 
       return res.status(200).json({is_set: 1});
