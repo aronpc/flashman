@@ -44,38 +44,38 @@ block content
             .input-entry.mt-2
               label Controle de Atualização de Firmware
               select.form-control(name="grant-firmware-upgrade")
-                option(value=0) Bloquear
-                option(value=1) Permitir
+                option(value="false") Bloquear
+                option(value="true") Permitir
             .input-entry.mt-2
               label Controle do Tipo de Conexão
               select.form-control(name="grant-wan-type")
-                option(value=0) Bloquear
-                option(value=1) Permitir
+                option(value="false") Bloquear
+                option(value="true") Permitir
             .input-entry.mt-2
               label Controle de Identificação do Dispositivo
               select.form-control(name="grant-device-id")
-                option(value=0) Bloquear
-                option(value=1) Permitir
+                option(value="false") Bloquear
+                option(value="true") Permitir
             .input-entry.mt-2
               label Controle de Ações no Dispositivo
               select.form-control(name="grant-device-actions")
-                option(value=0) Bloquear
-                option(value=1) Permitir
+                option(value="false") Bloquear
+                option(value="true") Permitir
             .input-entry.mt-2
               label Remoção de Registro de Dispositivo
               select.form-control(name="grant-device-removal")
-                option(value=0) Bloquear
-                option(value=1) Permitir
+                option(value="false") Bloquear
+                option(value="true") Permitir
             .input-entry.mt-2
               label Adição de Registro de Dispositivo
               select.form-control(name="grant-device-add")
-                option(value=0) Bloquear
-                option(value=1) Permitir
+                option(value="false") Bloquear
+                option(value="true") Permitir
             .input-entry.mt-2
               label Controle de Gerência de Firmwares
               select.form-control(name="grant-firmware-manage")
-                option(value=0) Bloquear
-                option(value=1) Permitir
+                option(value="false") Bloquear
+                option(value="true") Permitir
             .col.text-center.mt-3
               .form-buttons
                 button.btn.btn-lg.teal.lighten-2(type="submit")

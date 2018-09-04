@@ -130,8 +130,8 @@ $(document).ready(function() {
                       .text('Controle de Atualização de Firmware'),
                       $('<select></select>').addClass('form-control')
                       .attr('name', 'grant-firmware-upgrade').append(
-                        $('<option></option>').val(0).text('Bloquear'),
-                        $('<option></option>').val(1).text('Permitir')
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
                       )
                     )
                   ),
@@ -141,8 +141,8 @@ $(document).ready(function() {
                       .text('Controle do Tipo de Conexão'),
                       $('<select></select>').addClass('form-control')
                       .attr('name', 'grant-wan-type').append(
-                        $('<option></option>').val(0).text('Bloquear'),
-                        $('<option></option>').val(1).text('Permitir')
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
                       )
                     ),
                     $('<div></div>').addClass('input-entry').append(
@@ -150,8 +150,8 @@ $(document).ready(function() {
                       .text('Controle de Identificação do Dispositivo'),
                       $('<select></select>').addClass('form-control')
                       .attr('name', 'grant-device-id').append(
-                        $('<option></option>').val(0).text('Bloquear'),
-                        $('<option></option>').val(1).text('Permitir')
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
                       )
                     ),
                     $('<div></div>').addClass('input-entry').append(
@@ -159,8 +159,8 @@ $(document).ready(function() {
                       .text('Controle de Ações no Dispositivo'),
                       $('<select></select>').addClass('form-control')
                       .attr('name', 'grant-device-actions').append(
-                        $('<option></option>').val(0).text('Bloquear'),
-                        $('<option></option>').val(1).text('Permitir')
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
                       )
                     )
                   ),
@@ -170,8 +170,8 @@ $(document).ready(function() {
                       .text('Remoção de Registro de Dispositivo'),
                       $('<select></select>').addClass('form-control')
                       .attr('name', 'grant-device-removal').append(
-                        $('<option></option>').val(0).text('Bloquear'),
-                        $('<option></option>').val(1).text('Permitir')
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
                       )
                     ),
                     $('<div></div>').addClass('input-entry').append(
@@ -179,8 +179,8 @@ $(document).ready(function() {
                       .text('Adição de Registro de Dispositivo'),
                       $('<select></select>').addClass('form-control')
                       .attr('name', 'grant-device-add').append(
-                        $('<option></option>').val(0).text('Bloquear'),
-                        $('<option></option>').val(1).text('Permitir')
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
                       )
                     ),
                     $('<div></div>').addClass('input-entry').append(
@@ -188,8 +188,8 @@ $(document).ready(function() {
                       .text('Controle de Gerência de Firmwares'),
                       $('<select></select>').addClass('form-control')
                       .attr('name', 'grant-firmware-manage').append(
-                        $('<option></option>').val(0).text('Bloquear'),
-                        $('<option></option>').val(1).text('Permitir')
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
                       )
                     )
                   )

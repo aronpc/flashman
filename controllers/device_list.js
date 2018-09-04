@@ -2,6 +2,7 @@ const Validator = require('../public/javascripts/device_validator');
 const DeviceModel = require('../models/device');
 const User = require('../models/user');
 const Config = require('../models/config');
+const Role = require('../models/role');
 const mqtt = require('../mqtts');
 const extern_mqtt = require('mqtt');
 let deviceListController = {};
@@ -132,7 +133,18 @@ deviceListController.index = function(req, res) {
           indexContent.update = matchedConfig.hasUpdate;
         }
 
-        return res.render('index', indexContent);
+        // Filter data using user permissions
+        if (req.user.is_superuser) {
+          return res.render('index', indexContent);
+        } else {
+          Role.findOne({name: req.user.role}).lean().exec(function(err, role) {
+            if (err) {
+              console.log(err);
+            }
+            indexContent.role = role;
+            return res.render('index', indexContent);
+          });
+        }
       });
     });
   });

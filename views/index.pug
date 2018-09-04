@@ -400,10 +400,11 @@ block content
                               br
                           .row
                             // Buttons
-                            .col.text-left
-                              button.btn.btn-danger.btn-trash(type="button")
-                                .fas.fa-trash.fa-lg
-                                span &nbsp Remover
+                            if (superuser || role.grantDeviceRemoval)
+                              .col.text-left
+                                button.btn.btn-danger.btn-trash(type="button")
+                                  .fas.fa-trash.fa-lg
+                                  span &nbsp Remover
                             .col.text-right
                               button.btn.teal.lighten-2(type="submit")
                                 .fas.fa-check.fa-lg

@@ -20,10 +20,14 @@ router.route('/search').get(authController.ensureLogin(),
                              deviceListController.searchDeviceReg);
 
 // REST API or POST delete device
-router.route('/delete/:id').post(authController.ensureLogin(),
-                                 deviceListController.delDeviceReg)
-                           .delete(authController.ensureAPIAccess,
-                                   deviceListController.delDeviceReg);
+router.route('/delete/:id').post(
+  authController.ensureLogin(),
+  authController.ensurePermission('grantDeviceRemoval'),
+  deviceListController.delDeviceReg)
+                           .delete(
+  authController.ensureAPIAccess,
+  authController.ensurePermission('superuser'),
+  deviceListController.delDeviceReg);
 
 // REST API - GET device registry
 router.route('/update/:id').get(authController.ensureAPIAccess,

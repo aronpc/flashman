@@ -50,25 +50,15 @@ Role.find({}, function(err, roles) {
   if (err || !roles || 0 === roles.length) {
     let managerRole = new Role({
       name: 'Gerente',
-      rules: [
-        {role: 'Gerente', resource: 'device', action: 'create:any', attributes: '*'},
-        {role: 'Gerente', resource: 'device', action: 'read:any', attributes: '*'},
-        {role: 'Gerente', resource: 'device', action: 'update:any', attributes: '*'},
-        {role: 'Gerente', resource: 'device', action: 'delete:any', attributes: '*'},
-        {role: 'Gerente', resource: 'firmware', action: 'create:any', attributes: '*'},
-        {role: 'Gerente', resource: 'firmware', action: 'read:any', attributes: '*'},
-        {role: 'Gerente', resource: 'firmware', action: 'update:any', attributes: '*'},
-        {role: 'Gerente', resource: 'firmware', action: 'delete:any', attributes: '*'},
-      ],
       grantWifiInfo: 2,
       grantPPPoEInfo: 2,
-      grantFirmwareUpgrade: 1,
-      grantWanType: 1,
-      grantDeviceId: 1,
-      grantDeviceActions: 1,
-      grantDeviceRemoval: 1,
-      grantDeviceAdd: 1,
-      grantFirmwareManage: 1,
+      grantFirmwareUpgrade: true,
+      grantWanType: true,
+      grantDeviceId: true,
+      grantDeviceActions: true,
+      grantDeviceRemoval: true,
+      grantDeviceAdd: true,
+      grantFirmwareManage: true,
     });
     managerRole.save();
   }

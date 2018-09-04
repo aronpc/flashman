@@ -17,9 +17,10 @@ nav.navbar.navbar-expand-lg.navbar-dark.flashbox-color
             a.dropdown-item(href="/user/profile")
               .fas.fa-user.fa-lg
               span &nbsp Meu perfil
-            a.dropdown-item(href="/firmware")
-              .fas.fa-hdd.fa-lg
-              span &nbsp Firmwares
+            if (superuser || role.grantFirmwareManage)
+              a.dropdown-item(href="/firmware")
+                .fas.fa-hdd.fa-lg
+                span &nbsp Firmwares
             if (superuser)
               a.dropdown-item(href="/user/showall")
                 .fas.fa-users.fa-lg

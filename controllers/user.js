@@ -4,88 +4,6 @@ const Role = require('../models/role');
 const Config = require('../models/config');
 let userController = {};
 
-let createRules = function(roleName, grants) {
-  let readDeviceAttrs = ['*'];
-  let modifyDeviceAttrs = ['*'];
-
-  const wifiExceptions = ['!wifi_ssid', '!wifi_password', '!wifi_channel'];
-  if (parseInt(grants['grant-wifi-info']) == 1) {
-    modifyDeviceAttrs.push(...wifiExceptions);
-  } else if (parseInt(grants['grant-wifi-info']) == 0) {
-    modifyDeviceAttrs.push(...wifiExceptions);
-    readDeviceAttrs.push(...wifiExceptions);
-  }
-
-  const pppoeExceptions = ['!pppoe_user', '!pppoe_password'];
-  if (parseInt(grants['grant-pppoe-info']) == 1) {
-    modifyDeviceAttrs.push(...pppoeExceptions);
-  } else if (parseInt(grants['grant-pppoe-info']) == 0) {
-    modifyDeviceAttrs.push(...pppoeExceptions);
-    readDeviceAttrs.push(...pppoeExceptions);
-  }
-
-  const updateExceptions = ['!do_update'];
-  if (grants['grant-firmware-upgrade'] == 0) {
-    modifyDeviceAttrs.push(...updateExceptions);
-    readDeviceAttrs.push(...updateExceptions);
-  }
-
-  const connectExceptions = ['!connection_type'];
-  if (grants['grant-wan-type'] == 0) {
-    modifyDeviceAttrs.push(...connectExceptions);
-    readDeviceAttrs.push(...connectExceptions);
-  }
-
-  const extIdExceptions = ['!external_reference'];
-  if (grants['grant-device-id'] == 0) {
-    modifyDeviceAttrs.push(...extIdExceptions);
-    readDeviceAttrs.push(...extIdExceptions);
-  }
-
-  const actionExceptions = ['!actions'];
-  if (grants['grant-device-actions'] == 0) {
-    modifyDeviceAttrs.push(...actionExceptions);
-    readDeviceAttrs.push(...actionExceptions);
-  }
-
-  let rules = [
-    {role: roleName, resource: 'device',
-     action: 'read:any', attributes: readDeviceAttrs},
-    {role: roleName, resource: 'device',
-     action: 'update:any', attributes: modifyDeviceAttrs},
-  ];
-
-  if (grants['grant-device-removal'] == 1) {
-    rules.push({
-      role: roleName, resource: 'device',
-      action: 'delete:any', attributes: '*',
-    });
-  }
-
-  if (grants['grant-device-add'] == 1) {
-    rules.push({
-      role: roleName, resource: 'device',
-      action: 'create:any', attributes: '*',
-    });
-  }
-
-  if (grants['grant-firmware-manage'] == 1) {
-    const firmwareRules = [
-      {role: roleName, resource: 'firmware',
-       action: 'create:any', attributes: '*'},
-      {role: roleName, resource: 'firmware',
-       action: 'read:any', attributes: '*'},
-      {role: roleName, resource: 'firmware',
-       action: 'update:any', attributes: '*'},
-      {role: roleName, resource: 'firmware',
-       action: 'delete:any', attributes: '*'},
-    ];
-    rules.push(...firmwareRules);
-  }
-
-  return rules;
-};
-
 userController.changePassword = function(req, res) {
   return res.render('changepassword',
                     {user: req.user,
@@ -151,18 +69,18 @@ userController.postUser = function(req, res) {
 
 userController.postRole = function(req, res) {
   if (req.user.is_superuser) {
+    console.log(req.body['grant-firmware-upgrade']);
     let role = new Role({
       name: req.body.name,
-      rules: createRules(req.body.name, req.body),
       grantWifiInfo: parseInt(req.body['grant-wifi-info']),
       grantPPPoEInfo: parseInt(req.body['grant-pppoe-info']),
-      grantFirmwareUpgrade: parseInt(req.body['grant-firmware-upgrade']),
-      grantWanType: parseInt(req.body['grant-wan-type']),
-      grantDeviceId: parseInt(req.body['grant-device-id']),
-      grantDeviceActions: parseInt(req.body['grant-device-actions']),
-      grantDeviceRemoval: parseInt(req.body['grant-device-removal']),
-      grantDeviceAdd: parseInt(req.body['grant-device-add']),
-      grantFirmwareManage: parseInt(req.body['grant-firmware-manage']),
+      grantFirmwareUpgrade: req.body['grant-firmware-upgrade'],
+      grantWanType: req.body['grant-wan-type'],
+      grantDeviceId: req.body['grant-device-id'],
+      grantDeviceActions: req.body['grant-device-actions'],
+      grantDeviceRemoval: req.body['grant-device-removal'],
+      grantDeviceAdd: req.body['grant-device-add'],
+      grantFirmwareManage: req.body['grant-firmware-manage'],
     });
     role.save(function(err) {
       if (err) {
@@ -284,16 +202,15 @@ userController.editRole = function(req, res) {
           message: 'Erro ao encontrar classe.',
         });
       }
-      role.rules = createRules(role.name, req.body);
       role.grantWifiInfo = parseInt(req.body['grant-wifi-info']);
       role.grantPPPoEInfo = parseInt(req.body['grant-pppoe-info']);
-      role.grantFirmwareUpgrade = parseInt(req.body['grant-firmware-upgrade']);
-      role.grantWanType = parseInt(req.body['grant-wan-type']);
-      role.grantDeviceId = parseInt(req.body['grant-device-id']);
-      role.grantDeviceActions = parseInt(req.body['grant-device-actions']);
-      role.grantDeviceRemoval = parseInt(req.body['grant-device-removal']);
-      role.grantDeviceAdd = parseInt(req.body['grant-device-add']);
-      role.grantFirmwareManage = parseInt(req.body['grant-firmware-manage']);
+      role.grantFirmwareUpgrade = req.body['grant-firmware-upgrade'];
+      role.grantWanType = req.body['grant-wan-type'];
+      role.grantDeviceId = req.body['grant-device-id'];
+      role.grantDeviceActions = req.body['grant-device-actions'];
+      role.grantDeviceRemoval = req.body['grant-device-removal'];
+      role.grantDeviceAdd = req.body['grant-device-add'];
+      role.grantFirmwareManage = req.body['grant-firmware-manage'];
 
       role.save(function(err) {
         if (err) {

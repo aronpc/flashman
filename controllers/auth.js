@@ -4,6 +4,7 @@ var passport = require('passport');
 var BasicStrategy = require('passport-http').BasicStrategy;
 var LocalStrategy = require('passport-local');
 var User = require('../models/user');
+const Role = require('../models/role');
 
 passport.use(new BasicStrategy(
   function(name, password, callback) {
@@ -102,3 +103,34 @@ exports.ensureLogin = require('connect-ensure-login').ensureLoggedIn;
 exports.ensureAPIAccess = passport.authenticate('basic', {
   session: false,
 });
+
+exports.ensurePermission = function(permission) {
+  return function(req, res, next) {
+    if (req.user && req.user.is_superuser) {
+      next();
+    } else if (req.user && req.user.role && permission != 'superuser') {
+      Role.findOne({name: req.user.role}, function(err, role) {
+        if (err) {
+          console.log(err);
+          res.status(403).render('login', {
+            message: 'Permissão negada',
+            type: 'danger',
+          });
+        }
+        if (role[permission] == true || role[permission] >= 1) {
+          next();
+        } else {
+          res.status(403).render('login', {
+            message: 'Permissão negada',
+            type: 'danger',
+          });
+        }
+      });
+    } else {
+      res.status(403).render('login', {
+        message: 'Permissão negada',
+        type: 'danger',
+      });
+    }
+  };
+};
