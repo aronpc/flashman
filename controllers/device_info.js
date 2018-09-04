@@ -261,7 +261,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         return res.status(200).json({
           'do_update': matchedDevice.do_update,
           'do_newprobe': false,
-          'mqtt_status': (matchedDevice._id in mqtts.clients),
+          'mqtt_status': (matchedDevice._id in mqtt.clients),
           'release_id': returnObjOrEmptyStr(matchedDevice.release),
           'connection_type': returnObjOrEmptyStr(matchedDevice.connection_type),
           'pppoe_user': returnObjOrEmptyStr(matchedDevice.pppoe_user),
