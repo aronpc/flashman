@@ -1,9 +1,9 @@
 
 // Load required packages
-var passport = require('passport');
-var BasicStrategy = require('passport-http').BasicStrategy;
-var LocalStrategy = require('passport-local');
-var User = require('../models/user');
+const passport = require('passport');
+const BasicStrategy = require('passport-http').BasicStrategy;
+const LocalStrategy = require('passport-local');
+const User = require('../models/user');
 const Role = require('../models/role');
 
 passport.use(new BasicStrategy(
@@ -112,25 +112,46 @@ exports.ensurePermission = function(permission) {
       Role.findOne({name: req.user.role}, function(err, role) {
         if (err) {
           console.log(err);
-          res.status(403).render('login', {
-            message: 'Permissão negada',
-            type: 'danger',
-          });
+          if (req.accepts('text/html') && !req.is('application/json')) {
+            res.status(403).render('login', {
+              message: 'Permissão negada',
+              type: 'danger',
+            });
+          } else {
+            res.status(403).json({
+              message: 'Permissão negada',
+              type: 'danger',
+            });
+          }
         }
         if (role[permission] == true || role[permission] >= 1) {
           next();
         } else {
-          res.status(403).render('login', {
-            message: 'Permissão negada',
-            type: 'danger',
-          });
+          if (req.accepts('text/html') && !req.is('application/json')) {
+            res.status(403).render('login', {
+              message: 'Permissão negada',
+              type: 'danger',
+            });
+          } else {
+            res.status(403).json({
+              message: 'Permissão negada',
+              type: 'danger',
+            });
+          }
         }
       });
     } else {
-      res.status(403).render('login', {
-        message: 'Permissão negada',
-        type: 'danger',
-      });
+      if (req.accepts('text/html') && !req.is('application/json')) {
+        res.status(403).render('login', {
+          message: 'Permissão negada',
+          type: 'danger',
+        });
+      } else {
+        res.status(403).json({
+          message: 'Permissão negada',
+          type: 'danger',
+        });
+      }
     }
   };
 };

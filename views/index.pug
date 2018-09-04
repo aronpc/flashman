@@ -301,22 +301,42 @@ block content
                             .col-5
                               // Identification
                               .md-form.input-group.input-entry
-                                .input-group-btn
-                                  button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
-                                    type="button",
-                                    data-toggle="dropdown"
+                                if (superuser || role.grantDeviceId)
+                                  .input-group-btn
+                                    button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
+                                      type="button",
+                                      data-toggle="dropdown"
+                                    )
+                                      span.selected(id="edit_ext_ref_type_selected-" + (index + 1)) CPF
+                                    #ext_ref_type.dropdown-menu
+                                      a.dropdown-item.text-center.active.teal.lighten-2 CPF
+                                      a.dropdown-item.text-center CNPJ
+                                      a.dropdown-item.text-center Outro
+                                  input.form-control.py-0.added-margin.ext-ref-input(
+                                    type="text",
+                                    id="edit_external_reference-" + (index + 1),
+                                    placeholder="ID do cliente (opcional)",
+                                    maxlength="64"
                                   )
-                                    span.selected(id="edit_ext_ref_type_selected-" + (index + 1)) CPF
-                                  #ext_ref_type.dropdown-menu
-                                    a.dropdown-item.text-center.active.teal.lighten-2 CPF
-                                    a.dropdown-item.text-center CNPJ
-                                    a.dropdown-item.text-center Outro
-                                input.form-control.py-0.added-margin.ext-ref-input(
-                                  type="text",
-                                  id="edit_external_reference-" + (index + 1),
-                                  placeholder="ID do cliente (opcional)",
-                                  maxlength="64"
-                                )
+                                else
+                                  .input-group-btn
+                                    button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
+                                      type="button",
+                                      data-toggle="dropdown",
+                                      disabled
+                                    )
+                                      span.selected(id="edit_ext_ref_type_selected-" + (index + 1)) CPF
+                                    #ext_ref_type.dropdown-menu
+                                      a.dropdown-item.text-center.active.teal.lighten-2 CPF
+                                      a.dropdown-item.text-center CNPJ
+                                      a.dropdown-item.text-center Outro
+                                  input.form-control.py-0.added-margin.ext-ref-input(
+                                    type="text",
+                                    id="edit_external_reference-" + (index + 1),
+                                    placeholder="ID do cliente (opcional)",
+                                    maxlength="64",
+                                    disabled
+                                  )
                                 .invalid-feedback
                               br
                             // Actions

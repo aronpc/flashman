@@ -31,13 +31,16 @@ router.route('/delete/:id').post(
 
 // REST API - GET device registry
 router.route('/update/:id').get(authController.ensureAPIAccess,
+                                authController.ensurePermission('superuser'),
                                 deviceListController.getDeviceReg);
 // REST API - POST or PUT change device registry
 router.route('/update/:id').post(authController.ensureLogin(),
                                  deviceListController.setDeviceReg)
                            .post(authController.ensureAPIAccess,
+                                 authController.ensurePermission('superuser'),
                                  deviceListController.setDeviceReg)
                            .put(authController.ensureAPIAccess,
+                                authController.ensurePermission('superuser'),
                                 deviceListController.setDeviceReg);
 
 // REST API - PUT create device registry
