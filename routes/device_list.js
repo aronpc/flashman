@@ -9,11 +9,15 @@ let router = express.Router();
 router.route('/').get(authController.ensureLogin(),
                       deviceListController.index);
 // POST change device update status
-router.route('/update/:id/:release').post(authController.ensureLogin(),
-                                          deviceListController.changeUpdate);
+router.route('/update/:id/:release').post(
+  authController.ensureLogin(),
+  authController.ensurePermission('grantFirmwareUpgrade'),
+  deviceListController.changeUpdate);
 // POST change all device status
-router.route('/updateall').post(authController.ensureLogin(),
-                                deviceListController.changeAllUpdates);
+router.route('/updateall').post(
+  authController.ensureLogin(),
+  authController.ensurePermission('grantFirmwareUpgrade'),
+  deviceListController.changeAllUpdates);
 
 // POST search device
 router.route('/search').get(authController.ensureLogin(),

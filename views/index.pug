@@ -201,7 +201,8 @@ block content
                     th.text-center IP WAN
                     th.text-center IP Público
                     th.text-center Release
-                    th.text-center Atualizar Firmware
+                    if (superuser || role.grantFirmwareUpgrade)
+                      th.text-center Atualizar Firmware
                 tbody
                   tr
                     td
@@ -214,15 +215,16 @@ block content
                     td.text-center *
                     td.text-center *
                     td.text-center *
-                    td.text-center
-                      label.switch
-                        input.checkbox(
-                          id="all-devices",
-                          type="checkbox",
-                          name="do_update",
-                          checked=false
-                        )
-                        .slider.round
+                    if (superuser || role.grantFirmwareUpgrade)
+                      td.text-center
+                        label.switch
+                          input.checkbox(
+                            id="all-devices",
+                            type="checkbox",
+                            name="do_update",
+                            checked=false
+                          )
+                          .slider.round
                   each device, index in devices
                     tr.csv-export(id=device._id,
                        data-index=(index + 1),
@@ -267,7 +269,8 @@ block content
                             type="button",
                             data-toggle="dropdown",
                             aria-haspopup="true",
-                            aria-expanded="true"
+                            aria-expanded="true",
+                            disabled=((superuser || role.grantFirmwareUpgrade) ? false : true)
                           )
                             span.selected #{device.release}
                           .dropdown-menu
@@ -281,14 +284,15 @@ block content
                                     a.dropdown-item.text-center #{release.id}
                                 if (device.model === release.model)
                                   a.dropdown-item.text-center #{release.id}
-                      td.text-center.col-xs-1
-                        label.switch
-                          input.checkbox(
-                            type="checkbox",
-                            name="do_update",
-                            checked=device.do_update
-                          )
-                          .slider.round
+                      if (superuser || role.grantFirmwareUpgrade)
+                        td.text-center.col-xs-1
+                          label.switch
+                            input.checkbox(
+                              type="checkbox",
+                              name="do_update",
+                              checked=device.do_update
+                            )
+                            .slider.round
                     tr(
                       id="form-" + (index + 1),
                       data-deviceid=device._id,
@@ -297,7 +301,7 @@ block content
                     )
                       td(colspan=9).grey.lighten-5
                         form.edit-form.needs-validation(novalidate)
-                          .row
+                          .row(style="margin: 0;")
                             .col-5
                               // Identification
                               .md-form.input-group.input-entry
@@ -333,7 +337,7 @@ block content
                                     span &nbsp Resetar senha App
                                 br
                                 span.badge.badge-success.bounceIn(style="display: none;") Sucesso
-                          .row
+                          .row(style="margin: 0;")
                             .col-2
                               // Connection type
                               label(for="edit_connect_type-" + (index + 1)) Tipo de Conexão
@@ -405,7 +409,7 @@ block content
                                                    maxlength="64")
                                 .invalid-feedback
                               br
-                          .row
+                          .row(style="margin: 0;")
                             // Buttons
                             if (superuser || role.grantDeviceRemoval)
                               .col.text-left
