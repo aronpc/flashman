@@ -301,42 +301,24 @@ block content
                             .col-5
                               // Identification
                               .md-form.input-group.input-entry
-                                if (superuser || role.grantDeviceId)
-                                  .input-group-btn
-                                    button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
-                                      type="button",
-                                      data-toggle="dropdown"
-                                    )
-                                      span.selected(id="edit_ext_ref_type_selected-" + (index + 1)) CPF
-                                    #ext_ref_type.dropdown-menu
-                                      a.dropdown-item.text-center.active.teal.lighten-2 CPF
-                                      a.dropdown-item.text-center CNPJ
-                                      a.dropdown-item.text-center Outro
-                                  input.form-control.py-0.added-margin.ext-ref-input(
-                                    type="text",
-                                    id="edit_external_reference-" + (index + 1),
-                                    placeholder="ID do cliente (opcional)",
-                                    maxlength="64"
+                                .input-group-btn
+                                  button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
+                                    type="button",
+                                    data-toggle="dropdown",
+                                    disabled=((superuser || role.grantDeviceId) ? false : true)
                                   )
-                                else
-                                  .input-group-btn
-                                    button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
-                                      type="button",
-                                      data-toggle="dropdown",
-                                      disabled
-                                    )
-                                      span.selected(id="edit_ext_ref_type_selected-" + (index + 1)) CPF
-                                    #ext_ref_type.dropdown-menu
-                                      a.dropdown-item.text-center.active.teal.lighten-2 CPF
-                                      a.dropdown-item.text-center CNPJ
-                                      a.dropdown-item.text-center Outro
-                                  input.form-control.py-0.added-margin.ext-ref-input(
-                                    type="text",
-                                    id="edit_external_reference-" + (index + 1),
-                                    placeholder="ID do cliente (opcional)",
-                                    maxlength="64",
-                                    disabled
-                                  )
+                                    span.selected(id="edit_ext_ref_type_selected-" + (index + 1)) CPF
+                                  #ext_ref_type.dropdown-menu
+                                    a.dropdown-item.text-center.active.teal.lighten-2 CPF
+                                    a.dropdown-item.text-center CNPJ
+                                    a.dropdown-item.text-center Outro
+                                input.form-control.py-0.added-margin.ext-ref-input(
+                                  type="text",
+                                  id="edit_external_reference-" + (index + 1),
+                                  placeholder="ID do cliente (opcional)",
+                                  maxlength="64",
+                                  disabled=((superuser || role.grantDeviceId) ? false : true)
+                                )
                                 .invalid-feedback
                               br
                             // Actions
@@ -355,7 +337,10 @@ block content
                             .col-2
                               // Connection type
                               label(for="edit_connect_type-" + (index + 1)) Tipo de Conexão
-                              select.form-control(id="edit_connect_type-" + (index + 1))
+                              select.form-control(
+                                id="edit_connect_type-" + (index + 1),
+                                disabled=((superuser || role.grantWanType) ? false : true)
+                              )
                                 option(value="DHCP") DHCP
                                 option(value="PPPoE") PPPoE
                               br

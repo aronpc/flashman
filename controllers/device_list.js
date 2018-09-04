@@ -328,7 +328,18 @@ deviceListController.searchDeviceReg = function(req, res) {
           indexContent.update = matchedConfig.hasUpdate;
         }
 
-        return res.render('index', indexContent);
+        // Filter data using user permissions
+        if (req.user.is_superuser) {
+          return res.render('index', indexContent);
+        } else {
+          Role.findOne({name: req.user.role}).lean().exec(function(err, role) {
+            if (err) {
+              console.log(err);
+            }
+            indexContent.role = role;
+            return res.render('index', indexContent);
+          });
+        }
       });
     });
   });
@@ -495,7 +506,6 @@ deviceListController.setDeviceReg = function(req, res) {
       let ssid = returnObjOrEmptyStr(content.wifi_ssid).trim();
       let password = returnObjOrEmptyStr(content.wifi_password).trim();
       let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
-      let pppoe = (pppoeUser !== '' && pppoePassword !== '');
 
       let genericValidate = function(field, func, key) {
         let validField = func(field);
@@ -516,7 +526,7 @@ deviceListController.setDeviceReg = function(req, res) {
           message: 'Tipo de conexão deve ser "pppoe" ou "dhcp"',
         });
       }
-      if (pppoe) {
+      if (pppoeUser !== '' && pppoePassword !== '') {
         connectionType = 'pppoe';
         genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
         genericValidate(pppoePassword, validator.validatePassword,
@@ -527,10 +537,6 @@ deviceListController.setDeviceReg = function(req, res) {
       genericValidate(channel, validator.validateChannel, 'channel');
 
       if (errors.length < 1) {
-        if (connectionType != '') {
-          matchedDevice.connection_type = connectionType;
-          updateParameters = true;
-        }
         if (content.hasOwnProperty('pppoe_user')) {
           matchedDevice.pppoe_user = pppoeUser;
           updateParameters = true;
@@ -556,6 +562,10 @@ deviceListController.setDeviceReg = function(req, res) {
         }
 
         if (req.user.is_superuser) {
+          if (connectionType != '') {
+            matchedDevice.connection_type = connectionType;
+            matchedDevice.do_update_parameters = true;
+          }
           if (content.hasOwnProperty('external_reference')) {
             matchedDevice.external_reference = content.external_reference;
           }
@@ -580,6 +590,10 @@ deviceListController.setDeviceReg = function(req, res) {
           Role.findOne({name: req.user.role}).lean().exec(function(err, role) {
             if (err) {
               console.log(err);
+            }
+            if (connectionType != '' && role.grantWanType) {
+              matchedDevice.connection_type = connectionType;
+              matchedDevice.do_update_parameters = true;
             }
             if (content.hasOwnProperty('external_reference') &&
                 role.grantDeviceId) {
