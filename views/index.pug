@@ -65,87 +65,88 @@ block content
           | Termos Especiais &nbsp
           .fas.fa-plus-circle
 
-  .row.justify-content-center
-    .col-12.col-lg-8.mt-5
-      .card
-        h4.card-header.teal.lighten-2.white-text(id="card-header",
-                                                  data-toggle="collapse",
-                                                  data-target="#deviceCard",
-                                                  style="cursor: pointer;")
-          .row
-            .col-1
-              .fas.fa-plus
-            .col-10.text-center
-              span.card-title Adicionar novo dispositivo
-        .card-body.collapse.out(id="deviceCard")
-          form.needs-validation(id="deviceForm", novalidate)
-            .md-form.input-group
-              .input-group-btn
-                button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
-                  type="button",
-                  data-toggle="dropdown"
+  if (superuser || role.grantDeviceAdd)
+    .row.justify-content-center
+      .col-12.col-lg-8.mt-5
+        .card
+          h4.card-header.teal.lighten-2.white-text(id="card-header",
+                                                    data-toggle="collapse",
+                                                    data-target="#deviceCard",
+                                                    style="cursor: pointer;")
+            .row
+              .col-1
+                .fas.fa-plus
+              .col-10.text-center
+                span.card-title Adicionar novo dispositivo
+          .card-body.collapse.out(id="deviceCard")
+            form.needs-validation(id="deviceForm", novalidate)
+              .md-form.input-group
+                .input-group-btn
+                  button.btn.teal.lighten-2.dropdown-toggle.ml-0.my-0(
+                    type="button",
+                    data-toggle="dropdown"
+                  )
+                    span#new_ext_ref_type_selected.selected CPF
+                  #ext_ref_type.dropdown-menu
+                    a.dropdown-item.text-center.active.teal.lighten-2 CPF
+                    a.dropdown-item.text-center CNPJ
+                    a.dropdown-item.text-center Outro
+                input.col-xs-10.form-control.py-0.added-margin.ext-ref-input(
+                  type="text",
+                  id="new_external_reference",
+                  placeholder="Identificação do cliente (opcional)",
+                  maxlength="64"
                 )
-                  span#new_ext_ref_type_selected.selected CPF
-                #ext_ref_type.dropdown-menu
-                  a.dropdown-item.text-center.active.teal.lighten-2 CPF
-                  a.dropdown-item.text-center CNPJ
-                  a.dropdown-item.text-center Outro
-              input.col-xs-10.form-control.py-0.added-margin.ext-ref-input(
-                type="text",
-                id="new_external_reference",
-                placeholder="Identificação do cliente (opcional)",
-                maxlength="64"
-              )
-            label(for="new_connect_type") Tipo de Conexão
-            select.form-control(id="new_connect_type")
-              option(value="DHCP") DHCP
-              option(value="PPPoE") PPPoE
-            br
-            label(for="new_wifi_channel") Canal do WiFi
-            select.form-control(id="new_wifi_channel")
-              option(value="auto") auto
-              option(value="1") 1
-              option(value="6") 6
-              option(value="11") 11
-            br
-            .input-entry
-              label(for="new_wifi_ssid") SSID do WiFi
-              input.form-control(type="text",
-                                 id="new_wifi_ssid",
-                                 maxlength="32")
-              .invalid-feedback
+              label(for="new_connect_type") Tipo de Conexão
+              select.form-control(id="new_connect_type")
+                option(value="DHCP") DHCP
+                option(value="PPPoE") PPPoE
               br
-            .input-entry
-              label(for="new_wifi_pass") Senha do WiFi
-              input.form-control(type="text",
-                                 id="new_wifi_pass",
-                                 maxlength="64")
-              .invalid-feedback
+              label(for="new_wifi_channel") Canal do WiFi
+              select.form-control(id="new_wifi_channel")
+                option(value="auto") auto
+                option(value="1") 1
+                option(value="6") 6
+                option(value="11") 11
               br
-            .input-entry
-              label(for="new_mac") Endereço MAC
-              input.form-control(type="text", id="new_mac")
-              .invalid-feedback
-              br
-            .input-entry
-              label(for="new_pppoe_user") Usuário PPPoE
-              input.form-control(type="text",
-                                 id="new_pppoe_user",
-                                 maxlength="64")
-              .invalid-feedback
-              br
-            .input-entry
-              label(for="new_pppoe_pass") Senha PPPoE
-              input.form-control(type="text",
-                                 id="new_pppoe_pass",
-                                 maxlength="64")
-              .invalid-feedback
-              br
-            .col.text-center
-              .form-buttons
-                button.btn.btn-lg.teal.lighten-2(type="submit")
-                  .fas.fa-check.fa-lg
-                  span &nbsp Adicionar
+              .input-entry
+                label(for="new_wifi_ssid") SSID do WiFi
+                input.form-control(type="text",
+                                   id="new_wifi_ssid",
+                                   maxlength="32")
+                .invalid-feedback
+                br
+              .input-entry
+                label(for="new_wifi_pass") Senha do WiFi
+                input.form-control(type="text",
+                                   id="new_wifi_pass",
+                                   maxlength="64")
+                .invalid-feedback
+                br
+              .input-entry
+                label(for="new_mac") Endereço MAC
+                input.form-control(type="text", id="new_mac")
+                .invalid-feedback
+                br
+              .input-entry
+                label(for="new_pppoe_user") Usuário PPPoE
+                input.form-control(type="text",
+                                   id="new_pppoe_user",
+                                   maxlength="64")
+                .invalid-feedback
+                br
+              .input-entry
+                label(for="new_pppoe_pass") Senha PPPoE
+                input.form-control(type="text",
+                                   id="new_pppoe_pass",
+                                   maxlength="64")
+                .invalid-feedback
+                br
+              .col.text-center
+                .form-buttons
+                  button.btn.btn-lg.teal.lighten-2(type="submit")
+                    .fas.fa-check.fa-lg
+                    span &nbsp Adicionar
 
   .row.justify-content-center
     .col-12.mt-4
@@ -318,17 +319,18 @@ block content
                                 )
                                 .invalid-feedback
                               br
-                            .col-7.text-right.actions-opts
-                              // Actions
-                              .btn-group.btn-group-sm(role="group")
-                                button.btn.teal.lighten-2.btn-sm.btn-reboot(type="button")
-                                  .fas.fa-sync.fa-lg
-                                  span &nbsp Reiniciar roteador
-                                button.btn.teal.lighten-2.btn-sm.btn-reset-app(type="button")
-                                  .fas.fa-mobile-alt.fa-lg
-                                  span &nbsp Resetar senha App
-                              br
-                              span.badge.badge-success.bounceIn(style="display: none;") Sucesso
+                            // Actions
+                            if (superuser || role.grantDeviceActions)
+                              .col-7.text-right.actions-opts
+                                .btn-group.btn-group-sm(role="group")
+                                  button.btn.teal.lighten-2.btn-sm.btn-reboot(type="button")
+                                    .fas.fa-sync.fa-lg
+                                    span &nbsp Reiniciar roteador
+                                  button.btn.teal.lighten-2.btn-sm.btn-reset-app(type="button")
+                                    .fas.fa-mobile-alt.fa-lg
+                                    span &nbsp Resetar senha App
+                                br
+                                span.badge.badge-success.bounceIn(style="display: none;") Sucesso
                           .row
                             .col-2
                               // Connection type

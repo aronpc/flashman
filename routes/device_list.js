@@ -41,10 +41,14 @@ router.route('/update/:id').post(authController.ensureLogin(),
                                 deviceListController.setDeviceReg);
 
 // REST API - PUT create device registry
-router.route('/create').post(authController.ensureLogin(),
-                            deviceListController.createDeviceReg)
-                       .put(authController.ensureAPIAccess,
-                            deviceListController.createDeviceReg);
+router.route('/create').post(
+  authController.ensureLogin(),
+  authController.ensurePermission('grantDeviceAdd'),
+  deviceListController.createDeviceReg)
+                       .put(
+  authController.ensureAPIAccess,
+  authController.ensurePermission('superuser'),
+  deviceListController.createDeviceReg);
 
 // REST API - GET first boot logs
 router.route('/firstlog/:id').get(authController.ensureAPIAccess,
@@ -54,9 +58,13 @@ router.route('/lastlog/:id').get(authController.ensureAPIAccess,
                                 deviceListController.getLastBootLog);
 
 // REST API - Send a message using MQTT
-router.route('/command/:id/:msg').post(authController.ensureLogin(),
-                                       deviceListController.sendMqttMsg)
-                                 .put(authController.ensureAPIAccess,
-                                      deviceListController.sendMqttMsg);
+router.route('/command/:id/:msg').post(
+  authController.ensureLogin(),
+  authController.ensurePermission('grantDeviceActions'),
+  deviceListController.sendMqttMsg)
+                                 .put(
+  authController.ensureAPIAccess,
+  authController.ensurePermission('superuser'),
+  deviceListController.sendMqttMsg);
 
 module.exports = router;
