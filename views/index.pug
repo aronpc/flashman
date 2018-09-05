@@ -295,8 +295,12 @@ block content
                             .slider.round
                     tr(
                       id="form-" + (index + 1),
-                      data-deviceid=device._id,
                       data-index=(index + 1),
+                      data-deviceid=device._id,
+                      data-validate-wifi=(
+                        (superuser || role.grantWifiInfo >= 1) ? "true" : "false"),
+                      data-validate-pppoe=(
+                        (superuser || role.grantPPPoEInfo >= 1) ? "true" : "false"),
                       style="display: none;"
                     )
                       td(colspan=9).grey.lighten-5
@@ -369,46 +373,63 @@ block content
                                 .invalid-feedback
                               br
                             .col-4
-                              // Wifi channel
-                              label(for="edit_wifi_channel-" + (index + 1)) Canal do WiFi
-                              select.form-control(id="edit_wifi_channel-" + (index + 1))
-                                option(value="auto") auto
-                                option(value="1") 1
-                                option(value="6") 6
-                                option(value="11") 11
-                              br
-                              // Wifi ssid
-                              .input-entry
-                                label(for="edit_wifi_ssid-" + (index + 1)) SSID do WiFi
-                                input.form-control(type="text",
-                                                   id="edit_wifi_ssid-" + (index + 1),
-                                                   maxlength="32")
-                                .invalid-feedback
-                              br
-                              // Wifi password
-                              .input-entry
-                                label(for="edit_wifi_pass-" + (index + 1)) Senha do WiFi
-                                input.form-control(type="text",
-                                                   id="edit_wifi_pass-" + (index + 1),
-                                                   maxlength="64")
-                                .invalid-feedback
+                              if (superuser || role.grantWifiInfo >= 1)
+                                // Wifi channel
+                                label(for="edit_wifi_channel-" + (index + 1)) Canal do WiFi
+                                select.form-control(
+                                  id="edit_wifi_channel-" + (index + 1),
+                                  disabled=((superuser || role.grantWifiInfo > 1) ? false : true)
+                                )
+                                  option(value="auto") auto
+                                  option(value="1") 1
+                                  option(value="6") 6
+                                  option(value="11") 11
+                                br
+                                // Wifi ssid
+                                .input-entry
+                                  label(for="edit_wifi_ssid-" + (index + 1)) SSID do WiFi
+                                  input.form-control(
+                                    type="text",
+                                    id="edit_wifi_ssid-" + (index + 1),
+                                    maxlength="32",
+                                    disabled=((superuser || role.grantWifiInfo > 1) ? false : true)
+                                  )
+                                  .invalid-feedback
+                                br
+                                // Wifi password
+                                .input-entry
+                                  label(for="edit_wifi_pass-" + (index + 1)) Senha do WiFi
+                                  input.form-control(
+                                    type="text",
+                                    id="edit_wifi_pass-" + (index + 1),
+                                    maxlength="64",
+                                    disabled=((superuser || role.grantWifiInfo > 1) ? false : true)
+                                  )
+                                  .invalid-feedback
                             .col-3
-                              // PPPoE user
-                              .input-entry
-                                label(for="edit_pppoe_user-" + (index + 1)) Usuário PPPoE
-                                input.form-control(type="text",
-                                                   id="edit_pppoe_user-" + (index + 1),
-                                                   maxlength="64")
-                                .invalid-feedback
-                              br 
-                              // PPPoE password
-                              .input-entry
-                                label(for="edit_pppoe_pass-" + (index + 1)) Senha PPPoE
-                                input.form-control(type="text",
-                                                   id="edit_pppoe_pass-" + (index + 1),
-                                                   maxlength="64")
-                                .invalid-feedback
-                              br
+                              if (superuser || role.grantPPPoEInfo >= 1)
+                                // PPPoE user
+                                .input-entry
+                                  label(for="edit_pppoe_user-" + (index + 1)) Usuário PPPoE
+                                  input.form-control(
+                                    type="text",
+                                    id="edit_pppoe_user-" + (index + 1),
+                                    maxlength="64",
+                                    disabled=((superuser || role.grantPPPoEInfo > 1) ? false : true)
+                                  )
+                                  .invalid-feedback
+                                br 
+                                // PPPoE password
+                                .input-entry
+                                  label(for="edit_pppoe_pass-" + (index + 1)) Senha PPPoE
+                                  input.form-control(
+                                    type="text",
+                                    id="edit_pppoe_pass-" + (index + 1),
+                                    maxlength="64",
+                                    disabled=((superuser || role.grantPPPoEInfo > 1) ? false : true)
+                                  )
+                                  .invalid-feedback
+                                br
                           .row(style="margin: 0;")
                             // Buttons
                             if (superuser || role.grantDeviceRemoval)

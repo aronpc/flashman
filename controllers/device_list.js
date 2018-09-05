@@ -137,7 +137,7 @@ deviceListController.index = function(req, res) {
         if (req.user.is_superuser) {
           return res.render('index', indexContent);
         } else {
-          Role.findOne({name: req.user.role}).lean().exec(function(err, role) {
+          Role.findOne({name: req.user.role}, function(err, role) {
             if (err) {
               console.log(err);
             }
@@ -332,7 +332,7 @@ deviceListController.searchDeviceReg = function(req, res) {
         if (req.user.is_superuser) {
           return res.render('index', indexContent);
         } else {
-          Role.findOne({name: req.user.role}).lean().exec(function(err, role) {
+          Role.findOne({name: req.user.role}, function(err, role) {
             if (err) {
               console.log(err);
             }
@@ -537,39 +537,67 @@ deviceListController.setDeviceReg = function(req, res) {
       genericValidate(channel, validator.validateChannel, 'channel');
 
       if (errors.length < 1) {
-        if (content.hasOwnProperty('pppoe_user')) {
-          matchedDevice.pppoe_user = pppoeUser;
-          updateParameters = true;
-        }
-        if (content.hasOwnProperty('pppoe_password')) {
-          matchedDevice.pppoe_password = pppoePassword;
-          updateParameters = true;
-        }
-        if (content.hasOwnProperty('wifi_ssid')) {
-          matchedDevice.wifi_ssid = ssid;
-          updateParameters = true;
-        }
-        if (content.hasOwnProperty('wifi_password')) {
-          matchedDevice.wifi_password = password;
-          updateParameters = true;
-        }
-        if (content.hasOwnProperty('wifi_channel')) {
-          matchedDevice.wifi_channel = channel;
-          updateParameters = true;
-        }
-        if (updateParameters) {
-          matchedDevice.do_update_parameters = true;
-        }
-
-        if (req.user.is_superuser) {
-          if (connectionType != '') {
-            matchedDevice.connection_type = connectionType;
-            matchedDevice.do_update_parameters = true;
+        Role.findOne({name: returnObjOrEmptyStr(req.user.role)},
+        function(err, role) {
+          if (err) {
+            console.log(err);
           }
-          if (content.hasOwnProperty('external_reference')) {
+          let superuserGrant = false;
+          if (!role && req.user.is_superuser) {
+            superuserGrant = true;
+          }
+          if (connectionType != '' && (superuserGrant || role.grantWanType)) {
+            if (connectionType === 'pppoe') {
+              if (pppoeUser !== '' && pppoePassword !== '') {
+                matchedDevice.connection_type = connectionType;
+                updateParameters = true;
+              }
+            } else {
+              matchedDevice.connection_type = connectionType;
+              updateParameters = true;
+            }
+          }
+          if (content.hasOwnProperty('pppoe_user') &&
+              (superuserGrant || role.grantPPPoEInfo > 1) &&
+              pppoeUser !== '') {
+            matchedDevice.pppoe_user = pppoeUser;
+            updateParameters = true;
+          }
+          if (content.hasOwnProperty('pppoe_password') &&
+              (superuserGrant || role.grantPPPoEInfo > 1) &&
+              pppoePassword !== '') {
+            matchedDevice.pppoe_password = pppoePassword;
+            updateParameters = true;
+          }
+          if (content.hasOwnProperty('wifi_ssid') &&
+              (superuserGrant || role.grantWifiInfo > 1) &&
+              ssid !== '') {
+            matchedDevice.wifi_ssid = ssid;
+            updateParameters = true;
+          }
+          if (content.hasOwnProperty('wifi_password') &&
+              (superuserGrant || role.grantWifiInfo > 1) &&
+              password !== '') {
+            matchedDevice.wifi_password = password;
+            updateParameters = true;
+          }
+          if (content.hasOwnProperty('wifi_channel') &&
+              (superuserGrant || role.grantWifiInfo > 1) &&
+              channel !== '') {
+            matchedDevice.wifi_channel = channel;
+            updateParameters = true;
+          }
+          if (content.hasOwnProperty('external_reference') &&
+              (superuserGrant || role.grantDeviceId)) {
             matchedDevice.external_reference = content.external_reference;
           }
+          if (updateParameters) {
+            matchedDevice.do_update_parameters = true;
+          }
           matchedDevice.save(function(err) {
+            if (err) {
+              console.log(err);
+            }
             if (process.env.FLM_MQTT_BROKER) {
               // Send notification to device using external MQTT server
               let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
@@ -586,38 +614,7 @@ deviceListController.setDeviceReg = function(req, res) {
             matchedDevice.success = true;
             return res.status(200).json(matchedDevice);
           });
-        } else {
-          Role.findOne({name: req.user.role}).lean().exec(function(err, role) {
-            if (err) {
-              console.log(err);
-            }
-            if (connectionType != '' && role.grantWanType) {
-              matchedDevice.connection_type = connectionType;
-              matchedDevice.do_update_parameters = true;
-            }
-            if (content.hasOwnProperty('external_reference') &&
-                role.grantDeviceId) {
-              matchedDevice.external_reference = content.external_reference;
-            }
-            matchedDevice.save(function(err) {
-              if (process.env.FLM_MQTT_BROKER) {
-                // Send notification to device using external MQTT server
-                let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
-                client.on('connect', function() {
-                  client.publish(
-                    'flashman/update/' + matchedDevice._id,
-                    '1', {qos: 1, retain: true}); // topic, msg, options
-                  client.end();
-                });
-              } else {
-                mqtt.anlix_message_router_update(matchedDevice._id);
-              }
-
-              matchedDevice.success = true;
-              return res.status(200).json(matchedDevice);
-            });
-          });
-        }
+        });
       } else {
         return res.status(500).json({
           success: false,
