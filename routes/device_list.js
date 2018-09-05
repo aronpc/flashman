@@ -21,7 +21,7 @@ router.route('/updateall').post(
 
 // POST search device
 router.route('/search').get(authController.ensureLogin(),
-                             deviceListController.searchDeviceReg);
+                            deviceListController.searchDeviceReg);
 
 // REST API or POST delete device
 router.route('/delete/:id').post(
@@ -59,10 +59,12 @@ router.route('/create').post(
 
 // REST API - GET first boot logs
 router.route('/firstlog/:id').get(authController.ensureAPIAccess,
-                                deviceListController.getFirstBootLog);
+                                  authController.ensurePermission('superuser'),
+                                  deviceListController.getFirstBootLog);
 // REST API - GET last boot logs
 router.route('/lastlog/:id').get(authController.ensureAPIAccess,
-                                deviceListController.getLastBootLog);
+                                 authController.ensurePermission('superuser'),
+                                 deviceListController.getLastBootLog);
 
 // REST API - Send a message using MQTT
 router.route('/command/:id/:msg').post(
