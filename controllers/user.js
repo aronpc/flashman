@@ -5,11 +5,15 @@ const Config = require('../models/config');
 let userController = {};
 
 userController.changePassword = function(req, res) {
-  return res.render('changepassword',
-                    {user: req.user,
-                     username: req.user.name,
-                     message: 'Sua senha expirou. Insira uma nova senha',
-                     type: 'danger'});
+  Role.findOne({name: req.user.role}, function(err, role) {
+    return res.render('changepassword',
+                      {user: req.user,
+                       username: req.user.name,
+                       message: 'Sua senha expirou. Insira uma nova senha',
+                       type: 'danger',
+                       superuser: req.user.is_superuser,
+                       role: role});
+  });
 };
 
 userController.changeElementsPerPage = function(req, res) {
