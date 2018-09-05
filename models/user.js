@@ -18,7 +18,7 @@ let userSchema = new mongoose.Schema({
     autoUpdate: {type: Boolean, default: true},
     maxElementsPerPage: {type: Number, default: 10},
     is_superuser: {type: Boolean, default: false},
-    role: {type: String, required: true},
+    role: {type: String, required: false},
 });
 
 // Execute before each user.save() call
