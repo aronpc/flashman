@@ -1,6 +1,7 @@
 let User = require('../models/user');
 let Config = require('../models/config');
 let Firmware = require('../models/firmware');
+const Role = require('../models/role');
 
 const fs = require('fs');
 const unzip = require('unzip');
@@ -73,11 +74,21 @@ firmwareController.firmwares = function(req, res) {
           indexContent.message = err.message;
           return res.render('error', indexContent);
         }
-        indexContent.firmwares = firmwares.docs;
-        indexContent.page = firmwares.page;
-        indexContent.pages = firmwares.pages;
 
-        return res.render('firmware', indexContent);
+        Role.findOne({name: req.user.role}, function(err, role) {
+          if (err) {
+            console.log(err);
+            indexContent.type = 'danger';
+            indexContent.message = err.message;
+            return res.render('error', indexContent);
+          }
+          indexContent.role = role;
+          indexContent.firmwares = firmwares.docs;
+          indexContent.page = firmwares.page;
+          indexContent.pages = firmwares.pages;
+
+          return res.render('firmware', indexContent);
+        });
       });
     });
   });
