@@ -472,6 +472,8 @@ deviceListController.getDeviceReg = function(req, res) {
       matchedDevice['lastboot_log'] = null;
     }
 
+    matchedDevice['online_status'] = (req.params.id in mqtt.clients);
+
     return res.status(200).json(matchedDevice);
   });
 };
