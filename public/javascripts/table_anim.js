@@ -11,9 +11,8 @@ let loadDeviceInfoOnForm = function(row) {
   $('#edit_external_reference-' + index.toString())
     .val(row.data('external-ref')).change();
 
-  let pppoeUser = row.data('user');
-  let pppoePass = row.data('pass');
-  if (pppoeUser === '' && pppoePass === '') {
+  let connectionType = row.data('connection-type').toUpperCase();
+  if (connectionType === 'DHCP') {
     $('#edit_connect_type-' + index.toString()).val('DHCP');
     $('#edit_pppoe_user-' + index.toString()).parent().hide();
     $('#edit_pppoe_pass-' + index.toString()).parent().hide();

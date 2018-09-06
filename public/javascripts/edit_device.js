@@ -14,7 +14,8 @@ let renderEditErrors = function(errors) {
 
 let validateEditDevice = function(event) {
   $('.form-control').blur(); // Remove focus from form
-  $('.edit-form input').each(function(){ // Reset validation messages
+  $('.edit-form input').each(function() {
+    // Reset validation messages
     this.setCustomValidity('');
   });
   let validator = new Validator();
@@ -24,6 +25,8 @@ let validateEditDevice = function(event) {
 
   // Get form values
   let mac = row.data('deviceid');
+  let validateWifi = row.data('validateWifi');
+  let validatePppoe = row.data('validatePppoe');
   let pppoe = $('#edit_connect_type-' + index.toString()).val() === 'PPPoE';
   let pppoeUser = $('#edit_pppoe_user-' + index.toString()).val();
   let pppoePassword = $('#edit_pppoe_pass-' + index.toString()).val();
@@ -57,14 +60,16 @@ let validateEditDevice = function(event) {
   };
 
   // Validate fields
-  if (pppoe) {
+  if (pppoe && validatePppoe) {
     genericValidate(pppoeUser, validator.validateUser, errors.pppoe_user);
     genericValidate(pppoePassword, validator.validatePassword,
                     errors.pppoe_password);
   }
-  genericValidate(ssid, validator.validateSSID, errors.ssid);
-  genericValidate(password, validator.validateWifiPassword, errors.password);
-  genericValidate(channel, validator.validateChannel, errors.channel);
+  if (validateWifi) {
+    genericValidate(ssid, validator.validateSSID, errors.ssid);
+    genericValidate(password, validator.validateWifiPassword, errors.password);
+    genericValidate(channel, validator.validateChannel, errors.channel);
+  }
 
   let hasNoErrors = function(key) {
     return errors[key].messages.length < 1;
@@ -74,16 +79,20 @@ let validateEditDevice = function(event) {
     // If no errors present, send to backend
     let data = {'content': {
       'connection_type': (pppoe) ? 'pppoe' : 'dhcp',
-      'pppoe_user': (pppoe) ? pppoeUser : '',
-      'pppoe_password': (pppoe) ? pppoePassword : '',
-      'wifi_ssid': ssid,
-      'wifi_password': password,
-      'wifi_channel': channel,
       'external_reference': {
         kind: externalReferenceType,
         data: externalReferenceData,
       },
     }};
+    if (validatePppoe) {
+      data.content['pppoe_user'] = (pppoe) ? pppoeUser : '';
+      data.content['pppoe_password'] = (pppoe) ? pppoePassword : '';
+    }
+    if (validateWifi) {
+      data.content['wifi_ssid'] = ssid;
+      data.content['wifi_password'] = password;
+      data.content['wifi_channel'] = channel;
+    }
 
     $.ajax({
       type: 'POST',

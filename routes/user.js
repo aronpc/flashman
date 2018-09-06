@@ -20,7 +20,11 @@ router.route('/profile/:id').get(authController.ensureLogin(),
                                  userController.getProfile);
 
 router.route('/showall').get(authController.ensureLogin(),
+                             authController.ensurePermission('superuser'),
                              userController.showAll);
+
+router.route('/roles').get(authController.ensureLogin(),
+                           userController.showRoles);
 
 //
 // REST API
@@ -31,18 +35,52 @@ router.route('/edit/:id').post(authController.ensureLogin(),
                               userController.editUser);
 
 router.route('/get/all').get(authController.ensureLogin(),
-                              userController.getUsers)
+                             authController.ensurePermission('superuser'),
+                             userController.getUsers)
                         .get(authController.ensureAPIAccess,
+                             authController.ensurePermission('superuser'),
                              userController.getUsers);
 
 router.route('/new').post(authController.ensureLogin(),
+                          authController.ensurePermission('superuser'),
                           userController.postUser)
                     .put(authController.ensureAPIAccess,
+                         authController.ensurePermission('superuser'),
                          userController.postUser);
 
 router.route('/del').post(authController.ensureLogin(),
+                          authController.ensurePermission('superuser'),
                           userController.deleteUser)
                     .put(authController.ensureAPIAccess,
+                         authController.ensurePermission('superuser'),
                          userController.deleteUser);
+
+router.route('/role/get/all').get(authController.ensureLogin(),
+                                  userController.getRoles)
+                             .get(authController.ensureAPIAccess,
+                                  userController.getRoles);
+
+router.route('/role/new').post(authController.ensureLogin(),
+                               authController.ensurePermission('superuser'),
+                               userController.postRole)
+                         .put(authController.ensureAPIAccess,
+                              authController.ensurePermission('superuser'),
+                              userController.postRole);
+
+router.route('/role/edit/:id').post(
+  authController.ensureLogin(),
+  authController.ensurePermission('superuser'),
+  userController.editRole)
+                              .put(
+  authController.ensureAPIAccess,
+  authController.ensurePermission('superuser'),
+  userController.editRole);
+
+router.route('/role/del').post(authController.ensureLogin(),
+                               authController.ensurePermission('superuser'),
+                               userController.deleteRole)
+                         .put(authController.ensureAPIAccess,
+                              authController.ensurePermission('superuser'),
+                              userController.deleteRole);
 
 module.exports = router;

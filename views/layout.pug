@@ -28,13 +28,14 @@ html
     script(src='/javascripts/modal_actions.js')
     script(src='/javascripts/upgrade_flashman.js')
     script.
-      var message = '#{message}';
+      let message = '#{message}';
       if (message) {
         $('#frame-modal-alert').modal('show');
       }
-    script.
+      let superuser = '#{superuser}';
       let update = '#{update}' === "true";
-      if (update && Math.random() < 0.3) {
+      if (superuser && update && Math.random() < 0.3) {
         alertUpdateFlashman();
       }
+
     block scripts

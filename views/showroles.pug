@@ -1,0 +1,106 @@
+extends layout
+
+block stylesheets
+  link(rel='stylesheet', href='/scripts/datatables.net-bs4/css/dataTables.bootstrap4.min.css')
+
+block content
+  .row.justify-content-center
+    .col-12.col-lg-8.mt-5
+      .card
+        h4.card-header.teal.lighten-2.white-text(id="card-header",
+                                                  data-toggle="collapse",
+                                                  data-target="#new-role-card",
+                                                  style="cursor: pointer;")
+          .row
+            .col-1
+              .fas.fa-plus
+            .col-10.text-center
+              span.card-title Adicionar nova classe de permissões
+        .card-body.collapse.out(id="new-role-card")
+          form.needs-validation(
+            id="new-role-form",
+            method='post',
+            action='/user/role/new',
+            novalidate
+          )
+            .input-entry
+              label Nome da classe
+              input.form-control(type="text",
+                                 name="name",
+                                 required)
+              .invalid-feedback Por favor, preencha este campo
+            .input-entry.mt-2
+              label Informações do WiFi
+              select.form-control(name="grant-wifi-info")
+                option(value=0) Não visualizar
+                option(value=1) Visualizar
+                option(value=2) Visualizar e editar
+            .input-entry.mt-2
+              label Informações do PPPoE
+              select.form-control(name="grant-pppoe-info")
+                option(value=0) Não visualizar
+                option(value=1) Visualizar
+                option(value=2) Visualizar e editar
+            .input-entry.mt-2
+              label Controle de Atualização de Firmware
+              select.form-control(name="grant-firmware-upgrade")
+                option(value="false") Bloquear
+                option(value="true") Permitir
+            .input-entry.mt-2
+              label Controle do Tipo de Conexão
+              select.form-control(name="grant-wan-type")
+                option(value="false") Bloquear
+                option(value="true") Permitir
+            .input-entry.mt-2
+              label Controle de Identificação do Dispositivo
+              select.form-control(name="grant-device-id")
+                option(value="false") Bloquear
+                option(value="true") Permitir
+            .input-entry.mt-2
+              label Controle de Ações no Dispositivo
+              select.form-control(name="grant-device-actions")
+                option(value="false") Bloquear
+                option(value="true") Permitir
+            .input-entry.mt-2
+              label Remoção de Registro de Dispositivo
+              select.form-control(name="grant-device-removal")
+                option(value="false") Bloquear
+                option(value="true") Permitir
+            .input-entry.mt-2
+              label Adição de Registro de Dispositivo
+              select.form-control(name="grant-device-add")
+                option(value="false") Bloquear
+                option(value="true") Permitir
+            .input-entry.mt-2
+              label Controle de Gerência de Firmwares
+              select.form-control(name="grant-firmware-manage")
+                option(value="false") Bloquear
+                option(value="true") Permitir
+            .col.text-center.mt-3
+              .form-buttons
+                button.btn.btn-lg.teal.lighten-2(type="submit")
+                  .fas.fa-check.fa-lg
+                  span &nbsp Adicionar
+  .card.mt-4.mb-4
+    h4.card-header.teal.lighten-2.white-text
+      .fas.fa-address-card.fa-lg
+      span &nbsp Classes de permissões
+    .card-body
+      h3#loading-roles.text-center
+        i.fas.fa-spinner.fa-pulse.fa-2x.grey-text
+      #roles-table-wrapper.table-responsive(style="display: none;")
+        .text-right.mb-4
+          .btn-group(role="group")
+            button.btn.btn-danger(type="button" id="btn-roles-trash")
+              .fas.fa-trash.fa-lg
+        table#roles-table.table
+          thead
+            tr
+              th.col-xs-1
+                input.checkbox(type="checkbox" id="checkall")
+              th.text-center Nome da Classe
+              th
+          tbody#roles-table-content
+
+block scripts
+  script(src='/javascripts/showroles_actions.js')

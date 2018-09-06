@@ -10,6 +10,13 @@ let check = function(input) {
 $(document).ready(function() {
   let selectedItens = [];
 
+  $('#card-header').click(function() {
+    let plus = $(this).find('.fa-plus');
+    let cross = $(this).find('.fa-times');
+    plus.removeClass('fa-plus').addClass('fa-times');
+    cross.removeClass('fa-times').addClass('fa-plus');
+  });
+
   $('#btn-user-trash').click(function(event) {
     $.ajax({
       type: 'POST',
@@ -89,6 +96,7 @@ $(document).ready(function() {
               )
             ),
             $('<td></td>').addClass('text-center').html(userObj.name),
+            $('<td></td>').addClass('text-center').html(userObj.role),
             $('<td></td>').addClass('text-center').html(
               new Date(userObj.createdAt).toLocaleString()),
             $('<td></td>').addClass('text-center').append(

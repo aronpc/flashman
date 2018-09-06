@@ -1,8 +1,8 @@
 
-var express = require('express');
-var router = express.Router();
-var userController = require('../controllers/user');
-var authController = require('../controllers/auth');
+const express = require('express');
+const authController = require('../controllers/auth');
+
+let router = express.Router();
 
 // Requests for creating and getting users
 router.route('/')

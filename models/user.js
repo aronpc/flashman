@@ -4,20 +4,21 @@ const bcrypt = require('bcrypt-nodejs');
 
 let userSchema = new mongoose.Schema({
     name: {
-        type: String,
-        unique: true,
-        required: true,
+      type: String,
+      unique: true,
+      required: true,
     },
     password: {
-        type: String,
-        unique: true,
-        required: true,
+      type: String,
+      unique: true,
+      required: true,
     },
     lastLogin: {type: Date},
     createdAt: {type: Date, default: new Date()},
     autoUpdate: {type: Boolean, default: true},
     maxElementsPerPage: {type: Number, default: 10},
     is_superuser: {type: Boolean, default: false},
+    role: {type: String, required: false},
 });
 
 // Execute before each user.save() call
