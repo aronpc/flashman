@@ -532,9 +532,15 @@ deviceListController.setDeviceReg = function(req, res) {
         genericValidate(pppoePassword, validator.validatePassword,
                         'pppoe_password');
       }
-      genericValidate(ssid, validator.validateSSID, 'ssid');
-      genericValidate(password, validator.validateWifiPassword, 'password');
-      genericValidate(channel, validator.validateChannel, 'channel');
+      if (content.hasOwnProperty('wifi_ssid')) {
+        genericValidate(ssid, validator.validateSSID, 'ssid');
+      }
+      if (content.hasOwnProperty('wifi_password')) {
+        genericValidate(password, validator.validateWifiPassword, 'password');
+      }
+      if (content.hasOwnProperty('wifi_channel')) {
+        genericValidate(channel, validator.validateChannel, 'channel');
+      }
 
       if (errors.length < 1) {
         Role.findOne({name: returnObjOrEmptyStr(req.user.role)},
