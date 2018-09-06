@@ -1,0 +1,86 @@
+extends layout
+
+block stylesheets
+  link(rel='stylesheet', href='/scripts/datatables.net-bs4/css/dataTables.bootstrap4.min.css')
+
+block content
+  .row.justify-content-center
+    .col-12.col-lg-8.mt-5
+      .card
+        h4.card-header.teal.lighten-2.white-text(id="card-header",
+                                                  data-toggle="collapse",
+                                                  data-target="#new-user-card",
+                                                  style="cursor: pointer;")
+          .row
+            .col-1
+              .fas.fa-plus
+            .col-10.text-center
+              span.card-title Adicionar novo usuário
+        .card-body.collapse.out(id="new-user-card")
+          form.needs-validation(
+            id="new-user-form",
+            method='post',
+            action='/user/new',
+            novalidate
+          )
+            .input-entry
+              label(for="new_user") Usuário
+              input.form-control(type="text",
+                                 id="new_user",
+                                 name="name",
+                                 required)
+              .invalid-feedback Por favor, preencha este campo
+            .input-entry.mt-2
+              label(for="new_pass") Senha
+              input.form-control(type="password",
+                                 id="new_pass",
+                                 name="password",
+                                 required)
+              .invalid-feedback Por favor, preencha este campo
+            .input-entry.mt-2
+              label(for="new_pass_ack") Senha novamente
+              input.form-control(type="password",
+                                 id="new_pass_ack",
+                                 name="passwordack"
+                                 oninput="check(this)",
+                                 required)
+              .invalid-feedback As senhas estão diferentes
+            .input-entry.mt-2
+              label(for="new_user_role") Classe de permissões
+              select.form-control(id="new_user_role",
+                                  name="role",
+                                  required)
+                each role in roles
+                  option(value=role.name) #{role.name}
+            .col.text-center.mt-3
+              .form-buttons
+                button.btn.btn-lg.teal.lighten-2(type="submit")
+                  .fas.fa-check.fa-lg
+                  span &nbsp Adicionar
+  .card.mt-4.mb-4
+    h4.card-header.teal.lighten-2.white-text
+      .fas.fa-users.fa-lg
+      span &nbsp Usuários
+    .card-body
+      h3#loading-users.text-center
+        i.fas.fa-spinner.fa-pulse.fa-2x.grey-text
+      #users-table-wrapper.table-responsive(style="display: none;")
+        .text-right.mb-4
+          .btn-group(role="group")
+            button.btn.btn-danger(type="button" id="btn-user-trash")
+              .fas.fa-trash.fa-lg
+        table#users-table.table
+          thead
+            tr
+              th.col-xs-1
+                input.checkbox(type="checkbox" id="checkall")
+              th.text-center Usuário
+              th.text-center Classe de permissões
+              th.text-center Data de Criação
+              th.text-center
+          tbody#users-table-content
+
+block scripts
+  script(src='/scripts/datatables.net/js/jquery.dataTables.min.js')
+  script(src='/scripts/datatables.net-bs4/js/dataTables.bootstrap4.min.js')
+  script(src='/javascripts/showusers_actions.js')

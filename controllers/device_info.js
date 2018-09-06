@@ -15,7 +15,7 @@ const returnObjOrEmptyStr = function(query) {
 
 const createRegistry = function(req, res) {
   if (typeof req.body.id == 'undefined') {
-    return res.status(400).end();;
+    return res.status(400).end(); ;
   }
 
   const validator = new Validator();
@@ -85,7 +85,7 @@ const createRegistry = function(req, res) {
     newDeviceModel.save(function(err) {
       if (err) {
         console.log('Error creating entry: ' + err);
-        return res.status(500).end();;
+        return res.status(500).end(); ;
       } else {
         return res.status(200).json({'do_update': false,
                                      'do_newprobe': true,
@@ -93,7 +93,7 @@ const createRegistry = function(req, res) {
       }
     });
   } else {
-    return res.status(500).end();;
+    return res.status(500).end(); ;
   }
 };
 
@@ -102,65 +102,69 @@ const isJSONObject = function(val) {
 };
 
 deviceInfoController.syncDate = function(req, res) {
-  // WARNING: This api is open. 
-  var dev_id;
-  if(req.body.id) {
-    if(req.body.id.trim().length == 17)
-    dev_id = req.body.id.trim().toUpperCase();
-  } else {
-    dev_id="";
-  }
-
-  var dev_ntp;
-  if(req.body.ntp) {
-    if(req.body.ntp.trim().length <= 12)
-    dev_ntp = req.body.ntp.trim();
-  } else {
-    dev_ntp="";
-  }
-
-  var dev_date;
-  if(req.body.date) {
-    if(req.body.date.trim().length <= 14)
-    dev_date = req.body.date.trim();
-  } else {
-    dev_date="";
-  }
-  
-  console.log('Request Date from '+dev_id+': NTP '+dev_ntp+' Date '+dev_date);
-
-  var parsedate = parseInt(dev_date)
-  if(!isNaN(parsedate)) {
-    var loc_date = new Date(parsedate*1000);
-    var at_date = Date.now();
-    var diff_date = at_date - loc_date;
-    // adjust router clock if difference is more than a minute ahead or more than an hour behind
-    var server_date = Math.floor(Date.now() / 1000);
-    if((diff_date < -(60*1000)) || (diff_date>(60*60*1000))) {
-      res.status(200).json({'need_update': 1, 'new_date': server_date});
-    } else {
-      res.status(200).json({'need_update': 0, 'new_date': server_date});
+  // WARNING: This api is open.
+  let devId;
+  if (req.body.id) {
+    if (req.body.id.trim().length == 17) {
+      devId = req.body.id.trim().toUpperCase();
     }
+  } else {
+    devId = '';
   }
-  else
+
+  let devNtp;
+  if (req.body.ntp) {
+    if (req.body.ntp.trim().length <= 12) {
+      devNtp = req.body.ntp.trim();
+    }
+  } else {
+    devNtp = '';
+  }
+
+  let devDate;
+  if (req.body.date) {
+    if (req.body.date.trim().length <= 14) {
+      devDate = req.body.date.trim();
+    }
+  } else {
+    devDate = '';
+  }
+
+  console.log('Request Date from '+ devId +': NTP '+ devNtp +' Date '+ devDate);
+
+  let parsedate = parseInt(devDate);
+  if (!isNaN(parsedate)) {
+    let locDate = new Date(parsedate*1000);
+    let atDate = Date.now();
+    let diffDate = atDate - locDate;
+    // adjust router clock if difference is more than
+    // a minute ahead or more than an hour behind
+    let serverDate = Math.floor(Date.now() / 1000);
+    if ((diffDate < -(60*1000)) || (diffDate>(60*60*1000))) {
+      res.status(200).json({'need_update': 1, 'new_date': serverDate});
+    } else {
+      res.status(200).json({'need_update': 0, 'new_date': serverDate});
+    }
+  } else {
     res.status(500).end();
-}
+  }
+};
 
 
 // Create new device entry or update an existing one
 deviceInfoController.updateDevicesInfo = function(req, res) {
-  if(process.env.FLM_BYPASS_SECRET == undefined) {
+  if (process.env.FLM_BYPASS_SECRET == undefined) {
     if (req.body.secret != req.app.locals.secret) {
       console.log('Error in SYN: Secret not martch!');
-      return res.status(404).end();;
+      return res.status(404).end(); ;
     }
   }
 
-  var dev_id = req.body.id.toUpperCase();
-  DeviceModel.findById(dev_id, function(err, matchedDevice) {
+  let devId = req.body.id.toUpperCase();
+  DeviceModel.findById(devId, function(err, matchedDevice) {
     if (err) {
-      console.log('Error finding device '+dev_id+': ' + err);
-      return res.status(500).end();;
+      console.log('Error finding device '+devId+': ' + err);
+      return res.status(500).end(); ;
     } else {
       if (matchedDevice == null) {
         createRegistry(req, res);
@@ -181,51 +185,58 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
                                 returnObjOrEmptyStr(req.body.model_ver).trim();
         }
 
-        var sent_version = returnObjOrEmptyStr(req.body.version).trim();
-        if(matchedDevice.version != sent_version){
-          console.log('Device '+dev_id+' changed version to: '+sent_version);
-          matchedDevice.version = sent_version;
-        }  
+        let sentVersion = returnObjOrEmptyStr(req.body.version).trim();
+        if (matchedDevice.version != sentVersion) {
+          console.log('Device '+ devId +' changed version to: '+ sentVersion);
+          matchedDevice.version = sentVersion;
+        }
 
-        var sent_ntp = returnObjOrEmptyStr(req.body.ntp).trim();
-        if(matchedDevice.ntp_status != sent_ntp){
-          console.log('Device '+dev_id+' changed NTP STATUS to: '+sent_ntp);
-          matchedDevice.ntp_status = sent_ntp;
-        } 
+        let sentNtp = returnObjOrEmptyStr(req.body.ntp).trim();
+        if (matchedDevice.ntp_status != sentNtp) {
+          console.log('Device '+ devId +' changed NTP STATUS to: '+ sentNtp);
+          matchedDevice.ntp_status = sentNtp;
+        }
 
         // Parameters *NOT* available to be modified by REST API
         matchedDevice.wan_ip = returnObjOrEmptyStr(req.body.wan_ip).trim();
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
 
-        var hard_reset = returnObjOrEmptyStr(req.body.hardreset).trim();
-        if(hard_reset == "1") {
+        let hardReset = returnObjOrEmptyStr(req.body.hardreset).trim();
+        if (hardReset == '1') {
           matchedDevice.last_hardreset = Date.now();
         }
 
-        var upgrade_info = returnObjOrEmptyStr(req.body.upgfirm).trim();
-        if(upgrade_info == "1") {
-          if(matchedDevice.do_update) {
-            console.log('Device '+dev_id+' upgraded successfuly');
+        let upgradeInfo = returnObjOrEmptyStr(req.body.upgfirm).trim();
+        if (upgradeInfo == '1') {
+          if (matchedDevice.do_update) {
+            console.log('Device '+devId+' upgraded successfuly');
             matchedDevice.do_update = false;
-          }
-          else {
-            console.log('WARNING: Device '+dev_id+' sent a upgrade ack but was not marked as upgradable!');
-          }
-        }
-
-        var sent_release = returnObjOrEmptyStr(req.body.release_id).trim();
-        if(matchedDevice.release != sent_release){
-          if(matchedDevice.do_update) {
-            console.log('Device '+dev_id+' reported release as '+sent_release+', but is expect to change to '+matchedDevice.release);
           } else {
-            console.log('Device '+dev_id+' changed release to: '+sent_release);
-            matchedDevice.release = sent_release;
+            console.log(
+              'WARNING: Device ' + devId +
+              ' sent a upgrade ack but was not marked as upgradable!'
+            );
           }
         }
 
-        var flm_updater = returnObjOrEmptyStr(req.body.flm_updater).trim();
-        if(flm_updater == "1" || flm_updater == "") {
+        let sentRelease = returnObjOrEmptyStr(req.body.release_id).trim();
+        if (matchedDevice.release != sentRelease) {
+          if (matchedDevice.do_update) {
+            console.log(
+              'Device '+ devId +' reported release as '+ sentRelease +
+              ', but is expect to change to '+ matchedDevice.release
+            );
+          } else {
+            console.log(
+              'Device ' + devId + ' changed release to: ' + sentRelease
+            );
+            matchedDevice.release = sentRelease;
+          }
+        }
+
+        let flmUpdater = returnObjOrEmptyStr(req.body.flm_updater).trim();
+        if (flmUpdater == '1' || flmUpdater == '') {
           // The syn came from flashman_updater (or old routers...)
 
           // We can disable since the device will receive the update
@@ -244,12 +255,13 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           } else {
             mqtt.anlix_message_router_reset(matchedDevice._id);
           }
-        } 
+        }
 
         matchedDevice.save();
         return res.status(200).json({
           'do_update': matchedDevice.do_update,
           'do_newprobe': false,
+          'mqtt_status': (matchedDevice._id in mqtt.clients),
           'release_id': returnObjOrEmptyStr(matchedDevice.release),
           'connection_type': returnObjOrEmptyStr(matchedDevice.connection_type),
           'pppoe_user': returnObjOrEmptyStr(matchedDevice.pppoe_user),
@@ -276,14 +288,14 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
         let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
         matchedDevice.ip = ip;
         matchedDevice.last_contact = Date.now();
-        var upg_status = returnObjOrEmptyStr(req.body.status).trim(); 
-        if(upg_status == "1"){
+        let upgStatus = returnObjOrEmptyStr(req.body.status).trim();
+        if (upgStatus == '1') {
           console.log('Device '+req.body.id+' is going on upgrade...');
-        } else if(upg_status == "0"){
+        } else if (upgStatus == '0') {
           console.log('WARNING: Device '+req.body.id+' failed in firmware check!');
-        } else if(upg_status == "2"){
+        } else if (upgStatus == '2') {
           console.log('WARNING: Device '+req.body.id+' failed to download firmware!');
-        } else if (upg_status == '') {
+        } else if (upgStatus == '') {
           console.log('WARNING: Device '+req.body.id+' ack update on an old firmware! Reseting upgrade...');
           matchedDevice.do_update = false;
         }
@@ -308,7 +320,7 @@ deviceInfoController.registerMqtt = function(req, res) {
           req.body.id + ' failed: No device found.');
         return res.status(404).json({is_registered: 0});
       }
-      if(!matchedDevice.mqtt_secret) {
+      if (!matchedDevice.mqtt_secret) {
         matchedDevice.mqtt_secret = req.body.mqttsecret;
         matchedDevice.save();
         console.log('Device ' +
@@ -318,7 +330,7 @@ deviceInfoController.registerMqtt = function(req, res) {
         // Device have a secret. Modification of secret is forbidden!
         console.log('Attempt to register MQTT secret for device ' +
           req.body.id + ' failed: Device have a secret.');
-        return res.status(404).json({is_registered: 0});        
+        return res.status(404).json({is_registered: 0});
       }
     });
   } else {
@@ -447,11 +459,11 @@ deviceInfoController.appSet = function(req, res) {
 };
 
 deviceInfoController.receiveLog = function(req, res) {
-  var id = req.headers['x-anlix-id'];
-  var boot_type = req.headers['x-anlix-logs'];
-  var envsec = req.headers['x-anlix-sec'];
+  let id = req.headers['x-anlix-id'];
+  let bootType = req.headers['x-anlix-logs'];
+  let envsec = req.headers['x-anlix-sec'];
 
-  if(process.env.FLM_BYPASS_SECRET == undefined) {
+  if (process.env.FLM_BYPASS_SECRET == undefined) {
     if (envsec != req.app.locals.secret) {
       console.log('Error Receiving Log: Secret not martch!');
       return res.status(404).json({processed: 0});
@@ -470,26 +482,24 @@ deviceInfoController.receiveLog = function(req, res) {
       return res.status(404).json({processed: 0});
     }
 
-    if (boot_type == "FIRST") {
+    if (bootType == 'FIRST') {
       matchedDevice.firstboot_log = new Buffer(req.body);
       matchedDevice.firstboot_date = Date.now();
       matchedDevice.save();
       console.log('Log Receiving for device ' +
         id + ' successfully. FIRST BOOT');
-    }
-    else if (boot_type == "BOOT") {
-      matchedDevice.lastboot_log = new Buffer(req.body)
+    } else if (bootType == 'BOOT') {
+      matchedDevice.lastboot_log = new Buffer(req.body);
       matchedDevice.lastboot_date = Date.now();
       matchedDevice.save();
       console.log('Log Receiving for device ' +
         id + ' successfully. LAST BOOT');
-    }
-    else if (boot_type == "LIVE") {
+    } else if (bootType == 'LIVE') {
 
     }
 
     return res.status(200).json({processed: 1});
   });
-}
+};
 
 module.exports = deviceInfoController;

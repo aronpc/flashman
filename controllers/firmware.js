@@ -1,6 +1,7 @@
 let User = require('../models/user');
 let Config = require('../models/config');
 let Firmware = require('../models/firmware');
+const Role = require('../models/role');
 
 const fs = require('fs');
 const unzip = require('unzip');
@@ -73,45 +74,51 @@ firmwareController.firmwares = function(req, res) {
           indexContent.message = err.message;
           return res.render('error', indexContent);
         }
-        indexContent.firmwares = firmwares.docs;
-        indexContent.page = firmwares.page;
-        indexContent.pages = firmwares.pages;
 
-        return res.render('firmware', indexContent);
+        Role.findOne({name: req.user.role}, function(err, role) {
+          if (err) {
+            console.log(err);
+            indexContent.type = 'danger';
+            indexContent.message = err.message;
+            return res.render('error', indexContent);
+          }
+          indexContent.role = role;
+          indexContent.firmwares = firmwares.docs;
+          indexContent.page = firmwares.page;
+          indexContent.pages = firmwares.pages;
+
+          return res.render('firmware', indexContent);
+        });
       });
     });
   });
 };
 
 firmwareController.delFirmware = function(req, res) {
-  if (req.user.is_superuser) {
-    Firmware.find({'_id': {$in: req.body.ids}}, function(err, firmwares) {
-      if (err || firmwares.length == 0) {
+  Firmware.find({'_id': {$in: req.body.ids}}, function(err, firmwares) {
+    if (err || firmwares.length == 0) {
+      return res.json({
+        type: 'danger',
+        message: 'Registro não encontrado ou selecionado',
+      });
+    }
+    let promises = [];
+    firmwares.forEach((firmware) => {
+      promises.push(removeFirmware(firmware));
+    });
+    Promise.all(promises).then(
+      function() {
+        return res.json({
+          type: 'success',
+          message: 'Firmware(s) deletado(s) com sucesso!',
+        });
+      }, function(errMessage) {
         return res.json({
           type: 'danger',
-          message: 'Registro não encontrado ou selecionado',
+          message: errMessage,
         });
-      }
-      let promises = [];
-      firmwares.forEach((firmware) => {
-        promises.push(removeFirmware(firmware));
-      });
-      Promise.all(promises).then(
-        function() {
-          return res.json({
-            type: 'success',
-            message: 'Firmware(s) deletado(s) com sucesso!',
-          });
-        }, function(errMessage) {
-          return res.json({
-            type: 'danger',
-            message: errMessage,
-          });
-      });
     });
-  } else {
-    return res.status(403).json({message: 'Permissão negada'});
-  }
+  });
 };
 
 firmwareController.uploadFirmware = function(req, res) {

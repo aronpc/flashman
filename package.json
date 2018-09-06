@@ -1,6 +1,6 @@
 {
   "name": "flashman",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "private": true,
   "scripts": {
     "start": "node ./bin/www"
@@ -13,7 +13,7 @@
     "githubBranch": "master"
   },
   "dependencies": {
-    "aedes": "^0.34.0",
+    "aedes": "^0.35.2",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.3",
     "bootstrap": "^4.0.0",
