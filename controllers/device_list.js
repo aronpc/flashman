@@ -152,11 +152,12 @@ deviceListController.index = function(req, res) {
 
 deviceListController.changeUpdate = function(req, res) {
   DeviceModel.findById(req.params.id, function(err, matchedDevice) {
-    if (err) {
+    if (err || !matchedDevice) {
       let indexContent = {};
       indexContent.type = 'danger';
       indexContent.message = err.message;
-      return res.render('error', indexContent);
+      return res.status(500).json({success: false,
+                                   message: 'Erro ao encontrar dispositivo'});
     }
     matchedDevice.do_update = req.body.do_update;
     matchedDevice.release = req.params.release.trim();
@@ -165,7 +166,8 @@ deviceListController.changeUpdate = function(req, res) {
         let indexContent = {};
         indexContent.type = 'danger';
         indexContent.message = err.message;
-        return res.render('error', indexContent);
+        return res.status(500).json({success: false,
+                                     message: 'Erro ao registrar atualização'});
       }
 
       if (process.env.FLM_MQTT_BROKER) {

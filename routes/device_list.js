@@ -8,11 +8,17 @@ let router = express.Router();
 // GET home page
 router.route('/').get(authController.ensureLogin(),
                       deviceListController.index);
-// POST change device update status
+
+// POST or API PUT change device update status
 router.route('/update/:id/:release').post(
   authController.ensureLogin(),
   authController.ensurePermission('grantFirmwareUpgrade'),
+  deviceListController.changeUpdate)
+                                    .put(
+  authController.ensureAPIAccess,
+  authController.ensurePermission('superuser'),
   deviceListController.changeUpdate);
+
 // POST change all device status
 router.route('/updateall').post(
   authController.ensureLogin(),
