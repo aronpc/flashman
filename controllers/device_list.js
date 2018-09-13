@@ -450,7 +450,7 @@ deviceListController.getLastBootLog = function(req, res) {
 };
 
 deviceListController.getDeviceReg = function(req, res) {
-  DeviceModel.findById(req.params.id.toUpperCase(),
+  DeviceModel.findById(req.params.id.toUpperCase()).lean().exec(
   function(err, matchedDevice) {
     if (err) {
       return res.status(500).json({success: false,
