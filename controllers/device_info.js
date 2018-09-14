@@ -101,6 +101,11 @@ const isJSONObject = function(val) {
   return val instanceof Object ? true : false;
 };
 
+const serializeBlocked = function(devices) {
+  if (!devices) return [];
+  return devices.map((device)=>device.mac + '|' + device.id);
+};
+
 deviceInfoController.syncDate = function(req, res) {
   // WARNING: This api is open.
   let devId;
@@ -269,6 +274,8 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           'wifi_ssid': returnObjOrEmptyStr(matchedDevice.wifi_ssid),
           'wifi_password': returnObjOrEmptyStr(matchedDevice.wifi_password),
           'wifi_channel': returnObjOrEmptyStr(matchedDevice.wifi_channel),
+          'app_password': returnObjOrEmptyStr(matchedDevice.app_password),
+          'blocked_devices': serializeBlocked(matchedDevice.blocked_devices),
         });
       }
     }
@@ -390,7 +397,7 @@ deviceInfoController.removeApp = function(req, res) {
   }
 };
 
-deviceInfoController.appSet = function(req, res) {
+let appSet = function(req, res, processFunction) {
   DeviceModel.findById(req.body.id, function(err, matchedDevice) {
     if (err) {
       return res.status(400).json({is_set: 0});
@@ -410,30 +417,14 @@ deviceInfoController.appSet = function(req, res) {
 
     if (isJSONObject(req.body.content)) {
       let content = req.body.content;
-      let updateParameters = false;
 
-      if (content.hasOwnProperty('pppoe_user')) {
-        matchedDevice.pppoe_user = content.pppoe_user;
-        updateParameters = true;
-      }
-      if (content.hasOwnProperty('pppoe_password')) {
-        matchedDevice.pppoe_password = content.pppoe_password;
-        updateParameters = true;
-      }
-      if (content.hasOwnProperty('wifi_ssid')) {
-        matchedDevice.wifi_ssid = content.wifi_ssid;
-        updateParameters = true;
-      }
-      if (content.hasOwnProperty('wifi_password')) {
-        matchedDevice.wifi_password = content.wifi_password;
-        updateParameters = true;
-      }
-      if (content.hasOwnProperty('wifi_channel')) {
-        matchedDevice.wifi_channel = content.wifi_channel;
-        updateParameters = true;
-      }
-      if (updateParameters) {
+      if (processFunction(content, matchedDevice)) {
         matchedDevice.do_update_parameters = true;
+      }
+
+      let hashSuffix = '';
+      if (content.hasOwnProperty('command_hash')) {
+        hashSuffix = ' ' + content.command_hash;
       }
 
       matchedDevice.save();
@@ -444,11 +435,11 @@ deviceInfoController.appSet = function(req, res) {
         client.on('connect', function() {
           client.publish(
             'flashman/update/' + matchedDevice._id,
-            '1', {qos: 1, retain: true}); // topic, msg, options
+            '1'+hashSuffix, {qos: 1, retain: true}); // topic, msg, options
           client.end();
         });
       } else {
-        mqtt.anlix_message_router_update(matchedDevice._id);
+        mqtt.anlix_message_router_update(matchedDevice._id, hashSuffix);
       }
 
       return res.status(200).json({is_set: 1});
@@ -456,6 +447,86 @@ deviceInfoController.appSet = function(req, res) {
       return res.status(500).json({is_set: 0});
     }
   });
+};
+
+deviceInfoController.appSetWifi = function(req, res) {
+  let processFunction = (content, device) => {
+    let updateParameters = false;
+    if (content.hasOwnProperty('pppoe_user')) {
+      device.pppoe_user = content.pppoe_user;
+      updateParameters = true;
+    }
+    if (content.hasOwnProperty('pppoe_password')) {
+      device.pppoe_password = content.pppoe_password;
+      updateParameters = true;
+    }
+    if (content.hasOwnProperty('wifi_ssid')) {
+      device.wifi_ssid = content.wifi_ssid;
+      updateParameters = true;
+    }
+    if (content.hasOwnProperty('wifi_password')) {
+      device.wifi_password = content.wifi_password;
+      updateParameters = true;
+    }
+    if (content.hasOwnProperty('wifi_channel')) {
+      device.wifi_channel = content.wifi_channel;
+      updateParameters = true;
+    }
+    return updateParameters;
+  };
+  appSet(req, res, processFunction);
+};
+
+deviceInfoController.appSetPassword = function(req, res) {
+  let processFunction = (content, device) => {
+    if (content.hasOwnProperty('app_password')) {
+      device.app_password = content.app_password;
+      return true;
+    }
+    return false;
+  };
+  appSet(req, res, processFunction);
+};
+
+deviceInfoController.appSetBlacklist = function(req, res) {
+  let processFunction = (content, device) => {
+    let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
+    if (content.hasOwnProperty('blacklist_device') &&
+        content.blacklist_device.hasOwnProperty('mac') &&
+        content.blacklist_device.mac.match(macRegex)) {
+      let containsMac = device.blocked_devices.reduce((acc, val)=>{
+        return acc || (val.mac === content.blacklist_device);
+      }, false);
+      if (!containsMac) {
+        device.blocked_devices.push({
+          id: content.blacklist_device.id,
+          mac: content.blacklist_device.mac,
+        });
+        return true;
+      }
+    }
+    return false;
+  };
+  appSet(req, res, processFunction);
+};
+
+deviceInfoController.appSetWhitelist = function(req, res) {
+  let processFunction = (content, device) => {
+    let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
+    if (content.hasOwnProperty('whitelist_device') &&
+        content.whitelist_device.hasOwnProperty('mac') &&
+        content.whitelist_device.mac.match(macRegex)) {
+      let filteredDevices = device.blocked_devices.filter((device)=>{
+        return device.mac !== content.whitelist_device.mac;
+      });
+      if (device.blocked_devices.length !== filteredDevices.length) {
+        device.blocked_devices = filteredDevices;
+        return true;
+      }
+    }
+    return false;
+  };
+  appSet(req, res, processFunction);
 };
 
 deviceInfoController.receiveLog = function(req, res) {

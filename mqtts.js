@@ -70,13 +70,13 @@ mqtts.authenticate = function(client, username, password, cb) {
   }
 }
 
-mqtts.anlix_message_router_update = function(id) {
+mqtts.anlix_message_router_update = function(id, hashSuffix) {
   mqtts.publish({
       cmd: 'publish',
       qos: 2,
       retain: true,
       topic: 'flashman/update/' + id,
-      payload: '1'
+      payload: (hashSuffix) ? '1'+hashSuffix : '1',
     });
   console.log('MQTT SEND Message UPDATE to '+id);
 };
