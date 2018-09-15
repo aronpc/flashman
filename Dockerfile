@@ -3,7 +3,6 @@ FROM node:6
 # APP information
 MAINTAINER anlix "guisenges@gmail.com"
 
-ENV FLM_MQTT_BROKER ""
 ENV FLM_MQTTS_DOMAIN ""
 ENV FLM_ACME_FILE ""
 ENV FLM_KEY_MQTT_FILE ""
