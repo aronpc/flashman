@@ -248,18 +248,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           matchedDevice.do_update_parameters = false;
 
           // Remove notification to device using MQTT
-          if (process.env.FLM_MQTT_BROKER) {
-            // Send notification to device using external MQTT server
-            let client = externMqtt.connect(process.env.FLM_MQTT_BROKER);
-            client.on('connect', function() {
-              client.publish(
-                'flashman/update/' + matchedDevice._id,
-                '', {qos: 1, retain: true}); // topic, msg, options
-              client.end();
-            });
-          } else {
-            mqtt.anlix_message_router_reset(matchedDevice._id);
-          }
+          mqtt.anlix_message_router_reset(matchedDevice._id);
         }
 
         matchedDevice.save();
@@ -429,18 +418,7 @@ let appSet = function(req, res, processFunction) {
 
       matchedDevice.save();
 
-      if (process.env.FLM_MQTT_BROKER) {
-        // Send notification to device using external MQTT server
-        let client = externMqtt.connect(process.env.FLM_MQTT_BROKER);
-        client.on('connect', function() {
-          client.publish(
-            'flashman/update/' + matchedDevice._id,
-            '1'+hashSuffix, {qos: 1, retain: true}); // topic, msg, options
-          client.end();
-        });
-      } else {
-        mqtt.anlix_message_router_update(matchedDevice._id, hashSuffix);
-      }
+      mqtt.anlix_message_router_update(matchedDevice._id, hashSuffix);
 
       return res.status(200).json({is_set: 1});
     } else {
