@@ -170,18 +170,7 @@ deviceListController.changeUpdate = function(req, res) {
                                      message: 'Erro ao registrar atualização'});
       }
 
-      if (process.env.FLM_MQTT_BROKER) {
-        // Send notification to device using external MQTT server
-        let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
-        client.on('connect', function() {
-          client.publish(
-            'flashman/update/' + matchedDevice._id,
-            '1', {qos: 1, retain: true}); // topic, msg, options
-          client.end();
-        });
-      } else {
-        mqtt.anlix_message_router_update(matchedDevice._id);
-      }
+      mqtt.anlix_message_router_update(matchedDevice._id);
 
       return res.status(200).json({'success': true});
     });
@@ -199,33 +188,11 @@ deviceListController.changeAllUpdates = function(req, res) {
       return res.render('error', indexContent);
     }
 
-    if (process.env.FLM_MQTT_BROKER) {
-      // Send notification to device using external MQTT server
-      let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
-      client.on('connect', function() {
-        for (let idx = 0; idx < matchedDevices.length; idx++) {
-          matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
-          matchedDevices[idx].do_update = form.do_update;
-          matchedDevices[idx].save();
-
-          client.publish(
-            'flashman/update/' + matchedDevices[idx]._id,
-            '1', {qos: 1, retain: true},
-            function(err) {
-              if (idx == (matchedDevices.length - 1)) {
-                client.end();
-              }
-            }
-          ); // topic, msg, options, callback
-        }
-      });
-    } else {
-      for (let idx = 0; idx < matchedDevices.length; idx++) {
-        matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
-        matchedDevices[idx].do_update = form.do_update;
-        matchedDevices[idx].save();
-        mqtt.anlix_message_router_update(matchedDevices[idx]._id);
-      }
+    for (let idx = 0; idx < matchedDevices.length; idx++) {
+      matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
+      matchedDevices[idx].do_update = form.do_update;
+      matchedDevices[idx].save();
+      mqtt.anlix_message_router_update(matchedDevices[idx]._id);
     }
 
     return res.status(200).json({'success': true});
@@ -450,7 +417,7 @@ deviceListController.getLastBootLog = function(req, res) {
 };
 
 deviceListController.getDeviceReg = function(req, res) {
-  DeviceModel.findById(req.params.id.toUpperCase(),
+  DeviceModel.findById(req.params.id.toUpperCase()).lean().exec(
   function(err, matchedDevice) {
     if (err) {
       return res.status(500).json({success: false,
@@ -608,18 +575,7 @@ deviceListController.setDeviceReg = function(req, res) {
             if (err) {
               console.log(err);
             }
-            if (process.env.FLM_MQTT_BROKER) {
-              // Send notification to device using external MQTT server
-              let client = extern_mqtt.connect(process.env.FLM_MQTT_BROKER);
-              client.on('connect', function() {
-                client.publish(
-                  'flashman/update/' + matchedDevice._id,
-                  '1', {qos: 1, retain: true}); // topic, msg, options
-                client.end();
-              });
-            } else {
-              mqtt.anlix_message_router_update(matchedDevice._id);
-            }
+            mqtt.anlix_message_router_update(matchedDevice._id);
 
             matchedDevice.success = true;
             return res.status(200).json(matchedDevice);
