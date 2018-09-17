@@ -229,6 +229,9 @@ $(document).ready(function() {
         $(rowObj).find('[name=grant-pppoe-info] option[value=' +
           roleObj.grantPPPoEInfo + ']')
         .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-pass-show] option[value=' +
+          roleObj.grantPassShow + ']')
+        .attr('selected', 'selected');
         $(rowObj).find('[name=grant-firmware-upgrade] option[value=' +
           roleObj.grantFirmwareUpgrade + ']')
         .attr('selected', 'selected');
