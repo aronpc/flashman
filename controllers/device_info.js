@@ -399,14 +399,24 @@ let checkUpdateParametersDone = function(id, ncalls, maxcalls) {
       resolve(!matchedDevice.do_update_parameters);
     });
   }).then((done)=>{
-    if (done) return resolve(true);
-    if (ncalls >= maxcalls) resolve(false);
-    setTimeout(()=>{
-      checkUpdateParametersDone(id, ncalls+1, maxcalls);
-    }, 1000);
+    if (done) return Promise.resolve(true);
+    if (ncalls >= maxcalls) return Promise.resolve(false);
+    return new Promise((resolve, reject)=>{
+      setTimeout(()=>{
+        checkUpdateParametersDone(id, ncalls+1, maxcalls).then(resolve, reject);
+      }, 1000);
+    });
   }, (rejectedVal)=>{
-    reject(rejectedVal);
+    return Promise.reject(rejectedVal);
   });
+};
+
+let doRollback = function(device, values) {
+  for (let key in values) {
+    if (Object.prototype.hasOwnProperty.call(values, key)) {
+      device[key] = values[key];
+    }
+  }
 };
 
 let appSet = function(req, res, processFunction) {
@@ -444,13 +454,15 @@ let appSet = function(req, res, processFunction) {
 
       mqtt.anlix_message_router_update(matchedDevice._id, hashSuffix);
 
-      checkUpdateParametersDone(matchedDevice._id, 0)
+      checkUpdateParametersDone(matchedDevice._id, 0, 10)
       .then((done)=>{
         if (done) return res.status(200).json({is_set: 1});
-        doRollback(rollbackValues);
+        doRollback(matchedDevice, rollbackValues);
+        matchedDevice.save();
         return res.status(500).json({is_set: 0});
       }, (rejectedVal)=>{
-        doRollback(rollbackValues);
+        doRollback(matchedDevice, rollbackValues);
+        matchedDevice.save();
         return res.status(500).json({is_set: 0});
       });
     } else {
@@ -506,11 +518,11 @@ deviceInfoController.appSetPassword = function(req, res) {
 
 deviceInfoController.appSetBlacklist = function(req, res) {
   let processFunction = (content, device, rollback) => {
-    rollback.blocked_devices = device.blocked_devices;
     let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
     if (content.hasOwnProperty('blacklist_device') &&
         content.blacklist_device.hasOwnProperty('mac') &&
         content.blacklist_device.mac.match(macRegex)) {
+      rollback.blocked_devices = device.blocked_devices.splice(0);
       let containsMac = device.blocked_devices.reduce((acc, val)=>{
         return acc || (val.mac === content.blacklist_device);
       }, false);
@@ -529,11 +541,11 @@ deviceInfoController.appSetBlacklist = function(req, res) {
 
 deviceInfoController.appSetWhitelist = function(req, res) {
   let processFunction = (content, device, rollback) => {
-    rollback.blocked_devices = device.blocked_devices;
     let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
     if (content.hasOwnProperty('whitelist_device') &&
         content.whitelist_device.hasOwnProperty('mac') &&
         content.whitelist_device.mac.match(macRegex)) {
+      rollback.blocked_devices = device.blocked_devices.splice(0);
       let filteredDevices = device.blocked_devices.filter((device)=>{
         return device.mac !== content.whitelist_device.mac;
       });
@@ -549,11 +561,11 @@ deviceInfoController.appSetWhitelist = function(req, res) {
 
 deviceInfoController.appSetDeviceInfo = function(req, res) {
   let processFunction = (content, device, rollback) => {
-    rollback.named_devices = device.named_devices;
     let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
     if (content.hasOwnProperty('device_configs') &&
         content.device_configs.hasOwnProperty('mac') &&
         content.device_configs.mac.match(macRegex)) {
+      rollback.named_devices = device.named_devices.splice(0);
       let namedDevices = device.named_devices;
       let newMac = true;
       namedDevices = namedDevices.map((namedDevice)=>{
