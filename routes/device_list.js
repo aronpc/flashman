@@ -16,7 +16,7 @@ router.route('/update/:id/:release').post(
   deviceListController.changeUpdate)
                                     .put(
   authController.ensureAPIAccess,
-  authController.ensurePermission('superuser'),
+  authController.ensurePermission('grantAPIAccess'),
   deviceListController.changeUpdate);
 
 // POST change all device status
@@ -36,21 +36,21 @@ router.route('/delete/:id').post(
   deviceListController.delDeviceReg)
                            .delete(
   authController.ensureAPIAccess,
-  authController.ensurePermission('superuser'),
+  authController.ensurePermission('grantAPIAccess'),
   deviceListController.delDeviceReg);
 
 // REST API - GET device registry
 router.route('/update/:id').get(authController.ensureAPIAccess,
-                                authController.ensurePermission('superuser'),
+                                authController.ensurePermission('grantAPIAccess'),
                                 deviceListController.getDeviceReg);
 // REST API - POST or PUT change device registry
 router.route('/update/:id').post(authController.ensureLogin(),
                                  deviceListController.setDeviceReg)
                            .post(authController.ensureAPIAccess,
-                                 authController.ensurePermission('superuser'),
+                                 authController.ensurePermission('grantAPIAccess'),
                                  deviceListController.setDeviceReg)
                            .put(authController.ensureAPIAccess,
-                                authController.ensurePermission('superuser'),
+                                authController.ensurePermission('grantAPIAccess'),
                                 deviceListController.setDeviceReg);
 
 // REST API - PUT create device registry
@@ -60,16 +60,16 @@ router.route('/create').post(
   deviceListController.createDeviceReg)
                        .put(
   authController.ensureAPIAccess,
-  authController.ensurePermission('superuser'),
+  authController.ensurePermission('grantAPIAccess'),
   deviceListController.createDeviceReg);
 
 // REST API - GET first boot logs
 router.route('/firstlog/:id').get(authController.ensureAPIAccess,
-                                  authController.ensurePermission('superuser'),
+                                  authController.ensurePermission('grantAPIAccess'),
                                   deviceListController.getFirstBootLog);
 // REST API - GET last boot logs
 router.route('/lastlog/:id').get(authController.ensureAPIAccess,
-                                 authController.ensurePermission('superuser'),
+                                 authController.ensurePermission('grantAPIAccess'),
                                  deviceListController.getLastBootLog);
 
 // REST API - Send a message using MQTT
@@ -79,7 +79,7 @@ router.route('/command/:id/:msg').post(
   deviceListController.sendMqttMsg)
                                  .put(
   authController.ensureAPIAccess,
-  authController.ensurePermission('superuser'),
+  authController.ensurePermission('grantAPIAccess'),
   deviceListController.sendMqttMsg);
 
 module.exports = router;

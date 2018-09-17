@@ -42,6 +42,11 @@ block content
                 option(value=1) Visualizar
                 option(value=2) Visualizar e editar
             .input-entry.mt-2
+              label Visualização de Senhas ao Editar
+              select.form-control(name="grant-pass-show")
+                option(value="false") Bloquear
+                option(value="true") Permitir
+            .input-entry.mt-2
               label Controle de Atualização de Firmware
               select.form-control(name="grant-firmware-upgrade")
                 option(value="false") Bloquear
@@ -74,6 +79,11 @@ block content
             .input-entry.mt-2
               label Controle de Gerência de Firmwares
               select.form-control(name="grant-firmware-manage")
+                option(value="false") Bloquear
+                option(value="true") Permitir
+            .input-entry.mt-2
+              label Permitir acesso a API REST
+              select.form-control(name="grant-api-access")
                 option(value="false") Bloquear
                 option(value="true") Permitir
             .col.text-center.mt-3
