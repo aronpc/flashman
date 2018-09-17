@@ -127,6 +127,15 @@ $(document).ready(function() {
                     ),
                     $('<div></div>').addClass('input-entry').append(
                       $('<label></label>')
+                      .text('Visualização de Senhas ao Editar'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-pass-show').append(
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
+                      )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
                       .text('Controle de Atualização de Firmware'),
                       $('<select></select>').addClass('form-control')
                       .attr('name', 'grant-firmware-upgrade').append(
@@ -191,6 +200,15 @@ $(document).ready(function() {
                         $('<option></option>').val(false).text('Bloquear'),
                         $('<option></option>').val(true).text('Permitir')
                       )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Permitir acesso a API REST'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-api-access').append(
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
+                      )
                     )
                   )
                 ),
@@ -220,6 +238,9 @@ $(document).ready(function() {
         $(rowObj).find('[name=grant-pppoe-info] option[value=' +
           roleObj.grantPPPoEInfo + ']')
         .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-pass-show] option[value=' +
+          roleObj.grantPassShow + ']')
+        .attr('selected', 'selected');
         $(rowObj).find('[name=grant-firmware-upgrade] option[value=' +
           roleObj.grantFirmwareUpgrade + ']')
         .attr('selected', 'selected');
@@ -240,6 +261,9 @@ $(document).ready(function() {
         .attr('selected', 'selected');
         $(rowObj).find('[name=grant-firmware-manage] option[value=' +
           roleObj.grantFirmwareManage + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-api-access] option[value=' +
+          roleObj.grantAPIAccess + ']')
         .attr('selected', 'selected');
       });
     } else {

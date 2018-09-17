@@ -5,6 +5,7 @@ let roleSchema = new mongoose.Schema({
   name: {type: String, unique: true, required: true},
   grantWifiInfo: {type: Number, required: true, default: 0},
   grantPPPoEInfo: {type: Number, required: true, default: 0},
+  grantPassShow: {type: Boolean, required: true, default: false},
   grantFirmwareUpgrade: {type: Boolean, required: true, default: false},
   grantWanType: {type: Boolean, required: true, default: false},
   grantDeviceId: {type: Boolean, required: true, default: false},
@@ -12,6 +13,7 @@ let roleSchema = new mongoose.Schema({
   grantDeviceRemoval: {type: Boolean, required: true, default: false},
   grantDeviceAdd: {type: Boolean, required: true, default: false},
   grantFirmwareManage: {type: Boolean, required: true, default: false},
+  grantAPIAccess: {type: Boolean, required: true, default: false},
 });
 
 let Role = mongoose.model('Role', roleSchema);
