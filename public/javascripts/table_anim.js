@@ -15,11 +15,11 @@ let loadDeviceInfoOnForm = function(row) {
   if (connectionType === 'DHCP') {
     $('#edit_connect_type-' + index.toString()).val('DHCP');
     $('#edit_pppoe_user-' + index.toString()).parent().hide();
-    $('#edit_pppoe_pass-' + index.toString()).parent().hide();
+    $('#edit_pppoe_pass-' + index.toString()).closest('.input-entry').hide();
   } else {
     $('#edit_connect_type-' + index.toString()).val('PPPoE');
     $('#edit_pppoe_user-' + index.toString()).parent().show();
-    $('#edit_pppoe_pass-' + index.toString()).parent().show();
+    $('#edit_pppoe_pass-' + index.toString()).closest('.input-entry').show();
   }
 
   $('#edit_connect_type-' + index.toString()).change(function() {
@@ -27,10 +27,10 @@ let loadDeviceInfoOnForm = function(row) {
     $('#edit_connect_type-' + index.toString()).addClass('orange lighten-4');
     if ($('#edit_connect_type-' + index.toString()).val() === 'PPPoE') {
       $('#edit_pppoe_user-' + index.toString()).parent().show();
-      $('#edit_pppoe_pass-' + index.toString()).parent().show();
+      $('#edit_pppoe_pass-' + index.toString()).closest('.input-entry').show();
     } else {
       $('#edit_pppoe_user-' + index.toString()).parent().hide();
-      $('#edit_pppoe_pass-' + index.toString()).parent().hide();
+      $('#edit_pppoe_pass-' + index.toString()).closest('.input-entry').hide();
     }
   });
 

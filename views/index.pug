@@ -399,13 +399,18 @@ block content
                                 // Wifi password
                                 .input-entry
                                   label(for="edit_wifi_pass-" + (index + 1)) Senha do WiFi
-                                  input.form-control(
-                                    type="text",
-                                    id="edit_wifi_pass-" + (index + 1),
-                                    maxlength="64",
-                                    disabled=((superuser || role.grantWifiInfo > 1) ? false : true)
-                                  )
-                                  .invalid-feedback
+                                  .input-group
+                                    input.form-control(
+                                      type="password",
+                                      id="edit_wifi_pass-" + (index + 1),
+                                      maxlength="64",
+                                      disabled=((superuser || role.grantWifiInfo > 1) ? false : true)
+                                    )
+                                    .input-group-append
+                                      .input-group-text.teal.lighten-2
+                                        a.toggle-pass
+                                          .fas.fa-eye-slash.white-text
+                                    .invalid-feedback
                             .col-3
                               if (superuser || role.grantPPPoEInfo >= 1)
                                 // PPPoE user
@@ -422,13 +427,18 @@ block content
                                 // PPPoE password
                                 .input-entry
                                   label(for="edit_pppoe_pass-" + (index + 1)) Senha PPPoE
-                                  input.form-control(
-                                    type="text",
-                                    id="edit_pppoe_pass-" + (index + 1),
-                                    maxlength="64",
-                                    disabled=((superuser || role.grantPPPoEInfo > 1) ? false : true)
-                                  )
-                                  .invalid-feedback
+                                  .input-group
+                                    input.form-control(
+                                      type="password",
+                                      id="edit_pppoe_pass-" + (index + 1),
+                                      maxlength="64",
+                                      disabled=((superuser || role.grantPPPoEInfo > 1) ? false : true)
+                                    )
+                                    .input-group-append
+                                      .input-group-text.teal.lighten-2
+                                        a.toggle-pass
+                                          .fas.fa-eye-slash.white-text
+                                    .invalid-feedback
                                 br
                           .row(style="margin: 0;")
                             // Buttons

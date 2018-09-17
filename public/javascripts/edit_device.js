@@ -178,4 +178,15 @@ $(document).ready(function() {
       },
     });
   });
+
+  $('.toggle-pass').click(function(event) {
+    let inputField = $(event.target).closest('.input-group').find('input');
+    if (inputField.attr('type') == 'text') {
+      inputField.attr('type', 'password');
+      $(this).children().removeClass('fa-eye').addClass('fa-eye-slash');
+    } else {
+      inputField.attr('type', 'text');
+      $(this).children().removeClass('fa-eye-slash').addClass('fa-eye');
+    }
+  });
 });
