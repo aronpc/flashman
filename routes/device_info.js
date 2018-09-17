@@ -17,5 +17,6 @@ router.route('/app/set/wifi').post(deviceInfoController.appSetWifi);
 router.route('/app/set/password').post(deviceInfoController.appSetPassword);
 router.route('/app/set/blacklist').post(deviceInfoController.appSetBlacklist);
 router.route('/app/set/whitelist').post(deviceInfoController.appSetWhitelist);
+router.route('/app/set/editdevice').post(deviceInfoController.appSetDeviceInfo);
 
 module.exports = router;

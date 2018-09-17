@@ -106,6 +106,11 @@ const serializeBlocked = function(devices) {
   return devices.map((device)=>device.mac + '|' + device.id);
 };
 
+const serializeNamed = function(devices) {
+  if (!devices) return [];
+  return devices.map((device)=>device.mac + '|' + device.name);
+};
+
 deviceInfoController.syncDate = function(req, res) {
   // WARNING: This api is open.
   let devId;
@@ -265,6 +270,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           'wifi_channel': returnObjOrEmptyStr(matchedDevice.wifi_channel),
           'app_password': returnObjOrEmptyStr(matchedDevice.app_password),
           'blocked_devices': serializeBlocked(matchedDevice.blocked_devices),
+          'named_devices': serializeNamed(matchedDevice.named_devices),
         });
       }
     }
@@ -386,6 +392,23 @@ deviceInfoController.removeApp = function(req, res) {
   }
 };
 
+let checkUpdateParametersDone = function(id, ncalls, maxcalls) {
+  return new Promise((resolve, reject)=>{
+    DeviceModel.findById(id, (err, matchedDevice)=>{
+      if (err || !matchedDevice) return reject();
+      resolve(!matchedDevice.do_update_parameters);
+    });
+  }).then((done)=>{
+    if (done) return resolve(true);
+    if (ncalls >= maxcalls) resolve(false);
+    setTimeout(()=>{
+      checkUpdateParametersDone(id, ncalls+1, maxcalls);
+    }, 1000);
+  }, (rejectedVal)=>{
+    reject(rejectedVal);
+  });
+};
+
 let appSet = function(req, res, processFunction) {
   DeviceModel.findById(req.body.id, function(err, matchedDevice) {
     if (err) {
@@ -406,8 +429,9 @@ let appSet = function(req, res, processFunction) {
 
     if (isJSONObject(req.body.content)) {
       let content = req.body.content;
+      let rollbackValues = {};
 
-      if (processFunction(content, matchedDevice)) {
+      if (processFunction(content, matchedDevice, rollbackValues)) {
         matchedDevice.do_update_parameters = true;
       }
 
@@ -420,7 +444,15 @@ let appSet = function(req, res, processFunction) {
 
       mqtt.anlix_message_router_update(matchedDevice._id, hashSuffix);
 
-      return res.status(200).json({is_set: 1});
+      checkUpdateParametersDone(matchedDevice._id, 0)
+      .then((done)=>{
+        if (done) return res.status(200).json({is_set: 1});
+        doRollback(rollbackValues);
+        return res.status(500).json({is_set: 0});
+      }, (rejectedVal)=>{
+        doRollback(rollbackValues);
+        return res.status(500).json({is_set: 0});
+      });
     } else {
       return res.status(500).json({is_set: 0});
     }
@@ -428,25 +460,30 @@ let appSet = function(req, res, processFunction) {
 };
 
 deviceInfoController.appSetWifi = function(req, res) {
-  let processFunction = (content, device) => {
+  let processFunction = (content, device, rollback) => {
     let updateParameters = false;
     if (content.hasOwnProperty('pppoe_user')) {
+      rollback.pppoe_user = device.pppoe_user;
       device.pppoe_user = content.pppoe_user;
       updateParameters = true;
     }
     if (content.hasOwnProperty('pppoe_password')) {
+      rollback.pppoe_password = device.pppoe_password;
       device.pppoe_password = content.pppoe_password;
       updateParameters = true;
     }
     if (content.hasOwnProperty('wifi_ssid')) {
+      rollback.wifi_ssid = device.wifi_ssid;
       device.wifi_ssid = content.wifi_ssid;
       updateParameters = true;
     }
     if (content.hasOwnProperty('wifi_password')) {
+      rollback.wifi_password = device.wifi_password;
       device.wifi_password = content.wifi_password;
       updateParameters = true;
     }
     if (content.hasOwnProperty('wifi_channel')) {
+      rollback.wifi_channel = device.wifi_channel;
       device.wifi_channel = content.wifi_channel;
       updateParameters = true;
     }
@@ -456,8 +493,9 @@ deviceInfoController.appSetWifi = function(req, res) {
 };
 
 deviceInfoController.appSetPassword = function(req, res) {
-  let processFunction = (content, device) => {
+  let processFunction = (content, device, rollback) => {
     if (content.hasOwnProperty('app_password')) {
+      rollback.app_password = device.app_password;
       device.app_password = content.app_password;
       return true;
     }
@@ -467,7 +505,8 @@ deviceInfoController.appSetPassword = function(req, res) {
 };
 
 deviceInfoController.appSetBlacklist = function(req, res) {
-  let processFunction = (content, device) => {
+  let processFunction = (content, device, rollback) => {
+    rollback.blocked_devices = device.blocked_devices;
     let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
     if (content.hasOwnProperty('blacklist_device') &&
         content.blacklist_device.hasOwnProperty('mac') &&
@@ -489,7 +528,8 @@ deviceInfoController.appSetBlacklist = function(req, res) {
 };
 
 deviceInfoController.appSetWhitelist = function(req, res) {
-  let processFunction = (content, device) => {
+  let processFunction = (content, device, rollback) => {
+    rollback.blocked_devices = device.blocked_devices;
     let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
     if (content.hasOwnProperty('whitelist_device') &&
         content.whitelist_device.hasOwnProperty('mac') &&
@@ -501,6 +541,35 @@ deviceInfoController.appSetWhitelist = function(req, res) {
         device.blocked_devices = filteredDevices;
         return true;
       }
+    }
+    return false;
+  };
+  appSet(req, res, processFunction);
+};
+
+deviceInfoController.appSetDeviceInfo = function(req, res) {
+  let processFunction = (content, device, rollback) => {
+    rollback.named_devices = device.named_devices;
+    let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
+    if (content.hasOwnProperty('device_configs') &&
+        content.device_configs.hasOwnProperty('mac') &&
+        content.device_configs.mac.match(macRegex)) {
+      let namedDevices = device.named_devices;
+      let newMac = true;
+      namedDevices = namedDevices.map((namedDevice)=>{
+        if (namedDevice.mac !== content.device_configs.mac) return namedDevice;
+        newMac = false;
+        namedDevice.name = content.device_configs.name;
+        return namedDevice;
+      });
+      if (newMac) {
+        namedDevices.push({
+          name: content.device_configs.name,
+          mac: content.device_configs.mac,
+        });
+      }
+      device.named_devices = namedDevices;
+      return true;
     }
     return false;
   };
