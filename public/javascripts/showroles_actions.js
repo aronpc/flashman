@@ -200,6 +200,15 @@ $(document).ready(function() {
                         $('<option></option>').val(false).text('Bloquear'),
                         $('<option></option>').val(true).text('Permitir')
                       )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Permitir acesso a API REST'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-api-access').append(
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
+                      )
                     )
                   )
                 ),
@@ -252,6 +261,9 @@ $(document).ready(function() {
         .attr('selected', 'selected');
         $(rowObj).find('[name=grant-firmware-manage] option[value=' +
           roleObj.grantFirmwareManage + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-api-access] option[value=' +
+          roleObj.grantAPIAccess + ']')
         .attr('selected', 'selected');
       });
     } else {

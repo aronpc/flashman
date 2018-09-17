@@ -81,6 +81,11 @@ block content
               select.form-control(name="grant-firmware-manage")
                 option(value="false") Bloquear
                 option(value="true") Permitir
+            .input-entry.mt-2
+              label Permitir acesso a API REST
+              select.form-control(name="grant-api-access")
+                option(value="false") Bloquear
+                option(value="true") Permitir
             .col.text-center.mt-3
               .form-buttons
                 button.btn.btn-lg.teal.lighten-2(type="submit")

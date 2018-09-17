@@ -13,6 +13,7 @@ let roleSchema = new mongoose.Schema({
   grantDeviceRemoval: {type: Boolean, required: true, default: false},
   grantDeviceAdd: {type: Boolean, required: true, default: false},
   grantFirmwareManage: {type: Boolean, required: true, default: false},
+  grantAPIAccess: {type: Boolean, required: true, default: false},
 });
 
 let Role = mongoose.model('Role', roleSchema);
