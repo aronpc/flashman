@@ -69,6 +69,7 @@ userController.postRole = function(req, res) {
     name: req.body.name,
     grantWifiInfo: parseInt(req.body['grant-wifi-info']),
     grantPPPoEInfo: parseInt(req.body['grant-pppoe-info']),
+    grantPassShow: req.body['grant-pass-show'],
     grantFirmwareUpgrade: req.body['grant-firmware-upgrade'],
     grantWanType: req.body['grant-wan-type'],
     grantDeviceId: req.body['grant-device-id'],
@@ -182,6 +183,7 @@ userController.editRole = function(req, res) {
     }
     role.grantWifiInfo = parseInt(req.body['grant-wifi-info']);
     role.grantPPPoEInfo = parseInt(req.body['grant-pppoe-info']);
+    role.grantPassShow = req.body['grant-pass-show'];
     role.grantFirmwareUpgrade = req.body['grant-firmware-upgrade'];
     role.grantWanType = req.body['grant-wan-type'];
     role.grantDeviceId = req.body['grant-device-id'];

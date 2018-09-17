@@ -127,6 +127,15 @@ $(document).ready(function() {
                     ),
                     $('<div></div>').addClass('input-entry').append(
                       $('<label></label>')
+                      .text('Visualização de Senhas ao Editar'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-pass-show').append(
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
+                      )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
                       .text('Controle de Atualização de Firmware'),
                       $('<select></select>').addClass('form-control')
                       .attr('name', 'grant-firmware-upgrade').append(
