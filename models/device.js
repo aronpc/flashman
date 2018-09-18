@@ -15,6 +15,8 @@ let deviceSchema = new Schema({
   wifi_ssid: String,
   wifi_password: String,
   wifi_channel: String,
+  app_password: String,
+  blocked_devices: [{id: String, mac: String}],
   wan_ip: String,
   ip: String,
   ntp_status: String,

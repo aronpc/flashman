@@ -52,6 +52,7 @@ Role.find({}, function(err, roles) {
       name: 'Gerente',
       grantWifiInfo: 2,
       grantPPPoEInfo: 2,
+      grantPassShow: true,
       grantFirmwareUpgrade: true,
       grantWanType: true,
       grantDeviceId: true,
@@ -59,6 +60,7 @@ Role.find({}, function(err, roles) {
       grantDeviceRemoval: true,
       grantDeviceAdd: true,
       grantFirmwareManage: true,
+      grantAPIAccess: false,
     });
     managerRole.save();
   }
