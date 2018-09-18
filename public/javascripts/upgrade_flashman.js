@@ -80,41 +80,32 @@ let checkUpdateFlashman = function() {
   });
 };
 
-let configFlashman = function() {
+$(document).ready(function() {
+  $('.update').click(checkUpdateFlashman);
+
+  $('#config-flashman-form').submit(function(event) {
+    if ($(this)[0].checkValidity()) {
+      $.post($(this).attr('action'), $(this).serialize(), 'json')
+        .done(function(res) {
+          displayAlertMsg(res);
+        })
+        .fail(function(jqXHR, textStatus, errorThrown) {
+          displayAlertMsg(JSON.parse(jqXHR.responseText));
+        });
+    } else {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    $(this).addClass('was-validated');
+    return false;
+  });
+
   $.ajax({
     type: 'GET',
     url: '/upgrade/config',
     success: function(resp) {
-      swal({
-        title: 'Configurações',
-        input: 'checkbox',
-        inputValue: (resp.auto === true) ? true : false, // needed since can be null
-        inputPlaceholder: 'Deixar que o Flashman se atualize automaticamente',
-        confirmButtonText: 'Salvar Alterações',
-        confirmButtonColor: '#4db6ac',
-      }).then(function(result) {
-        if ('value' in result) {
-          $.ajax({
-            type: 'POST',
-            url: '/upgrade/config',
-            dataType: 'json',
-            data: JSON.stringify({auto: result.value}),
-            contentType: 'application/json',
-            success: function(resp) {
-              swal({
-                type: 'success',
-                title: 'Alterações feitas com sucesso',
-                confirmButtonColor: '#4db6ac',
-              });
-            },
-          });
-        }
-      });
+      $('#autoupdate').prop('checked', resp.auto).change();
+      $('#minlength-pass-pppoe').val(resp.minlengthpasspppoe);
     },
   });
-};
-
-$(document).ready(function() {
-  $('.update').click(checkUpdateFlashman);
-  $('.config').click(configFlashman);
 });

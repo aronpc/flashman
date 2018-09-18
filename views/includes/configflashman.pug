@@ -1,0 +1,38 @@
+
+#config-flashman-menu.modal.fade(tabindex="-1", role="dialog")
+  .modal-dialog.modal-notify.modal-teal(role="document")
+    .modal-content
+      .modal-header
+        p.heading.lead
+          span.fas.fa-cog.fa-lg
+          strong &nbsp; Configurações
+
+        button.close(type="button", data-dismiss="modal")
+          span.white-text &times;
+      .modal-body
+        form#config-flashman-form.needs-validation(method="post",
+                                                   action="/upgrade/config",
+                                                   novalidate)
+          .row
+            .col
+              .input-entry
+                label Número mínimo de caracteres da senha PPPoE
+                input.form-control(type="number",
+                                   name="minlength-pass-pppoe",
+                                   id="minlength-pass-pppoe")
+                .invalid-feedback
+              br
+              .custom-control.custom-checkbox
+                input.custom-control-input(
+                  name="autoupdate",
+                  type="checkbox",
+                  id="autoupdate"
+                )
+                label.custom-control-label(for="autoupdate")
+                  | Deixar que o Flashman se atualize automaticamente
+                .invalid-feedback
+          .row.mt-3
+            .col.text-center
+              button.btn.teal.lighten-2(type="submit")
+                .fas.fa-check.fa-lg
+                span &nbsp Salvar

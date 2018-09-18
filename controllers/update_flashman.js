@@ -216,21 +216,40 @@ updateController.apiForceUpdate = function(req, res) {
 updateController.getAutoConfig = function(req, res) {
   Config.findOne({is_default: true}, function(err, matchedConfig) {
     if (!err && matchedConfig) {
-      return res.status(200).json({auto: matchedConfig.autoUpdate});
+      return res.status(200).json({
+        auto: matchedConfig.autoUpdate,
+        minlengthpasspppoe: matchedConfig.pppoePassLength,
+      });
     } else {
-      return res.status(200).json({auto: null});
+      return res.status(200).json({
+        auto: null,
+        minlengthpasspppoe: 8,
+      });
     }
   });
 };
 
 updateController.setAutoConfig = function(req, res) {
+  console.log(req.body);
   Config.findOne({is_default: true}, function(err, matchedConfig) {
     if (!err && matchedConfig) {
-      matchedConfig.autoUpdate = req.body.auto;
-      matchedConfig.save();
-      return res.status(200).json({auto: req.body.auto});
+      matchedConfig.autoUpdate = req.body.autoupdate == 'on' ? true : false;
+      matchedConfig.pppoePassLength = parseInt(req.body['minlength-pass-pppoe']);
+      matchedConfig.save(function(err) {
+        if (err) {
+          console.log(err);
+        }
+        return res.json({
+          type: 'success',
+          message: 'Editado com sucesso!',
+        });
+      });
     } else {
-      return res.status(200).json({auto: null});
+      console.log(err);
+      return res.json({
+        type: 'danger',
+        message: 'Erro ao editar',
+      });
     }
   });
 };
