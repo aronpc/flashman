@@ -28,6 +28,7 @@ Config.findOne({is_default: true}, function(err, matchedConfig) {
     let newConfig = new Config({
       is_default: true,
       autoUpdate: true,
+      pppoePassLength: 8,
     });
     newConfig.save();
   }

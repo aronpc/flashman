@@ -139,7 +139,8 @@ block content
                 label(for="new_pppoe_pass") Senha PPPoE
                 input.form-control(type="text",
                                    id="new_pppoe_pass",
-                                   maxlength="64")
+                                   maxlength="64",
+                                   data-minlength-pass-pppoe=minlengthpasspppoe)
                 .invalid-feedback
                 br
               .col.text-center
@@ -301,6 +302,7 @@ block content
                         (superuser || role.grantWifiInfo >= 1) ? "true" : "false"),
                       data-validate-pppoe=(
                         (superuser || role.grantPPPoEInfo >= 1) ? "true" : "false"),
+                      data-minlength-pass-pppoe=minlengthpasspppoe,
                       style="display: none;"
                     )
                       td(colspan=9).grey.lighten-5
