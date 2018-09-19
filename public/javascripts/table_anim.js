@@ -65,11 +65,15 @@ let downloadCSV = function(csv, filename) {
 let exportTableToCSV = function(filename) {
   let csv = [];
   let rows = document.querySelectorAll('table tr.csv-export');
+  let ignoreFieldsList = ['index', 'passShow'];
 
   for (let i = 0; i < rows.length; i++) {
     let row = [];
     for (let data in rows[i].dataset) {
-      if (data != 'index') {
+      if (data == 'passShow' && rows[i].dataset[data] == 'false') {
+        ignoreFieldsList.push('pass', 'wifiPass');
+      }
+      if (!ignoreFieldsList.includes(data)) {
         if (rows[i].dataset[data]) {
           row.push(rows[i].dataset[data]);
         } else {
