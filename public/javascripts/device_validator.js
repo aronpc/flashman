@@ -47,13 +47,16 @@
       return ret;
     };
 
-    Validator.prototype.validatePassword = function(pass) {
+    Validator.prototype.validatePassword = function(pass, minlength) {
+      if (typeof(minlength) === 'undefined') {
+        minlength = 8;
+      }
       const messages = [
-        'Este campo deve ter no mínimo 8 caracteres',
+        'Este campo deve ter no mínimo ' + minlength + ' caracteres',
         'Este campo não pode ter mais de 64 caracteres',
         'Letras com acento, cedilha, e alguns caracteres especiais não são aceitos',
       ];
-      let ret = validateRegex(pass, 8, 64, /^[a-zA-Z0-9\-\_\#\!\@\$\%\&\*\=\+\?]+$/);
+      let ret = validateRegex(pass, minlength, 64, /^[a-zA-Z0-9\-\_\#\!\@\$\%\&\*\=\+\?]+$/);
       ret.err = ret.err.map((ind) => messages[ind]);
       return ret;
     };

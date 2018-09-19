@@ -139,7 +139,8 @@ block content
                 label(for="new_pppoe_pass") Senha PPPoE
                 input.form-control(type="text",
                                    id="new_pppoe_pass",
-                                   maxlength="64")
+                                   maxlength="64",
+                                   data-minlength-pass-pppoe=minlengthpasspppoe)
                 .invalid-feedback
                 br
               .col.text-center
@@ -171,7 +172,7 @@ block content
             .table-responsive
               table.table.devices-table
                 thead
-                  tr.csv-export(data-deviceid="Identificação",
+                  tr.csv-export(data-deviceid="Endereço MAC",
                      data-connection-type="Tipo de Conexão WAN",
                      data-user="Usuário PPPoE",
                      data-pass="Senha PPPoE",
@@ -197,7 +198,7 @@ block content
                         title="-Verde: Online\n-Vermelho: Sem resposta imediata\n-Cinza: Sem resposta por mais de 1 hora",
                       )
                     th.text-center Usuário PPPoE
-                    th.text-center Identificação
+                    th.text-center Endereço MAC
                     th.text-center IP WAN
                     th.text-center IP Público
                     th.text-center Release
@@ -301,6 +302,7 @@ block content
                         (superuser || role.grantWifiInfo >= 1) ? "true" : "false"),
                       data-validate-pppoe=(
                         (superuser || role.grantPPPoEInfo >= 1) ? "true" : "false"),
+                      data-minlength-pass-pppoe=minlengthpasspppoe,
                       style="display: none;"
                     )
                       td(colspan=9).grey.lighten-5
