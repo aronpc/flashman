@@ -80,26 +80,38 @@ let checkUpdateFlashman = function() {
   });
 };
 
+let configFlashman = function(event) {
+  if ($(this)[0].checkValidity()) {
+    $.post($(this).attr('action'), $(this).serialize(), 'json')
+      .done(function(res) {
+        $('#config-flashman-menu').modal('hide').on('hidden.bs.modal',
+          function() {
+            displayAlertMsg(res);
+            $('#config-flashman-menu').off('hidden.bs.modal');
+          }
+        );
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+        $('#config-flashman-menu').modal('hide').on('hidden.bs.modal',
+          function() {
+            displayAlertMsg(JSON.parse(jqXHR.responseText));
+            $('#config-flashman-menu').off('hidden.bs.modal');
+          }
+        );
+      });
+  } else {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  $(this).addClass('was-validated');
+  return false;
+};
+
 $(document).ready(function() {
   $('.update').click(checkUpdateFlashman);
+  $('#config-flashman-form').submit(configFlashman);
 
-  $('#config-flashman-form').submit(function(event) {
-    if ($(this)[0].checkValidity()) {
-      $.post($(this).attr('action'), $(this).serialize(), 'json')
-        .done(function(res) {
-          displayAlertMsg(res);
-        })
-        .fail(function(jqXHR, textStatus, errorThrown) {
-          displayAlertMsg(JSON.parse(jqXHR.responseText));
-        });
-    } else {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-    $(this).addClass('was-validated');
-    return false;
-  });
-
+  // Load configuration options
   $.ajax({
     type: 'GET',
     url: '/upgrade/config',

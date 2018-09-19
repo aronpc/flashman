@@ -238,17 +238,21 @@ updateController.setAutoConfig = function(req, res) {
       matchedConfig.save(function(err) {
         if (err) {
           console.log(err);
+          return res.status(500).json({
+            type: 'danger',
+            message: 'Erro ao editar configuração',
+          });
         }
         return res.json({
           type: 'success',
-          message: 'Editado com sucesso!',
+          message: 'Salvo com sucesso!',
         });
       });
     } else {
       console.log(err);
-      return res.json({
+      return res.status(500).json({
         type: 'danger',
-        message: 'Erro ao editar',
+        message: 'Erro ao encontrar configuração base',
       });
     }
   });

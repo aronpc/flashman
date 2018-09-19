@@ -52,7 +52,7 @@
         minlength = 8;
       }
       const messages = [
-        'Este campo deve ter no mínimo 8 caracteres',
+        'Este campo deve ter no mínimo ' + minlength + ' caracteres',
         'Este campo não pode ter mais de 64 caracteres',
         'Letras com acento, cedilha, e alguns caracteres especiais não são aceitos',
       ];

@@ -19,8 +19,11 @@
                 label Número mínimo de caracteres da senha PPPoE
                 input.form-control(type="number",
                                    name="minlength-pass-pppoe",
-                                   id="minlength-pass-pppoe")
-                .invalid-feedback
+                                   id="minlength-pass-pppoe",
+                                   min=0,
+                                   max=64,
+                                   required)
+                .invalid-feedback Insira um número entre 0 e 64
               br
               .custom-control.custom-checkbox
                 input.custom-control-input(
