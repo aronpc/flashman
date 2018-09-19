@@ -371,6 +371,33 @@ deviceInfoController.registerApp = function(req, res) {
   }
 };
 
+deviceInfoController.registerPassword = function(req, res) {
+  if (req.body.secret == req.app.locals.secret) {
+    DeviceModel.findById(req.body.id, function(err, matchedDevice) {
+      if (err) {
+        return res.status(400).json({is_registered: 0});
+      }
+      if (!matchedDevice) {
+        return res.status(404).json({is_registered: 0});
+      }
+      let appObj = matchedDevice.apps.filter(function(app) {
+        return app.id === req.body.app_id;
+      });
+      if (appObj.length == 0) {
+        return res.status(404).json({is_set: 0});
+      }
+      if (appObj[0].secret != req.body.app_secret) {
+        return res.status(403).json({is_set: 0});
+      }
+      matchedDevice.app_password = req.body.router_passwd;
+      matchedDevice.save();
+      return res.status(200).json({is_registered: 1});
+    });
+  } else {
+    return res.status(401).json({is_registered: 0});
+  }
+};
+
 deviceInfoController.removeApp = function(req, res) {
   if (req.body.secret == req.app.locals.secret) {
     DeviceModel.findById(req.body.id, function(err, matchedDevice) {
