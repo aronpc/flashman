@@ -492,6 +492,7 @@ block content
 
 block scripts
   script(src='/scripts/tags-input/tags-input.js')
+  script(src='/socket.io/socket.io.js')
   script(src='/javascripts/device_validator.js')
   script(src='/javascripts/new_device.js')
   script(src='/javascripts/edit_device.js')
@@ -500,6 +501,9 @@ block scripts
   script.
     (function() {
       'use strict';
+
+      var socket = io();
+
       window.addEventListener('load', function() {
         var forms = document.getElementsByClassName('needs-validation');
         // Loop over them and prevent submission

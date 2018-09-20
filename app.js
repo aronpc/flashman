@@ -10,6 +10,7 @@ const schedule = require('node-schedule');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const fileUpload = require('express-fileupload');
+const sio = require('./sio');
 let session = require('express-session');
 
 let updater = require('./controllers/update_flashman');
@@ -106,11 +107,15 @@ app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 app.use(logger(':req[x-forwarded-for] - :method :url HTTP/:http-version :status :res[content-length] - :response-time ms'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({
+
+var sess_param = session({
   secret: app.locals.secret,
   resave: false,
   saveUninitialized: false,
-}));
+});
+
+app.use(sess_param);
+sio.anlix_bindsession(sess_param);
 
 // create static routes for public libraries
 app.use('/scripts/jquery',
