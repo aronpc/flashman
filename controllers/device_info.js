@@ -1,5 +1,6 @@
 
 const DeviceModel = require('../models/device');
+const Config = require('../models/config');
 const mqtt = require('../mqtts');
 const externMqtt = require('mqtt');
 const Validator = require('../public/javascripts/device_validator');
@@ -36,8 +37,8 @@ const createRegistry = function(req, res) {
   let channel = returnObjOrEmptyStr(req.body.wifi_channel).trim();
   let pppoe = (pppoeUser !== '' && pppoePassword !== '');
 
-  let genericValidate = function(field, func, key) {
-    let validField = func(field);
+  let genericValidate = function(field, func, key, minlength) {
+    let validField = func(field, minlength);
     if (!validField.valid) {
       validField.err.forEach(function(error) {
         let obj = {};
@@ -47,54 +48,61 @@ const createRegistry = function(req, res) {
     }
   };
 
-  // Validate fields
-  genericValidate(macAddr, validator.validateMac, 'mac');
-  if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
-      connectionType != '') {
-    return res.status(500);
-  }
-  if (pppoe) {
-    genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
-    genericValidate(pppoePassword, validator.validatePassword,
-                    'pppoe_password');
-  }
-  genericValidate(ssid, validator.validateSSID, 'ssid');
-  genericValidate(password, validator.validateWifiPassword, 'password');
-  genericValidate(channel, validator.validateChannel, 'channel');
-
-  if (errors.length < 1) {
-    newDeviceModel = new DeviceModel({
-      '_id': macAddr,
-      'model': model,
-      'version': version,
-      'release': release,
-      'pppoe_user': pppoeUser,
-      'pppoe_password': pppoePassword,
-      'wifi_ssid': ssid,
-      'wifi_password': password,
-      'wifi_channel': channel,
-      'wan_ip': wanIp,
-      'ip': ip,
-      'last_contact': Date.now(),
-      'do_update': false,
-      'do_update_parameters': false,
-    });
-    if (connectionType != '') {
-      newDeviceModel.connection_type = connectionType;
+  Config.findOne({is_default: true}, function(err, matchedConfig) {
+    if (err || !matchedConfig) {
+      console.log('Error creating entry: ' + err);
+      return res.status(500).end();
     }
-    newDeviceModel.save(function(err) {
-      if (err) {
-        console.log('Error creating entry: ' + err);
-        return res.status(500).end(); ;
-      } else {
-        return res.status(200).json({'do_update': false,
-                                     'do_newprobe': true,
-                                     'release_id:': release});
+
+    // Validate fields
+    genericValidate(macAddr, validator.validateMac, 'mac');
+    if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
+        connectionType != '') {
+      return res.status(500);
+    }
+    if (pppoe) {
+      genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
+      genericValidate(pppoePassword, validator.validatePassword,
+                      'pppoe_password', matchedConfig.pppoePassLength);
+    }
+    genericValidate(ssid, validator.validateSSID, 'ssid');
+    genericValidate(password, validator.validateWifiPassword, 'password');
+    genericValidate(channel, validator.validateChannel, 'channel');
+
+    if (errors.length < 1) {
+      newDeviceModel = new DeviceModel({
+        '_id': macAddr,
+        'model': model,
+        'version': version,
+        'release': release,
+        'pppoe_user': pppoeUser,
+        'pppoe_password': pppoePassword,
+        'wifi_ssid': ssid,
+        'wifi_password': password,
+        'wifi_channel': channel,
+        'wan_ip': wanIp,
+        'ip': ip,
+        'last_contact': Date.now(),
+        'do_update': false,
+        'do_update_parameters': false,
+      });
+      if (connectionType != '') {
+        newDeviceModel.connection_type = connectionType;
       }
-    });
-  } else {
-    return res.status(500).end(); ;
-  }
+      newDeviceModel.save(function(err) {
+        if (err) {
+          console.log('Error creating entry: ' + err);
+          return res.status(500).end();
+        } else {
+          return res.status(200).json({'do_update': false,
+                                       'do_newprobe': true,
+                                       'release_id:': release});
+        }
+      });
+    } else {
+      return res.status(500).end(); ;
+    }
+  });
 };
 
 const isJSONObject = function(val) {

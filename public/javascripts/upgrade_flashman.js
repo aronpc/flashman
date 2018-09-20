@@ -80,41 +80,44 @@ let checkUpdateFlashman = function() {
   });
 };
 
-let configFlashman = function() {
-  $.ajax({
-    type: 'GET',
-    url: '/upgrade/config',
-    success: function(resp) {
-      swal({
-        title: 'Configurações',
-        input: 'checkbox',
-        inputValue: (resp.auto === true) ? true : false, // needed since can be null
-        inputPlaceholder: 'Deixar que o Flashman se atualize automaticamente',
-        confirmButtonText: 'Salvar Alterações',
-        confirmButtonColor: '#4db6ac',
-      }).then(function(result) {
-        if ('value' in result) {
-          $.ajax({
-            type: 'POST',
-            url: '/upgrade/config',
-            dataType: 'json',
-            data: JSON.stringify({auto: result.value}),
-            contentType: 'application/json',
-            success: function(resp) {
-              swal({
-                type: 'success',
-                title: 'Alterações feitas com sucesso',
-                confirmButtonColor: '#4db6ac',
-              });
-            },
-          });
-        }
+let configFlashman = function(event) {
+  if ($(this)[0].checkValidity()) {
+    $.post($(this).attr('action'), $(this).serialize(), 'json')
+      .done(function(res) {
+        $('#config-flashman-menu').modal('hide').on('hidden.bs.modal',
+          function() {
+            displayAlertMsg(res);
+            $('#config-flashman-menu').off('hidden.bs.modal');
+          }
+        );
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+        $('#config-flashman-menu').modal('hide').on('hidden.bs.modal',
+          function() {
+            displayAlertMsg(JSON.parse(jqXHR.responseText));
+            $('#config-flashman-menu').off('hidden.bs.modal');
+          }
+        );
       });
-    },
-  });
+  } else {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+  $(this).addClass('was-validated');
+  return false;
 };
 
 $(document).ready(function() {
   $('.update').click(checkUpdateFlashman);
-  $('.config').click(configFlashman);
+  $('#config-flashman-form').submit(configFlashman);
+
+  // Load configuration options
+  $.ajax({
+    type: 'GET',
+    url: '/upgrade/config',
+    success: function(resp) {
+      $('#autoupdate').prop('checked', resp.auto).change();
+      $('#minlength-pass-pppoe').val(resp.minlengthpasspppoe);
+    },
+  });
 });

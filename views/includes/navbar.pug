@@ -31,7 +31,10 @@ nav.navbar.navbar-expand-lg.navbar-dark.flashbox-color
               a.dropdown-item.update
                 .fas.fa-arrow-circle-down.fa-lg
                 span &nbsp Atualizar Flashman
-              a.dropdown-item.config
+              a.dropdown-item(
+                data-toggle="modal",
+                data-target="#config-flashman-menu"
+              )
                 .fas.fa-cog.fa-lg
                 span &nbsp Configurações
         li.nav-item
