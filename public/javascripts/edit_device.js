@@ -30,6 +30,7 @@ let validateEditDevice = function(event) {
   let pppoe = $('#edit_connect_type-' + index.toString()).val() === 'PPPoE';
   let pppoeUser = $('#edit_pppoe_user-' + index.toString()).val();
   let pppoePassword = $('#edit_pppoe_pass-' + index.toString()).val();
+  let pppoePassLength = row.data('minlengthPassPppoe');
   let ssid = $('#edit_wifi_ssid-' + index.toString()).val();
   let password = $('#edit_wifi_pass-' + index.toString()).val();
   let channel = $('#edit_wifi_channel-' + index.toString()).val();
@@ -52,8 +53,8 @@ let validateEditDevice = function(event) {
     }
   }
 
-  let genericValidate = function(value, func, errors) {
-    let validField = func(value);
+  let genericValidate = function(value, func, errors, minlength) {
+    let validField = func(value, minlength);
     if (!validField.valid) {
       errors.messages = validField.err;
     }
@@ -63,7 +64,7 @@ let validateEditDevice = function(event) {
   if (pppoe && validatePppoe) {
     genericValidate(pppoeUser, validator.validateUser, errors.pppoe_user);
     genericValidate(pppoePassword, validator.validatePassword,
-                    errors.pppoe_password);
+                    errors.pppoe_password, pppoePassLength);
   }
   if (validateWifi) {
     genericValidate(ssid, validator.validateSSID, errors.ssid);
@@ -177,5 +178,16 @@ $(document).ready(function() {
         }, 100);
       },
     });
+  });
+
+  $('.toggle-pass').click(function(event) {
+    let inputField = $(event.target).closest('.input-group').find('input');
+    if (inputField.attr('type') == 'text') {
+      inputField.attr('type', 'password');
+      $(this).children().removeClass('fa-eye').addClass('fa-eye-slash');
+    } else {
+      inputField.attr('type', 'text');
+      $(this).children().removeClass('fa-eye-slash').addClass('fa-eye');
+    }
   });
 });

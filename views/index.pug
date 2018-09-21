@@ -139,7 +139,8 @@ block content
                 label(for="new_pppoe_pass") Senha PPPoE
                 input.form-control(type="text",
                                    id="new_pppoe_pass",
-                                   maxlength="64")
+                                   maxlength="64",
+                                   data-minlength-pass-pppoe=minlengthpasspppoe)
                 .invalid-feedback
                 br
               .col.text-center
@@ -171,21 +172,23 @@ block content
             .table-responsive
               table.table.devices-table
                 thead
-                  tr.csv-export(data-deviceid="Identificação",
-                     data-connection-type="Tipo de Conexão WAN",
-                     data-user="Usuário PPPoE",
-                     data-pass="Senha PPPoE",
-                     data-ssid="WiFi SSID",
-                     data-wifi-pass="WiFi Senha",
-                     data-channel="WiFi Canal",
-                     data-ext-wan="IP Público",
-                     data-int-wan="IP WAN",
-                     data-external-ref-type="Tipo de ID do cliente",
-                     data-external-ref="ID do cliente",
-                     data-device-model="Modelo do roteador",
-                     data-device-version="Versão do Flashbox",
-                     data-device-release="Release",
-                     data-do-update="Atualizar Firmware"
+                  tr.csv-export(
+                    data-pass-show=(superuser || role.grantPassShow ? "true" : "false"),
+                    data-deviceid="Endereço MAC",
+                    data-connection-type="Tipo de Conexão WAN",
+                    data-user="Usuário PPPoE",
+                    data-pass="Senha PPPoE",
+                    data-ssid="WiFi SSID",
+                    data-wifi-pass="WiFi Senha",
+                    data-channel="WiFi Canal",
+                    data-ext-wan="IP Público",
+                    data-int-wan="IP WAN",
+                    data-external-ref-type="Tipo de ID do cliente",
+                    data-external-ref="ID do cliente",
+                    data-device-model="Modelo do roteador",
+                    data-device-version="Versão do Flashbox",
+                    data-device-release="Release",
+                    data-do-update="Atualizar Firmware"
                   )
                     th
                     th.text-center #
@@ -197,7 +200,7 @@ block content
                         title="-Verde: Online\n-Vermelho: Sem resposta imediata\n-Cinza: Sem resposta por mais de 1 hora",
                       )
                     th.text-center Usuário PPPoE
-                    th.text-center Identificação
+                    th.text-center Endereço MAC
                     th.text-center IP WAN
                     th.text-center IP Público
                     th.text-center Release
@@ -226,23 +229,24 @@ block content
                           )
                           .slider.round
                   each device, index in devices
-                    tr.csv-export(id=device._id,
-                       data-index=(index + 1),
-                       data-deviceid=device._id,
-                       data-connection-type=(device.connection_type ? device.connection_type : ""),
-                       data-user=device.pppoe_user,
-                       data-pass=device.pppoe_password,
-                       data-ssid=device.wifi_ssid,
-                       data-wifi-pass=device.wifi_password,
-                       data-channel=device.wifi_channel,
-                       data-ext-wan=(device.ip ? device.ip : ""),
-                       data-int-wan=(device.wan_ip ? device.wan_ip : ""),
-                       data-external-ref-type=(device.external_reference.kind ? device.external_reference.kind : ""),
-                       data-external-ref=(device.external_reference.data ? device.external_reference.data : ""),
-                       data-device-model=(device.model ? device.model : ""),
-                       data-device-version=(device.version ? device.version : ""),
-                       data-device-release=(device.release ? device.release : ""),
-                       data-do-update=(device.do_update ? "Sim" : "Não"),
+                    tr.csv-export(
+                      id=device._id,
+                      data-index=(index + 1),
+                      data-deviceid=device._id,
+                      data-connection-type=(device.connection_type ? device.connection_type : ""),
+                      data-user=device.pppoe_user,
+                      data-pass=device.pppoe_password,
+                      data-ssid=device.wifi_ssid,
+                      data-wifi-pass=device.wifi_password,
+                      data-channel=device.wifi_channel,
+                      data-ext-wan=(device.ip ? device.ip : ""),
+                      data-int-wan=(device.wan_ip ? device.wan_ip : ""),
+                      data-external-ref-type=(device.external_reference.kind ? device.external_reference.kind : ""),
+                      data-external-ref=(device.external_reference.data ? device.external_reference.data : ""),
+                      data-device-model=(device.model ? device.model : ""),
+                      data-device-version=(device.version ? device.version : ""),
+                      data-device-release=(device.release ? device.release : ""),
+                      data-do-update=(device.do_update ? "Sim" : "Não"),
                     )
                       td.text-center.col-xs-1(
                         style="cursor: pointer;"
@@ -301,6 +305,7 @@ block content
                         (superuser || role.grantWifiInfo >= 1) ? "true" : "false"),
                       data-validate-pppoe=(
                         (superuser || role.grantPPPoEInfo >= 1) ? "true" : "false"),
+                      data-minlength-pass-pppoe=minlengthpasspppoe,
                       style="display: none;"
                     )
                       td(colspan=9).grey.lighten-5
@@ -399,13 +404,19 @@ block content
                                 // Wifi password
                                 .input-entry
                                   label(for="edit_wifi_pass-" + (index + 1)) Senha do WiFi
-                                  input.form-control(
-                                    type="text",
-                                    id="edit_wifi_pass-" + (index + 1),
-                                    maxlength="64",
-                                    disabled=((superuser || role.grantWifiInfo > 1) ? false : true)
-                                  )
-                                  .invalid-feedback
+                                  .input-group
+                                    input.form-control(
+                                      type="password",
+                                      id="edit_wifi_pass-" + (index + 1),
+                                      maxlength="64",
+                                      disabled=((superuser || role.grantWifiInfo > 1) ? false : true)
+                                    )
+                                    if (superuser || role.grantPassShow)
+                                      .input-group-append
+                                        .input-group-text.teal.lighten-2
+                                          a.toggle-pass
+                                            .fas.fa-eye-slash.white-text
+                                    .invalid-feedback
                             .col-3
                               if (superuser || role.grantPPPoEInfo >= 1)
                                 // PPPoE user
@@ -422,13 +433,19 @@ block content
                                 // PPPoE password
                                 .input-entry
                                   label(for="edit_pppoe_pass-" + (index + 1)) Senha PPPoE
-                                  input.form-control(
-                                    type="text",
-                                    id="edit_pppoe_pass-" + (index + 1),
-                                    maxlength="64",
-                                    disabled=((superuser || role.grantPPPoEInfo > 1) ? false : true)
-                                  )
-                                  .invalid-feedback
+                                  .input-group
+                                    input.form-control(
+                                      type="password",
+                                      id="edit_pppoe_pass-" + (index + 1),
+                                      maxlength="64",
+                                      disabled=((superuser || role.grantPPPoEInfo > 1) ? false : true)
+                                    )
+                                    if (superuser || role.grantPassShow)
+                                      .input-group-append
+                                        .input-group-text.teal.lighten-2
+                                          a.toggle-pass
+                                            .fas.fa-eye-slash.white-text
+                                    .invalid-feedback
                                 br
                           .row(style="margin: 0;")
                             // Buttons

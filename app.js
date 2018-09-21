@@ -28,6 +28,7 @@ Config.findOne({is_default: true}, function(err, matchedConfig) {
     let newConfig = new Config({
       is_default: true,
       autoUpdate: true,
+      pppoePassLength: 8,
     });
     newConfig.save();
   }
@@ -52,6 +53,7 @@ Role.find({}, function(err, roles) {
       name: 'Gerente',
       grantWifiInfo: 2,
       grantPPPoEInfo: 2,
+      grantPassShow: true,
       grantFirmwareUpgrade: true,
       grantWanType: true,
       grantDeviceId: true,
@@ -59,6 +61,7 @@ Role.find({}, function(err, roles) {
       grantDeviceRemoval: true,
       grantDeviceAdd: true,
       grantFirmwareManage: true,
+      grantAPIAccess: false,
     });
     managerRole.save();
   }
@@ -104,7 +107,7 @@ app.use(logger(':req[x-forwarded-for] - :method :url HTTP/:http-version :status 
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-  secret: 'aSjdh%%$@asdy8ajoia7qnL&34S0))L',
+  secret: app.locals.secret,
   resave: false,
   saveUninitialized: false,
 }));

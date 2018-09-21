@@ -131,6 +131,7 @@ deviceListController.index = function(req, res) {
           indexContent.update = false;
         } else {
           indexContent.update = matchedConfig.hasUpdate;
+          indexContent.minlengthpasspppoe = matchedConfig.pppoePassLength;
         }
 
         // Filter data using user permissions
@@ -491,8 +492,8 @@ deviceListController.setDeviceReg = function(req, res) {
       let password = returnObjOrEmptyStr(content.wifi_password).trim();
       let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
 
-      let genericValidate = function(field, func, key) {
-        let validField = func(field);
+      let genericValidate = function(field, func, key, minlength) {
+        let validField = func(field, minlength);
         if (!validField.valid) {
           validField.err.forEach(function(error) {
             let obj = {};
@@ -502,105 +503,116 @@ deviceListController.setDeviceReg = function(req, res) {
         }
       };
 
-      // Validate fields
-      if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
-          connectionType != '') {
-        return res.status(500).json({
-          success: false,
-          message: 'Tipo de conexão deve ser "pppoe" ou "dhcp"',
-        });
-      }
-      if (pppoeUser !== '' && pppoePassword !== '') {
-        connectionType = 'pppoe';
-        genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
-        genericValidate(pppoePassword, validator.validatePassword,
-                        'pppoe_password');
-      }
-      if (content.hasOwnProperty('wifi_ssid')) {
-        genericValidate(ssid, validator.validateSSID, 'ssid');
-      }
-      if (content.hasOwnProperty('wifi_password')) {
-        genericValidate(password, validator.validateWifiPassword, 'password');
-      }
-      if (content.hasOwnProperty('wifi_channel')) {
-        genericValidate(channel, validator.validateChannel, 'channel');
-      }
+      Config.findOne({is_default: true}, function(err, matchedConfig) {
+        if (err || !matchedConfig) {
+          console.log('Error returning default config');
+          return res.status(500).json({
+            success: false,
+            message: 'Erro ao encontrar configuração',
+            errors: [],
+          });
+        }
 
-      if (errors.length < 1) {
-        Role.findOne({name: returnObjOrEmptyStr(req.user.role)},
-        function(err, role) {
-          if (err) {
-            console.log(err);
-          }
-          let superuserGrant = false;
-          if (!role && req.user.is_superuser) {
-            superuserGrant = true;
-          }
-          if (connectionType != '' && (superuserGrant || role.grantWanType)) {
-            if (connectionType === 'pppoe') {
-              if (pppoeUser !== '' && pppoePassword !== '') {
-                matchedDevice.connection_type = connectionType;
-                updateParameters = true;
-              }
-            } else {
-              matchedDevice.connection_type = connectionType;
-              updateParameters = true;
-            }
-          }
-          if (content.hasOwnProperty('pppoe_user') &&
-              (superuserGrant || role.grantPPPoEInfo > 1) &&
-              pppoeUser !== '') {
-            matchedDevice.pppoe_user = pppoeUser;
-            updateParameters = true;
-          }
-          if (content.hasOwnProperty('pppoe_password') &&
-              (superuserGrant || role.grantPPPoEInfo > 1) &&
-              pppoePassword !== '') {
-            matchedDevice.pppoe_password = pppoePassword;
-            updateParameters = true;
-          }
-          if (content.hasOwnProperty('wifi_ssid') &&
-              (superuserGrant || role.grantWifiInfo > 1) &&
-              ssid !== '') {
-            matchedDevice.wifi_ssid = ssid;
-            updateParameters = true;
-          }
-          if (content.hasOwnProperty('wifi_password') &&
-              (superuserGrant || role.grantWifiInfo > 1) &&
-              password !== '') {
-            matchedDevice.wifi_password = password;
-            updateParameters = true;
-          }
-          if (content.hasOwnProperty('wifi_channel') &&
-              (superuserGrant || role.grantWifiInfo > 1) &&
-              channel !== '') {
-            matchedDevice.wifi_channel = channel;
-            updateParameters = true;
-          }
-          if (content.hasOwnProperty('external_reference') &&
-              (superuserGrant || role.grantDeviceId)) {
-            matchedDevice.external_reference = content.external_reference;
-          }
-          if (updateParameters) {
-            matchedDevice.do_update_parameters = true;
-          }
-          matchedDevice.save(function(err) {
+        // Validate fields
+        if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
+            connectionType != '') {
+          return res.status(500).json({
+            success: false,
+            message: 'Tipo de conexão deve ser "pppoe" ou "dhcp"',
+          });
+        }
+        if (pppoeUser !== '' && pppoePassword !== '') {
+          connectionType = 'pppoe';
+          genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
+          genericValidate(pppoePassword, validator.validatePassword,
+                          'pppoe_password', matchedConfig.pppoePassLength);
+        }
+        if (content.hasOwnProperty('wifi_ssid')) {
+          genericValidate(ssid, validator.validateSSID, 'ssid');
+        }
+        if (content.hasOwnProperty('wifi_password')) {
+          genericValidate(password, validator.validateWifiPassword, 'password');
+        }
+        if (content.hasOwnProperty('wifi_channel')) {
+          genericValidate(channel, validator.validateChannel, 'channel');
+        }
+
+        if (errors.length < 1) {
+          Role.findOne({name: returnObjOrEmptyStr(req.user.role)},
+          function(err, role) {
             if (err) {
               console.log(err);
             }
-            mqtt.anlix_message_router_update(matchedDevice._id);
+            let superuserGrant = false;
+            if (!role && req.user.is_superuser) {
+              superuserGrant = true;
+            }
+            if (connectionType != '' && (superuserGrant || role.grantWanType)) {
+              if (connectionType === 'pppoe') {
+                if (pppoeUser !== '' && pppoePassword !== '') {
+                  matchedDevice.connection_type = connectionType;
+                  updateParameters = true;
+                }
+              } else {
+                matchedDevice.connection_type = connectionType;
+                updateParameters = true;
+              }
+            }
+            if (content.hasOwnProperty('pppoe_user') &&
+                (superuserGrant || role.grantPPPoEInfo > 1) &&
+                pppoeUser !== '') {
+              matchedDevice.pppoe_user = pppoeUser;
+              updateParameters = true;
+            }
+            if (content.hasOwnProperty('pppoe_password') &&
+                (superuserGrant || role.grantPPPoEInfo > 1) &&
+                pppoePassword !== '') {
+              matchedDevice.pppoe_password = pppoePassword;
+              updateParameters = true;
+            }
+            if (content.hasOwnProperty('wifi_ssid') &&
+                (superuserGrant || role.grantWifiInfo > 1) &&
+                ssid !== '') {
+              matchedDevice.wifi_ssid = ssid;
+              updateParameters = true;
+            }
+            if (content.hasOwnProperty('wifi_password') &&
+                (superuserGrant || role.grantWifiInfo > 1) &&
+                password !== '') {
+              matchedDevice.wifi_password = password;
+              updateParameters = true;
+            }
+            if (content.hasOwnProperty('wifi_channel') &&
+                (superuserGrant || role.grantWifiInfo > 1) &&
+                channel !== '') {
+              matchedDevice.wifi_channel = channel;
+              updateParameters = true;
+            }
+            if (content.hasOwnProperty('external_reference') &&
+                (superuserGrant || role.grantDeviceId)) {
+              matchedDevice.external_reference = content.external_reference;
+            }
+            if (updateParameters) {
+              matchedDevice.do_update_parameters = true;
+            }
+            matchedDevice.save(function(err) {
+              if (err) {
+                console.log(err);
+              }
+              mqtt.anlix_message_router_update(matchedDevice._id);
 
-            matchedDevice.success = true;
-            return res.status(200).json(matchedDevice);
+              matchedDevice.success = true;
+              return res.status(200).json(matchedDevice);
+            });
           });
-        });
-      } else {
-        return res.status(500).json({
-          success: false,
-          message: 'Erro validando os campos, ver campo "errors"',
-          errors: errors,
-        });
-      }
+        } else {
+          return res.status(500).json({
+            success: false,
+            message: 'Erro validando os campos, ver campo "errors"',
+            errors: errors,
+          });
+        }
+      });
     } else {
       return res.status(500).json({
         success: false,
@@ -628,8 +640,8 @@ deviceListController.createDeviceReg = function(req, res) {
     let channel = returnObjOrEmptyStr(content.wifi_channel).trim();
     let pppoe = (pppoeUser !== '' && pppoePassword !== '');
 
-    let genericValidate = function(field, func, key) {
-      let validField = func(field);
+    let genericValidate = function(field, func, key, minlength) {
+      let validField = func(field, minlength);
       if (!validField.valid) {
         validField.err.forEach(function(error) {
           let obj = {};
@@ -639,75 +651,85 @@ deviceListController.createDeviceReg = function(req, res) {
       }
     };
 
-    // Validate fields
-    genericValidate(macAddr, validator.validateMac, 'mac');
-    if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
-        connectionType != '') {
-      return res.status(500).json({
-        success: false,
-        message: 'Tipo de conexão deve ser "pppoe" ou "dhcp"',
-      });
-    }
-    if (pppoe) {
-      connectionType = 'pppoe';
-      genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
-      genericValidate(pppoePassword, validator.validatePassword,
-                      'pppoe_password');
-    } else {
-      connectionType = 'dhcp';
-    }
-    genericValidate(ssid, validator.validateSSID, 'ssid');
-    genericValidate(password, validator.validateWifiPassword, 'password');
-    genericValidate(channel, validator.validateChannel, 'channel');
-
-    DeviceModel.findById(macAddr, function(err, matchedDevice) {
-      if (err) {
+    Config.findOne({is_default: true}, function(err, matchedConfig) {
+      if (err || !matchedConfig) {
+        console.log('Error searching default config');
         return res.status(500).json({
           success: false,
-          message: 'Erro interno do servidor',
-          errors: errors,
+          message: 'Erro ao encontrar configuração',
         });
+      }
+
+      // Validate fields
+      genericValidate(macAddr, validator.validateMac, 'mac');
+      if (connectionType != 'pppoe' && connectionType != 'dhcp' &&
+          connectionType != '') {
+        return res.status(500).json({
+          success: false,
+          message: 'Tipo de conexão deve ser "pppoe" ou "dhcp"',
+        });
+      }
+      if (pppoe) {
+        connectionType = 'pppoe';
+        genericValidate(pppoeUser, validator.validateUser, 'pppoe_user');
+        genericValidate(pppoePassword, validator.validatePassword,
+                        'pppoe_password', matchedConfig.pppoePassLength);
       } else {
-        if (matchedDevice) {
-          errors.push({mac: 'Endereço MAC já cadastrado'});
-        }
-        if (errors.length < 1) {
-          newDeviceModel = new DeviceModel({
-            '_id': macAddr,
-            'external_reference': extReference,
-            'model': '',
-            'release': release,
-            'pppoe_user': pppoeUser,
-            'pppoe_password': pppoePassword,
-            'wifi_ssid': ssid,
-            'wifi_password': password,
-            'wifi_channel': channel,
-            'last_contact': new Date('January 1, 1970 01:00:00'),
-            'do_update': false,
-            'do_update_parameters': false,
-          });
-          if (connectionType != '') {
-            newDeviceModel.connection_type = connectionType;
-          }
-          newDeviceModel.save(function(err) {
-            if (err) {
-              return res.status(500).json({
-                success: false,
-                message: 'Erro ao salvar registro',
-                errors: errors,
-              });
-            } else {
-              return res.status(200).json({'success': true});
-            }
-          });
-        } else {
+        connectionType = 'dhcp';
+      }
+      genericValidate(ssid, validator.validateSSID, 'ssid');
+      genericValidate(password, validator.validateWifiPassword, 'password');
+      genericValidate(channel, validator.validateChannel, 'channel');
+
+      DeviceModel.findById(macAddr, function(err, matchedDevice) {
+        if (err) {
           return res.status(500).json({
             success: false,
-            message: 'Erro validando os campos, ver campo \"errors\"',
+            message: 'Erro interno do servidor',
             errors: errors,
           });
+        } else {
+          if (matchedDevice) {
+            errors.push({mac: 'Endereço MAC já cadastrado'});
+          }
+          if (errors.length < 1) {
+            newDeviceModel = new DeviceModel({
+              '_id': macAddr,
+              'external_reference': extReference,
+              'model': '',
+              'release': release,
+              'pppoe_user': pppoeUser,
+              'pppoe_password': pppoePassword,
+              'wifi_ssid': ssid,
+              'wifi_password': password,
+              'wifi_channel': channel,
+              'last_contact': new Date('January 1, 1970 01:00:00'),
+              'do_update': false,
+              'do_update_parameters': false,
+            });
+            if (connectionType != '') {
+              newDeviceModel.connection_type = connectionType;
+            }
+            newDeviceModel.save(function(err) {
+              if (err) {
+                return res.status(500).json({
+                  success: false,
+                  message: 'Erro ao salvar registro',
+                  errors: errors,
+                });
+              } else {
+                return res.status(200).json({'success': true});
+              }
+            });
+          } else {
+            return res.status(500).json({
+              success: false,
+              message: 'Erro validando os campos, ver campo \"errors\"',
+              errors: errors,
+            });
+          }
         }
-      }
+      });
     });
   } else {
     return res.status(500).json({

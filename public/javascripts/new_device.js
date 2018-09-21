@@ -14,7 +14,8 @@ let renderDeviceErrors = function(errors) {
 
 let validateNewDevice = function() {
   $('.form-control').blur(); // Remove focus from form
-  $('#deviceForm input').each(function(){ // Reset validation messages
+  $('#deviceForm input').each(function() {
+    // Reset validation messages
     this.setCustomValidity('');
   });
   let validator = new Validator();
@@ -24,6 +25,7 @@ let validateNewDevice = function() {
   let mac = $('#new_mac').val();
   let pppoeUser = $('#new_pppoe_user').val();
   let pppoePassword = $('#new_pppoe_pass').val();
+  let pppoePassLength = $('#new_pppoe_pass').data('minlengthPassPppoe');
   let ssid = $('#new_wifi_ssid').val();
   let password = $('#new_wifi_pass').val();
   let channel = $('#new_wifi_channel').val();
@@ -45,8 +47,8 @@ let validateNewDevice = function() {
     }
   }
 
-  let genericValidate = function(value, func, errors) {
-    let validField = func(value);
+  let genericValidate = function(value, func, errors, minlength) {
+    let validField = func(value, minlength);
     if (!validField.valid) {
       errors.messages = validField.err;
     }
@@ -57,7 +59,7 @@ let validateNewDevice = function() {
   if (pppoe) {
     genericValidate(pppoeUser, validator.validateUser, errors.pppoe_user);
     genericValidate(pppoePassword, validator.validatePassword,
-                    errors.pppoe_password);
+                    errors.pppoe_password, pppoePassLength);
   }
   genericValidate(ssid, validator.validateSSID, errors.ssid);
   genericValidate(password, validator.validateWifiPassword, errors.password);
