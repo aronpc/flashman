@@ -119,6 +119,10 @@ const serializeNamed = function(devices) {
   return devices.map((device)=>device.mac + '|' + device.name);
 };
 
+const deepCopyObject = function(obj) {
+  return JSON.parse(JSON.stringify(obj));
+};
+
 deviceInfoController.syncDate = function(req, res) {
   // WARNING: This api is open.
   let devId;
@@ -481,15 +485,19 @@ let appSet = function(req, res, processFunction) {
       }
 
       let hashSuffix = '';
+      let commandTimeout = 10;
       if (content.hasOwnProperty('command_hash')) {
         hashSuffix = ' ' + content.command_hash;
+      }
+      if (content.hasOwnProperty('command_timeout')) {
+        commandTimeout = content.command_timeout;
       }
 
       matchedDevice.save();
 
       mqtt.anlix_message_router_update(matchedDevice._id, hashSuffix);
 
-      checkUpdateParametersDone(matchedDevice._id, 0, 10)
+      checkUpdateParametersDone(matchedDevice._id, 0, commandTimeout)
       .then((done)=>{
         if (done) return res.status(200).json({is_set: 1});
         doRollback(matchedDevice, rollbackValues);
@@ -557,9 +565,10 @@ deviceInfoController.appSetBlacklist = function(req, res) {
     if (content.hasOwnProperty('blacklist_device') &&
         content.blacklist_device.hasOwnProperty('mac') &&
         content.blacklist_device.mac.match(macRegex)) {
-      rollback.blocked_devices = device.blocked_devices.splice(0);
+      // Deep copy blocked devices for rollback
+      rollback.blocked_devices = deepCopyObject(device.blocked_devices);
       let containsMac = device.blocked_devices.reduce((acc, val)=>{
-        return acc || (val.mac === content.blacklist_device);
+        return acc || (val.mac === content.blacklist_device.mac);
       }, false);
       if (!containsMac) {
         device.blocked_devices.push({
@@ -580,7 +589,8 @@ deviceInfoController.appSetWhitelist = function(req, res) {
     if (content.hasOwnProperty('whitelist_device') &&
         content.whitelist_device.hasOwnProperty('mac') &&
         content.whitelist_device.mac.match(macRegex)) {
-      rollback.blocked_devices = device.blocked_devices.splice(0);
+      // Deep copy blocked devices for rollback
+      rollback.blocked_devices = deepCopyObject(device.blocked_devices);
       let filteredDevices = device.blocked_devices.filter((device)=>{
         return device.mac !== content.whitelist_device.mac;
       });
@@ -600,7 +610,8 @@ deviceInfoController.appSetDeviceInfo = function(req, res) {
     if (content.hasOwnProperty('device_configs') &&
         content.device_configs.hasOwnProperty('mac') &&
         content.device_configs.mac.match(macRegex)) {
-      rollback.named_devices = device.named_devices.splice(0);
+      // Deep copy named devices for rollback
+      rollback.named_devices = deepCopyObject(device.named_devices);
       let namedDevices = device.named_devices;
       let newMac = true;
       namedDevices = namedDevices.map((namedDevice)=>{
