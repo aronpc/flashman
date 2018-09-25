@@ -367,9 +367,10 @@ block content
                                   button.btn.teal.lighten-2.btn-sm.btn-reset-app(type="button")
                                     .fas.fa-mobile-alt.fa-lg
                                     span &nbsp Resetar senha App
-                                  button.btn.teal.lighten-2.btn-sm.btn-log-modal(type="button")
-                                    .fas.fa-file-alt.fa-lg
-                                    span &nbsp Logs do Roteador
+                                  if (superuser || role.grantLOGAccess)
+                                    button.btn.teal.lighten-2.btn-sm.btn-log-modal(type="button")
+                                      .fas.fa-file-alt.fa-lg
+                                      span &nbsp Logs do Roteador
                                 br
                                 span.badge.badge-success.bounceIn(style="display: none;") Sucesso
                                 span.badge.badge-warning.bounceIn(style="display: none;") Falha

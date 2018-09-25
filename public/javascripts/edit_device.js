@@ -300,11 +300,11 @@ $(document).ready(function() {
   });
 
   $('.btn-log-upgrade').click(function(event) {
-    printLogData('/devicelist/upgradelog/');
+    printLogData('/devicelist/uifirstlog/');
   });
 
   $('.btn-log-init').click(function(event) {
-    printLogData('/devicelist/rebootlog/');
+    printLogData('/devicelist/uilastlog/');
   });
 
 });
