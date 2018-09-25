@@ -124,6 +124,12 @@ app.use('/scripts/jquery',
 app.use('/scripts/jquery-mask',
   express.static(path.join(__dirname, 'node_modules/jquery-mask-plugin/dist'))
 );
+app.use('/scripts/jquery-highlight',
+  express.static(path.join(__dirname, 'node_modules/jquery-highlight'))
+);
+app.use('/scripts/pako',
+  express.static(path.join(__dirname, 'node_modules/pako/dist'))
+);
 app.use('/scripts/popper',
   express.static(path.join(__dirname, 'node_modules/popper.js/dist'))
 );

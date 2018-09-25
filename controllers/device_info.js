@@ -3,6 +3,7 @@ const DeviceModel = require('../models/device');
 const Config = require('../models/config');
 const mqtt = require('../mqtts');
 const externMqtt = require('mqtt');
+const sio = require('../sio');
 const Validator = require('../public/javascripts/device_validator');
 let deviceInfoController = {};
 
@@ -552,7 +553,9 @@ deviceInfoController.receiveLog = function(req, res) {
       console.log('Log Receiving for device ' +
         id + ' successfully. LAST BOOT');
     } else if (bootType == 'LIVE') {
-
+      sio.anlix_send_livelog_notifications(id, req.body);
+      console.log('Log Receiving for device ' +
+        id + ' successfully. LIVE');
     }
 
     return res.status(200).json({processed: 1});
