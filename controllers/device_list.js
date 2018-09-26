@@ -4,7 +4,6 @@ const User = require('../models/user');
 const Config = require('../models/config');
 const Role = require('../models/role');
 const mqtt = require('../mqtts');
-const extern_mqtt = require('mqtt');
 const sio = require('../sio');
 let deviceListController = {};
 
@@ -365,7 +364,7 @@ deviceListController.sendMqttMsg = function(req, res) {
                                  message: 'Roteador não esta online!'});
   }
 
-  switch(msgtype) {
+  switch (msgtype) {
     case 'boot':
       mqtt.anlix_message_router_reboot(req.params.id.toUpperCase());
       break;
@@ -374,23 +373,26 @@ deviceListController.sendMqttMsg = function(req, res) {
       break;
     case 'log':
       // This message is only valid if we have a socket to send response to
-      if(sio.anlix_connections[req.sessionID]){
-        sio.anlix_wait_for_livelog_notification(req.sessionID, req.params.id.toUpperCase(), 5000);
+      if (sio.anlix_connections[req.sessionID]) {
+        sio.anlix_wait_for_livelog_notification(
+          req.sessionID, req.params.id.toUpperCase(), 5000);
         mqtt.anlix_message_router_log(req.params.id.toUpperCase());
       } else {
-        return res.status(200).json({success: false,
-                        message: 'Esse comando somente funciona em uma sessão!'});
+        return res.status(200).json({
+          success: false,
+          message: 'Esse comando somente funciona em uma sessão!',
+        });
       }
       break;
     default:
       // Message not implemented
-      console.log('REST API MQTT Message not recognized ('+ msgtype +')');
+      console.log('REST API MQTT Message not recognized (' + msgtype + ')');
       return res.status(200).json({success: false,
                                    message: 'Esse comando não existe'});
   }
 
   return res.status(200).json({success: true});
-}
+};
 
 deviceListController.getFirstBootLog = function(req, res) {
   DeviceModel.findById(req.params.id.toUpperCase(),
