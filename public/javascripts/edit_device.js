@@ -12,19 +12,34 @@ let renderEditErrors = function(errors) {
   }
 };
 
-var socket = io();
-socket.on('LIVELOG', function (macaddr, data) {
-  if(($('#analyse-logs').data('bs.modal') || {})._isShown){
+let socket = io();
+socket.on('LIVELOG', function(macaddr, data) {
+  if (($('#analyse-logs').data('bs.modal') || {})._isShown) {
     let id = $('#logRouterid_label').text();
-    if(id == macaddr) {
+    if (id == macaddr) {
       let textarea = $('#logArea');
-      if(textarea.text() == 'Aguardando resposta do roteador...') {
-        let usrtypes = ['user', 'daemon', 'kern', 'local1', 'authpriv', ];
-        textarea.html('<code>'+pako.ungzip(data,{ to: 'string' })+'</code>');
-        textarea.highlight(usrtypes.map(function(x){return x+'.warn';}), {element: 'strong', className: 'text-warning'});
-        textarea.highlight(usrtypes.map(function(x){return x+'.err';}), {element: 'strong', className: 'text-danger'});
-        textarea.highlight(usrtypes.map(function(x){return x+'.debug';}), {element: 'strong', className: 'text-info'});
-      }    
+      if (textarea.text() == 'Aguardando resposta do roteador...') {
+        let usrtypes = ['user', 'daemon', 'kern', 'local1', 'authpriv'];
+        textarea.html('<code>' + pako.ungzip(data, {to: 'string'}) + '</code>');
+        textarea.highlight(
+          usrtypes.map(function(x) {
+            return x + '.warn';
+          }),
+          {element: 'strong', className: 'text-warning'}
+        );
+        textarea.highlight(
+          usrtypes.map(function(x) {
+            return x + '.err';
+          }),
+          {element: 'strong', className: 'text-danger'}
+        );
+        textarea.highlight(
+          usrtypes.map(function(x) {
+            return x+'.debug';
+          }),
+          {element: 'strong', className: 'text-info'}
+        );
+      }
     }
   }
 });
@@ -32,19 +47,34 @@ socket.on('LIVELOG', function (macaddr, data) {
 let printLogData = function(url) {
   let textarea = $('#logArea');
   let id = $('#logRouterid_label').text();
-  let usrtypes = ['user', 'daemon', 'kern', 'local1', 'authpriv', ];
+  let usrtypes = ['user', 'daemon', 'kern', 'local1', 'authpriv'];
   $.ajax({
     url: url + id,
     type: 'get',
     success: function(res, status, xhr) {
-      let ct = xhr.getResponseHeader("content-type") || "";
-      if (ct.indexOf('json') > -1) 
-        textarea.html('ERRO: '+res.message);
-      else {
-        textarea.html('<code>'+res+'</code>');
-        textarea.highlight(usrtypes.map(function(x){return x+'.warn';}), {element: 'strong', className: 'text-warning'});
-        textarea.highlight(usrtypes.map(function(x){return x+'.err';}), {element: 'strong', className: 'text-danger'});
-        textarea.highlight(usrtypes.map(function(x){return x+'.debug';}), {element: 'strong', className: 'text-info'});
+      let ct = xhr.getResponseHeader('content-type') || '';
+      if (ct.indexOf('json') > -1) {
+        textarea.html('ERRO: ' + res.message);
+      } else {
+        textarea.html('<code>' + res + '</code>');
+        textarea.highlight(
+          usrtypes.map(function(x) {
+            return x + '.warn';
+          }),
+          {element: 'strong', className: 'text-warning'}
+        );
+        textarea.highlight(
+          usrtypes.map(function(x) {
+            return x + '.err';
+          }),
+          {element: 'strong', className: 'text-danger'}
+        );
+        textarea.highlight(
+          usrtypes.map(function(x) {
+            return x + '.debug';
+          }),
+          {element: 'strong', className: 'text-info'}
+        );
       }
     },
     error: function(xhr, status, error) {
@@ -181,14 +211,15 @@ $(document).ready(function() {
       type: 'post',
       success: function(res) {
         let badge;
-        if(res.success) {
+        if (res.success) {
           badge = $(event.target).closest('.actions-opts')
                                      .find('.badge-success');
         } else {
           badge = $(event.target).closest('.actions-opts')
                                      .find('.badge-warning');
-          if(res.message)
+          if (res.message) {
             badge.text(res.message);
+          }
         }
 
         badge.show();
@@ -217,14 +248,15 @@ $(document).ready(function() {
       dataType: 'json',
       success: function(res) {
         let badge;
-        if(res.success) {
+        if (res.success) {
           badge = $(event.target).closest('.actions-opts')
                                      .find('.badge-success');
         } else {
           badge = $(event.target).closest('.actions-opts')
                                      .find('.badge-warning');
-          if(res.message)
+          if (res.message) {
             badge.text(res.message);
+          }
         }
 
         badge.show();
@@ -274,7 +306,6 @@ $(document).ready(function() {
     let id = row.data('deviceid');
 
     $('#logRouterid_label').text(id);
-    console.log("INFO: "+id);
     $('#analyse-logs').modal('show');
   });
 
@@ -286,8 +317,7 @@ $(document).ready(function() {
       type: 'post',
       dataType: 'json',
       success: function(res) {
-        let badge;
-        if(res.success) {
+        if (res.success) {
           textarea.html('Aguardando resposta do roteador...');
         } else {
           textarea.html(res.message);
@@ -306,5 +336,4 @@ $(document).ready(function() {
   $('.btn-log-init').click(function(event) {
     printLogData('/devicelist/uilastlog/');
   });
-
 });
