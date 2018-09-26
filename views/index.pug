@@ -360,17 +360,34 @@ block content
                             // Actions
                             if (superuser || role.grantDeviceActions)
                               .col-7.text-right.actions-opts
-                                .btn-group.btn-group-sm(role="group")
-                                  button.btn.teal.lighten-2.btn-sm.btn-reboot(type="button")
-                                    .fas.fa-sync.fa-lg
-                                    span &nbsp Reiniciar roteador
-                                  button.btn.teal.lighten-2.btn-sm.btn-reset-app(type="button")
-                                    .fas.fa-mobile-alt.fa-lg
-                                    span &nbsp Resetar senha App
-                                  if (superuser || role.grantLOGAccess)
-                                    button.btn.teal.lighten-2.btn-sm.btn-log-modal(type="button")
-                                      .fas.fa-file-alt.fa-lg
-                                      span &nbsp Logs do Roteador
+                                .btn-group(role="group")
+              
+                                  button.btn.teal.lighten-2.dropdown-toggle(
+                                    type="button",
+                                    id="dropActions",
+                                    data-toggle="dropdown",
+                                    aria-haspopup="true",
+                                    aria-expanded="false",
+                                    disabled=((superuser || role.grantDeviceActions) ? false : true)
+                                  ) Ações
+
+                                  .dropdown-menu.dropdown-menu-right(
+                                    aria-labelledby="dropActions",
+                                    data-dropdown-in="fadeIn",
+                                    data-dropdown-out="fadeOut"
+                                  )
+                                    a.dropdown-item.btn-reboot 
+                                      .fas.fa-sync
+                                      span &nbsp Reiniciar roteador  
+                                    .dropdown-divider
+                                    a.dropdown-item.btn-reset-app 
+                                      .fas.fa-mobile-alt
+                                      span &nbsp Resetar senha App
+                                    if (superuser || role.grantLOGAccess)
+                                      .dropdown-divider
+                                      a.dropdown-item.btn-log-modal 
+                                        .fas.fa-file-alt
+                                        span &nbsp Logs do Roteador
                                 br
                                 span.badge.badge-success.bounceIn(style="display: none;") Sucesso
                                 span.badge.badge-warning.bounceIn(style="display: none;") Falha

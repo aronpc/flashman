@@ -274,7 +274,6 @@ $(document).ready(function() {
     let id = row.data('deviceid');
 
     $('#logRouterid_label').text(id);
-    console.log("INFO: "+id);
     $('#analyse-logs').modal('show');
   });
 
