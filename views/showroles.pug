@@ -67,6 +67,11 @@ block content
                 option(value="false") Bloquear
                 option(value="true") Permitir
             .input-entry.mt-2
+              label Acesso aos LOGS dos Roteadores
+              select.form-control(name="grant-log-access")
+                option(value="false") Bloquear
+                option(value="true") Permitir
+            .input-entry.mt-2
               label Remoção de Registro de Dispositivo
               select.form-control(name="grant-device-removal")
                 option(value="false") Bloquear
@@ -84,11 +89,6 @@ block content
             .input-entry.mt-2
               label Permitir acesso a API REST
               select.form-control(name="grant-api-access")
-                option(value="false") Bloquear
-                option(value="true") Permitir
-            .input-entry.mt-2
-              label Acesso aos LOGS dos Roteadores
-              select.form-control(name="grant-log-access")
                 option(value="false") Bloquear
                 option(value="true") Permitir
             .col.text-center.mt-3

@@ -171,6 +171,15 @@ $(document).ready(function() {
                         $('<option></option>').val(false).text('Bloquear'),
                         $('<option></option>').val(true).text('Permitir')
                       )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Acesso aos LOGS dos roteadores'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-log-access').append(
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
+                      )
                     )
                   ),
                   $('<div></div>').addClass('col-4').append(
@@ -206,15 +215,6 @@ $(document).ready(function() {
                       .text('Permitir acesso a API REST'),
                       $('<select></select>').addClass('form-control')
                       .attr('name', 'grant-api-access').append(
-                        $('<option></option>').val(false).text('Bloquear'),
-                        $('<option></option>').val(true).text('Permitir')
-                      )
-                    ),
-                    $('<div></div>').addClass('input-entry').append(
-                      $('<label></label>')
-                      .text('Acesso aos LOGS dos roteadores'),
-                      $('<select></select>').addClass('form-control')
-                      .attr('name', 'grant-log-access').append(
                         $('<option></option>').val(false).text('Bloquear'),
                         $('<option></option>').val(true).text('Permitir')
                       )
