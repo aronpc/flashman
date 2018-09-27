@@ -171,6 +171,15 @@ $(document).ready(function() {
                         $('<option></option>').val(false).text('Bloquear'),
                         $('<option></option>').val(true).text('Permitir')
                       )
+                    ),
+                    $('<div></div>').addClass('input-entry').append(
+                      $('<label></label>')
+                      .text('Acesso aos LOGS dos roteadores'),
+                      $('<select></select>').addClass('form-control')
+                      .attr('name', 'grant-log-access').append(
+                        $('<option></option>').val(false).text('Bloquear'),
+                        $('<option></option>').val(true).text('Permitir')
+                      )
                     )
                   ),
                   $('<div></div>').addClass('col-4').append(
@@ -264,6 +273,9 @@ $(document).ready(function() {
         .attr('selected', 'selected');
         $(rowObj).find('[name=grant-api-access] option[value=' +
           roleObj.grantAPIAccess + ']')
+        .attr('selected', 'selected');
+        $(rowObj).find('[name=grant-log-access] option[value=' +
+          roleObj.grantLOGAccess + ']')
         .attr('selected', 'selected');
       });
     } else {

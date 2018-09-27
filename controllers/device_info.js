@@ -2,7 +2,7 @@
 const DeviceModel = require('../models/device');
 const Config = require('../models/config');
 const mqtt = require('../mqtts');
-const externMqtt = require('mqtt');
+const sio = require('../sio');
 const Validator = require('../public/javascripts/device_validator');
 let deviceInfoController = {};
 
@@ -306,11 +306,14 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
         if (upgStatus == '1') {
           console.log('Device '+req.body.id+' is going on upgrade...');
         } else if (upgStatus == '0') {
-          console.log('WARNING: Device '+req.body.id+' failed in firmware check!');
+          console.log('WARNING: Device ' + req.body.id +
+                      ' failed in firmware check!');
         } else if (upgStatus == '2') {
-          console.log('WARNING: Device '+req.body.id+' failed to download firmware!');
+          console.log('WARNING: Device ' + req.body.id +
+                      ' failed to download firmware!');
         } else if (upgStatus == '') {
-          console.log('WARNING: Device '+req.body.id+' ack update on an old firmware! Reseting upgrade...');
+          console.log('WARNING: Device ' + req.body.id +
+                      ' ack update on an old firmware! Reseting upgrade...');
           matchedDevice.do_update = false;
         }
 
@@ -671,7 +674,9 @@ deviceInfoController.receiveLog = function(req, res) {
       console.log('Log Receiving for device ' +
         id + ' successfully. LAST BOOT');
     } else if (bootType == 'LIVE') {
-
+      sio.anlix_send_livelog_notifications(id, req.body);
+      console.log('Log Receiving for device ' +
+        id + ' successfully. LIVE');
     }
 
     return res.status(200).json({processed: 1});

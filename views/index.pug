@@ -43,6 +43,29 @@ block content
                 p
                   strong Use um desses termos para filtrar somente os dispositivos não marcados para atualização
 
+  #analyse-logs.modal.fade(tabindex="-1", role="dialog")
+    .modal-dialog.modal-notify.modal-teal.modal-lg(role="document")
+      .modal-content
+        .modal-header
+          p.heading.lead
+            span.fas.fa-file-alt.fa-lg
+            strong &nbsp; Logs do Roteador &nbsp;
+              label(name="logRouterid_label" id="logRouterid_label")
+
+          button.close(type="button", data-dismiss="modal")
+            span.white-text &times;
+        .modal-body
+            .row
+              pre.pre-scrollable#logArea 
+        .modal-footer 
+          .btn-group.btn-group-sm(role="group")
+              button.btn.teal.lighten-2.btn-sm.btn-log-upgrade(type="button")
+                span &nbsp Upgrade
+              button.btn.teal.lighten-2.btn-sm.btn-log-init(type="button")
+                span &nbsp Inicianização
+              button.btn.teal.lighten-2.btn-sm.btn-log-live(type="button")
+                span &nbsp Ao Vivo
+
   .row.justify-content-center
     .col-12.col-lg-8.mt-4
       form(action="/devicelist/search")
@@ -337,15 +360,37 @@ block content
                             // Actions
                             if (superuser || role.grantDeviceActions)
                               .col-7.text-right.actions-opts
-                                .btn-group.btn-group-sm(role="group")
-                                  button.btn.teal.lighten-2.btn-sm.btn-reboot(type="button")
-                                    .fas.fa-sync.fa-lg
-                                    span &nbsp Reiniciar roteador
-                                  button.btn.teal.lighten-2.btn-sm.btn-reset-app(type="button")
-                                    .fas.fa-mobile-alt.fa-lg
-                                    span &nbsp Resetar senha App
+                                .btn-group(role="group")
+              
+                                  button.btn.teal.lighten-2.dropdown-toggle(
+                                    type="button",
+                                    id="dropActions",
+                                    data-toggle="dropdown",
+                                    aria-haspopup="true",
+                                    aria-expanded="false",
+                                    disabled=((superuser || role.grantDeviceActions) ? false : true)
+                                  ) Ações
+
+                                  .dropdown-menu.dropdown-menu-right(
+                                    aria-labelledby="dropActions",
+                                    data-dropdown-in="fadeIn",
+                                    data-dropdown-out="fadeOut"
+                                  )
+                                    a.dropdown-item.btn-reboot 
+                                      .fas.fa-sync
+                                      span &nbsp Reiniciar roteador  
+                                    .dropdown-divider
+                                    a.dropdown-item.btn-reset-app 
+                                      .fas.fa-mobile-alt
+                                      span &nbsp Resetar senha App
+                                    if (superuser || role.grantLOGAccess)
+                                      .dropdown-divider
+                                      a.dropdown-item.btn-log-modal 
+                                        .fas.fa-file-alt
+                                        span &nbsp Logs do Roteador
                                 br
                                 span.badge.badge-success.bounceIn(style="display: none;") Sucesso
+                                span.badge.badge-warning.bounceIn(style="display: none;") Falha
                           .row(style="margin: 0;")
                             .col-2
                               // Connection type
@@ -492,6 +537,9 @@ block content
 
 block scripts
   script(src='/scripts/tags-input/tags-input.js')
+  script(src='/socket.io/socket.io.js')
+  script(src='/scripts/jquery-highlight/jquery.highlight.js')
+  script(src='/scripts/pako/pako.js')
   script(src='/javascripts/device_validator.js')
   script(src='/javascripts/new_device.js')
   script(src='/javascripts/edit_device.js')
@@ -500,6 +548,7 @@ block scripts
   script.
     (function() {
       'use strict';
+
       window.addEventListener('load', function() {
         var forms = document.getElementsByClassName('needs-validation');
         // Loop over them and prevent submission
