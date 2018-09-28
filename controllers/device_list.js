@@ -40,7 +40,7 @@ const getStatus = function(devices) {
       deviceColor = 'green-text';
     } else {
       // No MQTT connected. Check last keepalive
-      if (device.last_contact.getTime() > lastHour.getTime()) {
+      if (device.last_contact.getTime() >= lastHour.getTime()) {
         deviceColor = 'red-text';
       }
     }
@@ -54,7 +54,12 @@ const getOnlineCount = function(query, status) {
   let lastHour = new Date();
   lastHour.setHours(lastHour.getHours() - 1);
 
-  andQuery.$and = [{last_contact: {$gt: lastHour.getTime()}}, query];
+  andQuery.$and = [
+    {$or: [
+      {_id: {$in: Object.keys(mqtt.clients)}},
+      {last_contact: {$gte: lastHour.getTime()}},
+    ]},
+    query];
   DeviceModel.count(andQuery, function(err, count) {
     if (err) {
       status.onlinenum = 0;
@@ -217,12 +222,14 @@ deviceListController.searchDeviceReg = function(req, res) {
       let lastHour = new Date();
       lastHour.setHours(lastHour.getHours() - 1);
       field['last_contact'] = {$gte: lastHour};
+      field['_id'] = {$in: Object.keys(mqtt.clients)};
       queryArray.push(field);
     } else if (queryContents[idx].toLowerCase() == 'offline') {
       let field = {};
       let lastHour = new Date();
       lastHour.setHours(lastHour.getHours() - 1);
       field['last_contact'] = {$lt: lastHour};
+      field['_id'] = {$nin: Object.keys(mqtt.clients)};
       queryArray.push(field);
     } else if ((queryContents[idx].toLowerCase() == 'upgrade on') ||
                (queryContents[idx].toLowerCase() == 'update on')) {
