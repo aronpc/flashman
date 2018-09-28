@@ -331,8 +331,26 @@ deviceListController.delDeviceReg = function(req, res) {
 
 deviceListController.sendMqttMsg = function(req, res) {
   msgtype = req.params.msg.toLowerCase();
-
-  if (msgtype == 'rstmqtt') {
+  if (msgtype == 'boot') {
+    mqtt.anlix_message_router_reboot(req.params.id.toUpperCase());
+    return res.status(200).json({success: true});
+  } else if (msgtype == 'rstapp') {
+    DeviceModel.findById(req.params.id.toUpperCase(),
+    function(err, matchedDevice) {
+      if (err) {
+        return res.status(500).json({success: false,
+                                     message: 'Erro interno do servidor'});
+      }
+      if (matchedDevice == null) {
+        return res.status(404).json({success: false,
+                                     message: 'Roteador não encontrado'});
+      }
+      matchedDevice.app_password = undefined;
+      matchedDevice.save();
+      mqtt.anlix_message_router_resetapp(req.params.id.toUpperCase());
+      return res.status(200).json({success: true});
+    });
+  } else if (msgtype == 'rstmqtt') {
     DeviceModel.findById(req.params.id.toUpperCase(),
     function(err, matchedDevice) {
       if (err) {

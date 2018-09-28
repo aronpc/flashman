@@ -12,10 +12,12 @@ router.route('/ntp').post(deviceInfoController.syncDate);
 router.route('/mqtt/add').post(deviceInfoController.registerMqtt);
 router.route('/app/add').post(deviceInfoController.registerApp);
 router.route('/app/del').post(deviceInfoController.removeApp);
+router.route('/app/addpass').post(deviceInfoController.registerPassword);
 router.route('/app/set').post(deviceInfoController.appSetWifi);
 router.route('/app/set/wifi').post(deviceInfoController.appSetWifi);
 router.route('/app/set/password').post(deviceInfoController.appSetPassword);
 router.route('/app/set/blacklist').post(deviceInfoController.appSetBlacklist);
 router.route('/app/set/whitelist').post(deviceInfoController.appSetWhitelist);
+router.route('/app/set/editdevice').post(deviceInfoController.appSetDeviceInfo);
 
 module.exports = router;
