@@ -21,7 +21,11 @@ let index = require('./routes/index');
 
 let app = express();
 
-mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman');
+mongoose.connect(
+  'mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman',
+  {useNewUrlParser: true}
+);
+mongoose.set('useCreateIndex', true);
 
 // check config existence
 Config.findOne({is_default: true}, function(err, matchedConfig) {
