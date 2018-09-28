@@ -78,6 +78,7 @@ userController.postRole = function(req, res) {
     grantDeviceAdd: req.body['grant-device-add'],
     grantFirmwareManage: req.body['grant-firmware-manage'],
     grantAPIAccess: req.body['grant-api-access'],
+    grantLOGAccess: req.body['grant-log-access'],
   });
   role.save(function(err) {
     if (err) {
@@ -193,6 +194,7 @@ userController.editRole = function(req, res) {
     role.grantDeviceAdd = req.body['grant-device-add'];
     role.grantFirmwareManage = req.body['grant-firmware-manage'];
     role.grantAPIAccess = req.body['grant-api-access'];
+    role.grantLOGAccess = req.body['grant-log-access'];
 
     role.save(function(err) {
       if (err) {

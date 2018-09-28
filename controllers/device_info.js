@@ -2,7 +2,7 @@
 const DeviceModel = require('../models/device');
 const Config = require('../models/config');
 const mqtt = require('../mqtts');
-const externMqtt = require('mqtt');
+const sio = require('../sio');
 const Validator = require('../public/javascripts/device_validator');
 let deviceInfoController = {};
 
@@ -112,6 +112,15 @@ const isJSONObject = function(val) {
 const serializeBlocked = function(devices) {
   if (!devices) return [];
   return devices.map((device)=>device.mac + '|' + device.id);
+};
+
+const serializeNamed = function(devices) {
+  if (!devices) return [];
+  return devices.map((device)=>device.mac + '|' + device.name);
+};
+
+const deepCopyObject = function(obj) {
+  return JSON.parse(JSON.stringify(obj));
 };
 
 deviceInfoController.syncDate = function(req, res) {
@@ -273,6 +282,7 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
           'wifi_channel': returnObjOrEmptyStr(matchedDevice.wifi_channel),
           'app_password': returnObjOrEmptyStr(matchedDevice.app_password),
           'blocked_devices': serializeBlocked(matchedDevice.blocked_devices),
+          'named_devices': serializeNamed(matchedDevice.named_devices),
         });
       }
     }
@@ -296,11 +306,14 @@ deviceInfoController.confirmDeviceUpdate = function(req, res) {
         if (upgStatus == '1') {
           console.log('Device '+req.body.id+' is going on upgrade...');
         } else if (upgStatus == '0') {
-          console.log('WARNING: Device '+req.body.id+' failed in firmware check!');
+          console.log('WARNING: Device ' + req.body.id +
+                      ' failed in firmware check!');
         } else if (upgStatus == '2') {
-          console.log('WARNING: Device '+req.body.id+' failed to download firmware!');
+          console.log('WARNING: Device ' + req.body.id +
+                      ' failed to download firmware!');
         } else if (upgStatus == '') {
-          console.log('WARNING: Device '+req.body.id+' ack update on an old firmware! Reseting upgrade...');
+          console.log('WARNING: Device ' + req.body.id +
+                      ' ack update on an old firmware! Reseting upgrade...');
           matchedDevice.do_update = false;
         }
 
@@ -373,6 +386,33 @@ deviceInfoController.registerApp = function(req, res) {
   }
 };
 
+deviceInfoController.registerPassword = function(req, res) {
+  if (req.body.secret == req.app.locals.secret) {
+    DeviceModel.findById(req.body.id, function(err, matchedDevice) {
+      if (err) {
+        return res.status(400).json({is_registered: 0});
+      }
+      if (!matchedDevice) {
+        return res.status(404).json({is_registered: 0});
+      }
+      let appObj = matchedDevice.apps.filter(function(app) {
+        return app.id === req.body.app_id;
+      });
+      if (appObj.length == 0) {
+        return res.status(404).json({is_set: 0});
+      }
+      if (appObj[0].secret != req.body.app_secret) {
+        return res.status(403).json({is_set: 0});
+      }
+      matchedDevice.app_password = req.body.router_passwd;
+      matchedDevice.save();
+      return res.status(200).json({is_registered: 1});
+    });
+  } else {
+    return res.status(401).json({is_registered: 0});
+  }
+};
+
 deviceInfoController.removeApp = function(req, res) {
   if (req.body.secret == req.app.locals.secret) {
     DeviceModel.findById(req.body.id, function(err, matchedDevice) {
@@ -391,6 +431,33 @@ deviceInfoController.removeApp = function(req, res) {
     });
   } else {
     return res.status(401).json({is_unregistered: 0});
+  }
+};
+
+let checkUpdateParametersDone = function(id, ncalls, maxcalls) {
+  return new Promise((resolve, reject)=>{
+    DeviceModel.findById(id, (err, matchedDevice)=>{
+      if (err || !matchedDevice) return reject();
+      resolve(!matchedDevice.do_update_parameters);
+    });
+  }).then((done)=>{
+    if (done) return Promise.resolve(true);
+    if (ncalls >= maxcalls) return Promise.resolve(false);
+    return new Promise((resolve, reject)=>{
+      setTimeout(()=>{
+        checkUpdateParametersDone(id, ncalls+1, maxcalls).then(resolve, reject);
+      }, 1000);
+    });
+  }, (rejectedVal)=>{
+    return Promise.reject(rejectedVal);
+  });
+};
+
+let doRollback = function(device, values) {
+  for (let key in values) {
+    if (Object.prototype.hasOwnProperty.call(values, key)) {
+      device[key] = values[key];
+    }
   }
 };
 
@@ -414,21 +481,36 @@ let appSet = function(req, res, processFunction) {
 
     if (isJSONObject(req.body.content)) {
       let content = req.body.content;
+      let rollbackValues = {};
 
-      if (processFunction(content, matchedDevice)) {
+      if (processFunction(content, matchedDevice, rollbackValues)) {
         matchedDevice.do_update_parameters = true;
       }
 
       let hashSuffix = '';
+      let commandTimeout = 10;
       if (content.hasOwnProperty('command_hash')) {
         hashSuffix = ' ' + content.command_hash;
+      }
+      if (content.hasOwnProperty('command_timeout')) {
+        commandTimeout = content.command_timeout;
       }
 
       matchedDevice.save();
 
       mqtt.anlix_message_router_update(matchedDevice._id, hashSuffix);
 
-      return res.status(200).json({is_set: 1});
+      checkUpdateParametersDone(matchedDevice._id, 0, commandTimeout)
+      .then((done)=>{
+        if (done) return res.status(200).json({is_set: 1});
+        doRollback(matchedDevice, rollbackValues);
+        matchedDevice.save();
+        return res.status(500).json({is_set: 0});
+      }, (rejectedVal)=>{
+        doRollback(matchedDevice, rollbackValues);
+        matchedDevice.save();
+        return res.status(500).json({is_set: 0});
+      });
     } else {
       return res.status(500).json({is_set: 0});
     }
@@ -436,25 +518,30 @@ let appSet = function(req, res, processFunction) {
 };
 
 deviceInfoController.appSetWifi = function(req, res) {
-  let processFunction = (content, device) => {
+  let processFunction = (content, device, rollback) => {
     let updateParameters = false;
     if (content.hasOwnProperty('pppoe_user')) {
+      rollback.pppoe_user = device.pppoe_user;
       device.pppoe_user = content.pppoe_user;
       updateParameters = true;
     }
     if (content.hasOwnProperty('pppoe_password')) {
+      rollback.pppoe_password = device.pppoe_password;
       device.pppoe_password = content.pppoe_password;
       updateParameters = true;
     }
     if (content.hasOwnProperty('wifi_ssid')) {
+      rollback.wifi_ssid = device.wifi_ssid;
       device.wifi_ssid = content.wifi_ssid;
       updateParameters = true;
     }
     if (content.hasOwnProperty('wifi_password')) {
+      rollback.wifi_password = device.wifi_password;
       device.wifi_password = content.wifi_password;
       updateParameters = true;
     }
     if (content.hasOwnProperty('wifi_channel')) {
+      rollback.wifi_channel = device.wifi_channel;
       device.wifi_channel = content.wifi_channel;
       updateParameters = true;
     }
@@ -464,8 +551,9 @@ deviceInfoController.appSetWifi = function(req, res) {
 };
 
 deviceInfoController.appSetPassword = function(req, res) {
-  let processFunction = (content, device) => {
+  let processFunction = (content, device, rollback) => {
     if (content.hasOwnProperty('app_password')) {
+      rollback.app_password = device.app_password;
       device.app_password = content.app_password;
       return true;
     }
@@ -475,13 +563,15 @@ deviceInfoController.appSetPassword = function(req, res) {
 };
 
 deviceInfoController.appSetBlacklist = function(req, res) {
-  let processFunction = (content, device) => {
+  let processFunction = (content, device, rollback) => {
     let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
     if (content.hasOwnProperty('blacklist_device') &&
         content.blacklist_device.hasOwnProperty('mac') &&
         content.blacklist_device.mac.match(macRegex)) {
+      // Deep copy blocked devices for rollback
+      rollback.blocked_devices = deepCopyObject(device.blocked_devices);
       let containsMac = device.blocked_devices.reduce((acc, val)=>{
-        return acc || (val.mac === content.blacklist_device);
+        return acc || (val.mac === content.blacklist_device.mac);
       }, false);
       if (!containsMac) {
         device.blocked_devices.push({
@@ -497,11 +587,13 @@ deviceInfoController.appSetBlacklist = function(req, res) {
 };
 
 deviceInfoController.appSetWhitelist = function(req, res) {
-  let processFunction = (content, device) => {
+  let processFunction = (content, device, rollback) => {
     let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
     if (content.hasOwnProperty('whitelist_device') &&
         content.whitelist_device.hasOwnProperty('mac') &&
         content.whitelist_device.mac.match(macRegex)) {
+      // Deep copy blocked devices for rollback
+      rollback.blocked_devices = deepCopyObject(device.blocked_devices);
       let filteredDevices = device.blocked_devices.filter((device)=>{
         return device.mac !== content.whitelist_device.mac;
       });
@@ -509,6 +601,36 @@ deviceInfoController.appSetWhitelist = function(req, res) {
         device.blocked_devices = filteredDevices;
         return true;
       }
+    }
+    return false;
+  };
+  appSet(req, res, processFunction);
+};
+
+deviceInfoController.appSetDeviceInfo = function(req, res) {
+  let processFunction = (content, device, rollback) => {
+    let macRegex = /^([0-9A-Fa-f]{2}:){5}([0-9A-Fa-f]{2})$/;
+    if (content.hasOwnProperty('device_configs') &&
+        content.device_configs.hasOwnProperty('mac') &&
+        content.device_configs.mac.match(macRegex)) {
+      // Deep copy named devices for rollback
+      rollback.named_devices = deepCopyObject(device.named_devices);
+      let namedDevices = device.named_devices;
+      let newMac = true;
+      namedDevices = namedDevices.map((namedDevice)=>{
+        if (namedDevice.mac !== content.device_configs.mac) return namedDevice;
+        newMac = false;
+        namedDevice.name = content.device_configs.name;
+        return namedDevice;
+      });
+      if (newMac) {
+        namedDevices.push({
+          name: content.device_configs.name,
+          mac: content.device_configs.mac,
+        });
+      }
+      device.named_devices = namedDevices;
+      return true;
     }
     return false;
   };
@@ -552,7 +674,9 @@ deviceInfoController.receiveLog = function(req, res) {
       console.log('Log Receiving for device ' +
         id + ' successfully. LAST BOOT');
     } else if (bootType == 'LIVE') {
-
+      sio.anlix_send_livelog_notifications(id, req.body);
+      console.log('Log Receiving for device ' +
+        id + ' successfully. LIVE');
     }
 
     return res.status(200).json({processed: 1});

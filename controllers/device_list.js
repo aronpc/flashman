@@ -4,7 +4,7 @@ const User = require('../models/user');
 const Config = require('../models/config');
 const Role = require('../models/role');
 const mqtt = require('../mqtts');
-const extern_mqtt = require('mqtt');
+const sio = require('../sio');
 let deviceListController = {};
 
 const fs = require('fs');
@@ -40,7 +40,7 @@ const getStatus = function(devices) {
       deviceColor = 'green-text';
     } else {
       // No MQTT connected. Check last keepalive
-      if (device.last_contact.getTime() > lastHour.getTime()) {
+      if (device.last_contact.getTime() >= lastHour.getTime()) {
         deviceColor = 'red-text';
       }
     }
@@ -54,7 +54,12 @@ const getOnlineCount = function(query, status) {
   let lastHour = new Date();
   lastHour.setHours(lastHour.getHours() - 1);
 
-  andQuery.$and = [{last_contact: {$gt: lastHour.getTime()}}, query];
+  andQuery.$and = [
+    {$or: [
+      {_id: {$in: Object.keys(mqtt.clients)}},
+      {last_contact: {$gte: lastHour.getTime()}},
+    ]},
+    query];
   DeviceModel.count(andQuery, function(err, count) {
     if (err) {
       status.onlinenum = 0;
@@ -217,12 +222,16 @@ deviceListController.searchDeviceReg = function(req, res) {
       let lastHour = new Date();
       lastHour.setHours(lastHour.getHours() - 1);
       field['last_contact'] = {$gte: lastHour};
+      field['_id'] = {$in: Object.keys(mqtt.clients)};
       queryArray.push(field);
     } else if (queryContents[idx].toLowerCase() == 'offline') {
       let field = {};
       let lastHour = new Date();
       lastHour.setHours(lastHour.getHours() - 1);
-      field['last_contact'] = {$lt: lastHour};
+      field['$and'] = [
+        {last_contact: {$lt: lastHour}},
+        {_id: {$nin: Object.keys(mqtt.clients)}},
+      ];
       queryArray.push(field);
     } else if ((queryContents[idx].toLowerCase() == 'upgrade on') ||
                (queryContents[idx].toLowerCase() == 'update on')) {
@@ -335,9 +344,6 @@ deviceListController.sendMqttMsg = function(req, res) {
     mqtt.anlix_message_router_reboot(req.params.id.toUpperCase());
     return res.status(200).json({success: true});
   } else if (msgtype == 'rstapp') {
-    mqtt.anlix_message_router_resetapp(req.params.id.toUpperCase());
-    return res.status(200).json({success: true}); ;
-  } else if (msgtype == 'rstmqtt') {
     DeviceModel.findById(req.params.id.toUpperCase(),
     function(err, matchedDevice) {
       if (err) {
@@ -346,6 +352,22 @@ deviceListController.sendMqttMsg = function(req, res) {
       }
       if (matchedDevice == null) {
         return res.status(404).json({success: false,
+                                     message: 'Roteador não encontrado'});
+      }
+      matchedDevice.app_password = undefined;
+      matchedDevice.save();
+      mqtt.anlix_message_router_resetapp(req.params.id.toUpperCase());
+      return res.status(200).json({success: true});
+    });
+  } else if (msgtype == 'rstmqtt') {
+    DeviceModel.findById(req.params.id.toUpperCase(),
+    function(err, matchedDevice) {
+      if (err) {
+        return res.status(200).json({success: false,
+                                     message: 'Erro interno do servidor'});
+      }
+      if (matchedDevice == null) {
+        return res.status(200).json({success: false,
                                      message: 'Roteador não encontrado'});
       }
 
@@ -358,26 +380,56 @@ deviceListController.sendMqttMsg = function(req, res) {
       mqtt.anlix_message_router_resetmqtt(req.params.id.toUpperCase());
       return res.status(200).json({success: true});
     });
-  } else if (msgtype == 'log') {
-    mqtt.anlix_message_router_log(req.params.id.toUpperCase());
-    return res.status(200).json({success: true});
-  } else {
-    // Message not implemented
-    console.log('REST API MQTT Message not recognized ('+ msgtype +')');
-    return res.status(404).json({success: false,
-                                 message: 'Esse comando não existe'});
+
+    // can we get to here?
+    return res.status(200).json({success: false,
+                                 message: 'Erro interno do servidor'});
   }
+
+  if (!mqtt.clients[req.params.id.toUpperCase()]) {
+    return res.status(200).json({success: false,
+                                 message: 'Roteador não esta online!'});
+  }
+
+  switch (msgtype) {
+    case 'boot':
+      mqtt.anlix_message_router_reboot(req.params.id.toUpperCase());
+      break;
+    case 'rstapp':
+      mqtt.anlix_message_router_resetapp(req.params.id.toUpperCase());
+      break;
+    case 'log':
+      // This message is only valid if we have a socket to send response to
+      if (sio.anlix_connections[req.sessionID]) {
+        sio.anlix_wait_for_livelog_notification(
+          req.sessionID, req.params.id.toUpperCase(), 5000);
+        mqtt.anlix_message_router_log(req.params.id.toUpperCase());
+      } else {
+        return res.status(200).json({
+          success: false,
+          message: 'Esse comando somente funciona em uma sessão!',
+        });
+      }
+      break;
+    default:
+      // Message not implemented
+      console.log('REST API MQTT Message not recognized (' + msgtype + ')');
+      return res.status(200).json({success: false,
+                                   message: 'Esse comando não existe'});
+  }
+
+  return res.status(200).json({success: true});
 };
 
 deviceListController.getFirstBootLog = function(req, res) {
   DeviceModel.findById(req.params.id.toUpperCase(),
   function(err, matchedDevice) {
     if (err) {
-      return res.status(500).json({success: false,
+      return res.status(200).json({success: false,
                                    message: 'Erro interno do servidor'});
     }
     if (matchedDevice == null) {
-      return res.status(404).json({success: false,
+      return res.status(200).json({success: false,
                                    message: 'Roteador não encontrado'});
     }
 
@@ -387,7 +439,7 @@ deviceListController.getFirstBootLog = function(req, res) {
       res.end(matchedDevice.firstboot_log, 'binary');
       return res.status(200);
     } else {
-      return res.status(200).json({success: true,
+      return res.status(200).json({success: false,
                                    message: 'Não existe log deste roteador'});
     }
   });
@@ -397,11 +449,11 @@ deviceListController.getLastBootLog = function(req, res) {
   DeviceModel.findById(req.params.id.toUpperCase(),
   function(err, matchedDevice) {
     if (err) {
-      return res.status(500).json({success: false,
+      return res.status(200).json({success: false,
                                    message: 'Erro interno do servidor'});
     }
     if (matchedDevice == null) {
-      return res.status(404).json({success: false,
+      return res.status(200).json({success: false,
                                    message: 'Roteador não encontrado'});
     }
 
@@ -411,7 +463,7 @@ deviceListController.getLastBootLog = function(req, res) {
       res.end(matchedDevice.lastboot_log, 'binary');
       return res.status(200);
     } else {
-      return res.status(200).json({success: true,
+      return res.status(200).json({success: false,
                                    message: 'Não existe log deste roteador'});
     }
   });

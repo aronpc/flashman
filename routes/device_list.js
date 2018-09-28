@@ -67,10 +67,18 @@ router.route('/create').post(
 router.route('/firstlog/:id').get(authController.ensureAPIAccess,
                                   authController.ensurePermission('grantAPIAccess'),
                                   deviceListController.getFirstBootLog);
+// from user interface
+router.route('/uifirstlog/:id').get(authController.ensureLogin(),
+                                  authController.ensurePermission('grantLOGAccess'),
+                                  deviceListController.getFirstBootLog);
 // REST API - GET last boot logs
 router.route('/lastlog/:id').get(authController.ensureAPIAccess,
                                  authController.ensurePermission('grantAPIAccess'),
                                  deviceListController.getLastBootLog);
+// from user interface
+router.route('/uilastlog/:id').get(authController.ensureLogin(),
+                                  authController.ensurePermission('grantLOGAccess'),
+                                  deviceListController.getLastBootLog);
 
 // REST API - Send a message using MQTT
 router.route('/command/:id/:msg').post(

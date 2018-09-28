@@ -10,6 +10,7 @@ const schedule = require('node-schedule');
 const mongoose = require('mongoose');
 const passport = require('passport');
 const fileUpload = require('express-fileupload');
+const sio = require('./sio');
 let session = require('express-session');
 
 let updater = require('./controllers/update_flashman');
@@ -20,7 +21,11 @@ let index = require('./routes/index');
 
 let app = express();
 
-mongoose.connect('mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman');
+mongoose.connect(
+  'mongodb://' + process.env.FLM_MONGODB_HOST + ':27017/flashman',
+  {useNewUrlParser: true}
+);
+mongoose.set('useCreateIndex', true);
 
 // check config existence
 Config.findOne({is_default: true}, function(err, matchedConfig) {
@@ -106,11 +111,15 @@ app.use(favicon(path.join(__dirname, 'public', 'images', 'favicon.ico')));
 app.use(logger(':req[x-forwarded-for] - :method :url HTTP/:http-version :status :res[content-length] - :response-time ms'));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({
+
+var sess_param = session({
   secret: app.locals.secret,
   resave: false,
   saveUninitialized: false,
-}));
+});
+
+app.use(sess_param);
+sio.anlix_bindsession(sess_param);
 
 // create static routes for public libraries
 app.use('/scripts/jquery',
@@ -118,6 +127,12 @@ app.use('/scripts/jquery',
 );
 app.use('/scripts/jquery-mask',
   express.static(path.join(__dirname, 'node_modules/jquery-mask-plugin/dist'))
+);
+app.use('/scripts/jquery-highlight',
+  express.static(path.join(__dirname, 'node_modules/jquery-highlight'))
+);
+app.use('/scripts/pako',
+  express.static(path.join(__dirname, 'node_modules/pako/dist'))
 );
 app.use('/scripts/popper',
   express.static(path.join(__dirname, 'node_modules/popper.js/dist'))
