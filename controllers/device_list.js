@@ -228,8 +228,10 @@ deviceListController.searchDeviceReg = function(req, res) {
       let field = {};
       let lastHour = new Date();
       lastHour.setHours(lastHour.getHours() - 1);
-      field['last_contact'] = {$lt: lastHour};
-      field['_id'] = {$nin: Object.keys(mqtt.clients)};
+      field['$and'] = [
+        {last_contact: {$lt: lastHour}},
+        {_id: {$nin: Object.keys(mqtt.clients)}},
+      ];
       queryArray.push(field);
     } else if ((queryContents[idx].toLowerCase() == 'upgrade on') ||
                (queryContents[idx].toLowerCase() == 'update on')) {
