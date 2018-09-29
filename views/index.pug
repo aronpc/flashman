@@ -240,12 +240,27 @@ block content
                     td.text-center *
                     td.text-center *
                     td.text-center *
-                    td.text-center *
+                    td.text-center
+                      .btn-group
+                        button.btn.btn-sm.teal.lighten-2.dropdown-toggle(
+                          type="button",
+                          id="all-releases",
+                          data-toggle="dropdown",
+                          aria-haspopup="true",
+                          aria-expanded="true",
+                          disabled=((superuser || role.grantFirmwareUpgrade) ? false : true)
+                        )
+                          span.selected Selecionar
+                        .dropdown-menu
+                          each release, idx in singlereleases
+                            a.dropdown-item.text-center #{release.id}
+
                     if (superuser || role.grantFirmwareUpgrade)
                       td.text-center
                         label.switch
                           input.checkbox(
                             id="all-devices",
+                            data-singlereleases=singlereleases
                             type="checkbox",
                             name="do_update",
                             checked=false
