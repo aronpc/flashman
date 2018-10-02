@@ -23,6 +23,8 @@ const getReleases = function(modelAsArray=false) {
     if (fnameSubStrings.length == 4) {
       releaseModel += fnameSubStrings[2];
     }
+    // Always make comparison using upper case
+    releaseModel = releaseModel.toUpperCase();
     if (modelAsArray) {
       if (releaseIds.includes(releaseId)) {
         for (let i=0; i < releases.length; i++) {
