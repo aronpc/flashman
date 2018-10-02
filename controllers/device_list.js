@@ -214,14 +214,16 @@ deviceListController.changeAllUpdates = function(req, res) {
       return res.render('error', indexContent);
     }
 
+    let scheduledDevices = [];
     for (let idx = 0; idx < matchedDevices.length; idx++) {
       matchedDevices[idx].release = form.ids[matchedDevices[idx]._id].trim();
       matchedDevices[idx].do_update = form.do_update;
       matchedDevices[idx].save();
       mqtt.anlix_message_router_update(matchedDevices[idx]._id);
+      scheduledDevices.push(matchedDevices[idx]._id);
     }
 
-    return res.status(200).json({'success': true});
+    return res.status(200).json({'success': true, 'devices': scheduledDevices});
   });
 };
 
