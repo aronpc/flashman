@@ -26,8 +26,8 @@ const createRegistry = function(req, res) {
   let ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
   let wanIp = returnObjOrEmptyStr(req.body.wan_ip).trim();
   let release = returnObjOrEmptyStr(req.body.release_id).trim();
-  let model = returnObjOrEmptyStr(req.body.model).trim() +
-              returnObjOrEmptyStr(req.body.model_ver).trim();
+  let model = returnObjOrEmptyStr(req.body.model).trim().toUpperCase() +
+              returnObjOrEmptyStr(req.body.model_ver).trim().toUpperCase();
   let version = returnObjOrEmptyStr(req.body.version).trim();
   let connectionType = returnObjOrEmptyStr(req.body.connection_type).trim();
   let pppoeUser = returnObjOrEmptyStr(req.body.pppoe_user).trim();
@@ -200,12 +200,13 @@ deviceInfoController.updateDevicesInfo = function(req, res) {
         }
 
         // Parameters only modified on first comm between device and flashman
-        if (matchedDevice.model == '' ||
-          matchedDevice.model == returnObjOrEmptyStr(req.body.model).trim()
-        ) {
+        let bodyModel =
+          returnObjOrEmptyStr(req.body.model).trim().toUpperCase();
+        let bodyModelVer =
+          returnObjOrEmptyStr(req.body.model_ver).trim().toUpperCase();
+        if (matchedDevice.model == '' || matchedDevice.model == bodyModel) {
           // Legacy versions include only model so let's include model version
-          matchedDevice.model = returnObjOrEmptyStr(req.body.model).trim() +
-                                returnObjOrEmptyStr(req.body.model_ver).trim();
+          matchedDevice.model = bodyModel + bodyModelVer;
         }
 
         let sentVersion = returnObjOrEmptyStr(req.body.version).trim();
