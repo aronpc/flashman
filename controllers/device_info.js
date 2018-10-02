@@ -100,6 +100,7 @@ const createRegistry = function(req, res) {
         }
       });
     } else {
+      console.log('Error creating entry: ' + errors);
       return res.status(500).end(); ;
     }
   });
