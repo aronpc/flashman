@@ -23,35 +23,57 @@ let updateAllDevices = function(event) {
   let isChecked = $(event.target).is(':checked');
   let rows = row.siblings();
   let idsObj = {};
+  let singleReleases = $(event.target).data('singlereleases');
+  let selectedRelease = $('#all-releases').text();
+  let selectedModels = [];
+
+  // Get models of selected release
+  for (let i=0; i < singleReleases.length; i++) {
+    if (singleReleases[i].id == selectedRelease) {
+      selectedModels = singleReleases[i].model;
+      break;
+    }
+  }
+
   rows.each(function(idx) {
-    if ($(this).prop('id') !== undefined && $(this).prop('id').length > 0) {
+    if ($(this).prop('id') !== undefined && $(this).prop('id').length > 0 &&
+        selectedModels.includes($(this).data('deviceModel'))) {
       let id = $(this).prop('id');
-      let rel = $(this).find('span.selected').text();
+      let rel = selectedRelease;
       idsObj[id] = rel;
     }
   });
   $(event.target).prop('disabled', true);
   $.post('/devicelist/updateall',
          {content: JSON.stringify({ids: idsObj, do_update: isChecked})})
-    .done(function(res) {
-      if (res.success) {
-        $('.checkbox').prop('checked', isChecked);
-        $(event.target).prop('disabled', false);
-      }
-    });
+  .done(function(res) {
+    if (res.success) {
+      res.devices.forEach(function(deviceId) {
+        $('#' + $.escapeSelector(deviceId))
+          .find('.checkbox').prop('checked', isChecked);
+        $('#' + $.escapeSelector(deviceId))
+          .find('.btn-group span.selected').text(selectedRelease);
+        $('#' + $.escapeSelector(deviceId))
+          .find('.btn-group .dropdown-item')
+          .removeClass('active teal lighten-2');
+        $('#' + $.escapeSelector(deviceId))
+          .find('.btn-group .dropdown-item:contains(' + selectedRelease + ')')
+          .addClass('active teal lighten-2');
+      });
+      $(event.target).prop('disabled', false);
+    }
+  });
 };
 
 let refreshRelease = function(event) {
+  $(event.target).parents('.btn-group').find('.dropdown-item')
+    .removeClass('active teal lighten-2');
+
   let selected = $(event.target).parents('.btn-group').find('span.selected');
   selected.text($(this).text());
-  // Check if firmware update is enabled. If not, enable it.
-  let isChecked = $(event.target).parents('tr').find('.checkbox').is(':checked');
-  if (isChecked) {
-    updateDevice(event);
-  } else {
-    // Trigger slider animation
-    $(event.target).parents('tr').find('.checkbox').trigger('click');
-  }
+  let dropItem = $(event.target).parents('.btn-group')
+    .find('.dropdown-item:contains(' + $(this).text() + ')');
+  dropItem.addClass('active teal lighten-2');
 };
 
 $(function() {
