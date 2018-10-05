@@ -301,6 +301,43 @@ $(document).ready(function() {
     }
   });
 
+  $('.btn-reset-blocked').click(function(event) {
+    let row = $(event.target).parents('tr');
+    let id = row.data('deviceid');
+    $.ajax({
+      url: '/devicelist/command/' + id + '/rstdevices',
+      type: 'post',
+      dataType: 'json',
+      success: function(res) {
+        let badge;
+        if (res.success) {
+          badge = $(event.target).closest('.actions-opts')
+                                     .find('.badge-success');
+        } else {
+          badge = $(event.target).closest('.actions-opts')
+                                     .find('.badge-warning');
+          if (res.message) {
+            badge.text(res.message);
+          }
+        }
+
+        badge.show();
+        setTimeout(function() {
+          badge.hide();
+        }, 1500);
+      },
+      error: function(xhr, status, error) {
+        let badge = $(event.target).closest('.actions-opts')
+                                   .find('.badge-warning');
+        badge.text(status);
+        badge.show();
+        setTimeout(function() {
+          badge.hide();
+        }, 1500);
+      },
+    });
+  });
+
   $('.btn-log-modal').click(function(event) {
     let row = $(event.target).parents('tr');
     let id = row.data('deviceid');

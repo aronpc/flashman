@@ -382,10 +382,16 @@ block content
                                       .fas.fa-mobile-alt
                                       span &nbsp Resetar senha App
                                     if (superuser || role.grantLOGAccess)
+                                      if (devicesPermissions[index].grantViewLogs)
+                                        .dropdown-divider
+                                        a.dropdown-item.btn-log-modal
+                                          .fas.fa-file-alt
+                                          span &nbsp Logs do Roteador
+                                    if (devicesPermissions[index].grantResetDevices)
                                       .dropdown-divider
-                                      a.dropdown-item.btn-log-modal 
-                                        .fas.fa-file-alt
-                                        span &nbsp Logs do Roteador
+                                      a.dropdown-item.btn-reset-blocked
+                                        .fas.fa-ban
+                                        span &nbsp Desbloquear Dispositivos
                                 br
                                 span.badge.badge-success.bounceIn(style="display: none;") Sucesso
                                 span.badge.badge-warning.bounceIn(style="display: none;") Falha

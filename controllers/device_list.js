@@ -1,6 +1,7 @@
 const Validator = require('../public/javascripts/device_validator');
 const DeviceModel = require('../models/device');
 const User = require('../models/user');
+const DeviceVersion = require('../models/device_version');
 const Config = require('../models/config');
 const Role = require('../models/role');
 const mqtt = require('../mqtts');
@@ -123,6 +124,9 @@ deviceListController.index = function(req, res) {
     indexContent.status = status;
     indexContent.page = devices.page;
     indexContent.pages = devices.pages;
+    indexContent.devicesPermissions = devices.docs.map((device)=>{
+      return DeviceVersion.findByVersion(device.version);
+    });
 
     User.findOne({name: req.user.name}, function(err, user) {
       if (err || !user) {
@@ -340,8 +344,7 @@ deviceListController.delDeviceReg = function(req, res) {
 
 deviceListController.sendMqttMsg = function(req, res) {
   msgtype = req.params.msg.toLowerCase();
-  var device;
-  
+
   DeviceModel.findById(req.params.id.toUpperCase(),
   function(err, matchedDevice) {
     if (err) {
@@ -363,11 +366,18 @@ deviceListController.sendMqttMsg = function(req, res) {
         mqtt.anlix_message_router_reboot(req.params.id.toUpperCase());
         break;
       case 'rstapp':
-        if(device) {
+        if (device) {
           device.app_password = undefined;
           device.save();
         }
         mqtt.anlix_message_router_resetapp(req.params.id.toUpperCase());
+        break;
+      case 'rstdevices':
+        if (device) {
+          device.blocked_devices = undefined;
+          device.save();
+        }
+        mqtt.anlix_message_router_update(req.params.id.toUpperCase());
         break;
       case 'rstmqtt':
         if (device) {
@@ -375,7 +385,7 @@ deviceListController.sendMqttMsg = function(req, res) {
           device.save();
         }
         mqtt.anlix_message_router_resetmqtt(req.params.id.toUpperCase());
-        break
+        break;
       case 'log':
         if (!mqtt.clients[req.params.id.toUpperCase()]) {
           return res.status(200).json({success: false,
@@ -401,9 +411,7 @@ deviceListController.sendMqttMsg = function(req, res) {
     }
 
     return res.status(200).json({success: true});
-
   });
-
 };
 
 deviceListController.getFirstBootLog = function(req, res) {
