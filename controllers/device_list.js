@@ -358,7 +358,8 @@ deviceListController.sendMqttMsg = function(req, res) {
       return res.status(200).json({success: false,
                                    message: 'Roteador não encontrado'});
     }
-    device = matchedDevice;
+    let device = matchedDevice;
+    let permissions = DeviceVersion.findByVersion(device.version);
 
     switch (msgtype) {
       case 'boot':
@@ -383,7 +384,12 @@ deviceListController.sendMqttMsg = function(req, res) {
         mqtt.anlix_message_router_update(req.params.id.toUpperCase());
         break;
       case 'rstmqtt':
-        if (device) {
+        if (!permissions.grantResetDevices) {
+          return res.status(200).json({
+            success: false,
+            message: 'Roteador não possui essa função!',
+          });
+        } else if (device) {
           device.mqtt_secret = undefined;
           device.save();
         }
