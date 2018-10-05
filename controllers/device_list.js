@@ -296,6 +296,9 @@ deviceListController.searchDeviceReg = function(req, res) {
     indexContent.page = matchedDevices.page;
     indexContent.pages = matchedDevices.pages;
     indexContent.lastquery = req.query.content;
+    indexContent.devicesPermissions = matchedDevices.docs.map((device)=>{
+      return DeviceVersion.findByVersion(device.version);
+    });
 
     User.findOne({name: req.user.name}, function(err, user) {
       if (err || !user) {
